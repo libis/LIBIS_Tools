@@ -2,7 +2,7 @@
 
 ### require 'tools/string'
 
-require 'LIBIS/tools/format/type_database'
+require 'libis/tools/format/type_database'
 
 require_relative 'repository'
 
@@ -19,11 +19,9 @@ module LIBIS
         public
 
         def initialize( source = nil, options = {}, flags = {} )
-          @options ||= {}
-          @options.merge! options if options
-          @flags ||= {}
-          @flags.merge! flags if flags
-          init(source.to_s) if source
+          @options = options ? options : {}
+          @flags = flags ? flags : {}
+          init(source.to_s rescue nil)
         end
 
         def convert(target, format = nil)

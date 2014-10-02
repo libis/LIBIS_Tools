@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'backports'
+
 module LIBIS
   module Tools
 
@@ -30,7 +32,10 @@ module LIBIS
 
       def message(severity, msg, *args)
         message_text = (msg % args rescue ((msg + ' - %s') % args.to_s))
-        Config.logger.add(severity, message_text, Config.appname)
+        appname = Config.appname
+        appname = self.name if self.respond_to? :name
+        appname = self.class.name if (appname.nil? or appname == '')
+        Config.logger.add(severity, message_text, appname)
       end
 
     end

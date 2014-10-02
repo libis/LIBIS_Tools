@@ -2,8 +2,8 @@
 
 require 'fileutils'
 
-require 'LIBIS/tools/logger'
-require 'LIBIS/tools/format/type_database'
+require 'libis/tools/logger'
+require 'libis/tools/format/type_database'
 
 module LIBIS
   module Tools

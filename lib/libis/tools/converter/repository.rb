@@ -3,7 +3,7 @@
 require 'set'
 require 'singleton'
 
-require 'LIBIS/tools/logger'
+require 'libis/tools/logger'
 
 require_relative 'chain'
 
@@ -13,7 +13,7 @@ module LIBIS
 
       class Repository
         include Singleton
-        include Logger
+        include ::LIBIS::Tools::Logger
 
         attr_reader :converters
         attr_writer :converters_glob

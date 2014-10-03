@@ -20,9 +20,10 @@ module LIBIS
       def self.base64digest(file_path, type)
         get_hasher(type).file(file_path).base64digest
       end
+
       def self.get_hasher(type)
         raise RuntimeError, "Checksum type '#{type}' not supported." unless CHECKSUM_TYPES.include? type
-        ::Digest(type).new
+        Digest(type).new
       end
 
     end

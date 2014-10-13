@@ -62,18 +62,21 @@ module LIBIS
         end
       end
 
-      def check_constraint(v)
-        constraint = send(:constraint)
+      def check_constraint(v, constraint = nil)
+        constraint ||= send(:constraint)
         return if constraint.nil?
         case constraint
           when Regexp
             return if v =~ constraint
           when Array
+            constraint.each do |c|
+              return if (check_constraint(v, c) rescue false)
+            end
             return if constraint.include? v
           when Range
             return if constraint.cover? v
           else
-            # nothing
+            return if v == constraint
         end
         raise ArgumentError, "Value '#{v}' is not allowed (constraint: #{constraint})."
       end

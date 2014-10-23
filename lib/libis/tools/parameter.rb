@@ -95,11 +95,8 @@ module LIBIS
         param_def = options.shift
         name = param_def.first.to_s.to_sym
         default = param_def.last
-        parameters[name] =
-            Parameter.new(name, default,
-                          options[:datatype], options[:description],
-                          options[:propagate_to], options[:constraint]
-            )
+        parameters[name] = Parameter.new(name, default) if parameters[name].nil?
+        VALID_PARAMETER_KEYS.each { |key| parameters[name][key] = options[key] if options[key] }
       end
 
       def get_parameter(name)

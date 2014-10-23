@@ -7,7 +7,6 @@ module LIBIS
       class MimeType
         include Singleton
 
-        protected
         attr_reader :puid2mime
 
         def initialize
@@ -15,7 +14,6 @@ module LIBIS
           init
         end
 
-        public
         def init
           @puid2mime['fido-fmt/189.word'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           @puid2mime['lias-fmt/189.word'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'

@@ -1,10 +1,13 @@
 # coding: utf-8
 
 require 'nokogiri'
+require 'gyoku'
+require 'nori'
 
-module LIIS
+module LIBIS
   module Tools
 
+    # noinspection RubyTooManyMethodsInspection
     class XmlDocument
 
       attr_accessor :document
@@ -34,6 +37,11 @@ module LIIS
         doc
       end
 
+      def self.from_hash( hash, options = {} )
+        doc = XmlDocument.new
+        doc.document = Nokogiri::XML(Gyoku.xml(hash, options))
+      end
+
       def save( file, indent = 2, encoding = 'utf-8' )
         fd = File.open(file, 'w')
         @document.write_xml_to(fd, :indent => indent, :encoding => encoding)
@@ -45,9 +53,18 @@ module LIIS
         @document.to_xml(options)
       end
 
+      def to_hash( options = {} )
+        Nori.new(options).parse(to_xml)
+      end
+
       def validates_against?(schema)
         schema_doc = Nokogiri::XML::Schema.new(File.open(schema))
         schema_doc.valid?(@document)
+      end
+
+      def validate(schema)
+        schema_doc = Nokogiri::XML::Schema.new(File.open(schema))
+        schema_doc.validate(@document)
       end
 
       def add_processing_instruction( name, content )
@@ -64,6 +81,10 @@ module LIIS
           @document = xml.doc
         end
         self
+      end
+
+      def self.build(&block)
+        self.new.build(nil, &block)
       end
 
       def create_text_node( name, text, options = {} )
@@ -143,6 +164,89 @@ module LIIS
 
       def self.get_content(nodelist)
         (nodelist.first && nodelist.first.content) || ''
+      end
+
+      def value(key)
+        get_node(key).content rescue nil
+      end
+
+      alias_method :[], :value
+
+      def values(key)
+        get_nodes(key).map &:content
+      end
+
+      def []=(key, value)
+        node = get_node(key) || add_node(key, value)
+        node.content = value if value
+        node
+      end
+
+      def <<(*args)
+        attributes = {}
+        attributes = args.pop if args.last === Hash
+        raise ArgumentError unless args.size == 2
+        node = (self[args.first] = args.second)
+        attributes.each {|k,v| node[k] = v}
+      end
+
+      def method_missing(method, *args, &block)
+        super unless method.to_s =~ /^([a-z_][a-z0-9_]*)(=)?$/i
+        node = get_node($1)
+        super unless node
+        case args.size
+          when 0
+            node = get_node($1)
+            if block_given?
+              build(node, &block)
+            end
+          when 1
+            if $2
+              node.content = args.first.to_s
+            else
+              return node[args.first.to_s]
+            end
+          when 2
+            node[args.first.to_s] = args[1].to_s
+            return node[args.first.to_s]
+          else
+            raise ArgumentError, 'Too many arguments.'
+        end
+        node
+      end
+
+      protected
+
+      # Get all the first node matching the tag. The node will be seached with XPath search term = "//#{tag}".
+      #
+      # @param [String] tag XML tag to look for; XPath syntax is allowed
+      # @param [Node] parent
+      def get_node(tag, parent = nil)
+        get_nodes(tag, parent).first
+      end
+
+      # Get all the nodes matching the tag. The node will be seached with XPath search term = "//#{tag}".
+      #
+      # @param [String] tag XML tag to look for; XPath syntax is allowed
+      # @param [Node] parent
+      def get_nodes(tag, parent = nil)
+        parent ||= root
+        term = "#{tag.to_s =~ /^\// ? '' : '//'}#{tag.to_s}"
+        parent.xpath(term)
+      end
+
+      # Create a new node.
+      #
+      # @param [String] tag tag for the new node
+      # @param [String] value optional content for new node; empty if nil
+      # @param [Node] parent optional parent node for new node; root if nil
+      # @param [Hash] attributes optional list of tag-value pairs for attributes to set on the new node
+      def add_node(tag, value = nil, parent = nil, attributes = {})
+        parent ||= root
+        new_node = value.nil? ? create_node(tag) : create_text_node(tag, value)
+        parent << new_node
+        attributes.each { |k,v| new_node[k] = v }
+        new_node
       end
 
     end

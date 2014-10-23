@@ -28,5 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
 
   spec.add_runtime_dependency 'backports'
-  spec.add_runtime_dependency 'nokogiri'
+  spec.add_runtime_dependency 'savon', '~> 2.0'
+  spec.add_runtime_dependency 'rest_client'
+
 end

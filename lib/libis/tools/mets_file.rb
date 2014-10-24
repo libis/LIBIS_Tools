@@ -242,7 +242,7 @@ module LIBIS
         ::LIBIS::Tools::XmlDocument.build do |xml|
           xml[:mets].mets(
               # 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-              'xmlns:mets' => 'http://www/loc.goc/METS/',
+              'xmlns:mets' => 'http://www/loc.gov/METS/',
               # 'xmlns:mets' => 'http://www.exlibrisgroup.com/xsd/dps/rosettaMets',
           # 'xmlns:mets' => 'file:///home/kris/mets_rosetta.xsd',
           # 'xmlns:xlink' => 'http://www.w3.org/TR/xlink',

@@ -183,7 +183,7 @@ module LIBIS
         end
 
         def tag
-          self.local_tag || self.class.tag
+          self.class.tag
         end
       end
 
@@ -327,10 +327,10 @@ module LIBIS
             @representations.values.each { |rep| add_amd(xml, rep) }
             @files.values.each { |file| add_amd(xml, file) }
           when LIBIS::Tools::MetsFile::File
-            add_amd_section(xml, object.xml_id, object.amd, :File)
-            object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd, :File) }
+            add_amd_section(xml, object.xml_id, object.amd)
+            object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd) }
           when LIBIS::Tools::MetsFile::Representation
-            add_amd_section(xml, object.xml_id, object.amd, :Rep)
+            add_amd_section(xml, object.xml_id, object.amd)
           else
             raise RuntimeError, "Unsupported object type: #{object.class}"
         end
@@ -420,13 +420,13 @@ module LIBIS
         }
       end
 
-      def add_amd_section(xml, id, dnx_sections = {}, klass = nil)
+      def add_amd_section(xml, id, dnx_sections = {})
         xml[:mets].amdSec(ID: amd_id(id)) {
           [:tech, :rights, :source, :digiprov].each do |section_type|
             xml.send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
               xml[:mets].mdWrap(MDTYPE: 'OTHER', OTHERMDTYPE: 'dnx') {
                 xml[:mets].xmlData {
-                  add_dnx_sections(xml, dnx_sections[section_type], klass)
+                  add_dnx_sections(xml, dnx_sections[section_type])
                 }
               }
             }
@@ -434,11 +434,11 @@ module LIBIS
         }
       end
 
-      def add_dnx_sections(xml, section_data, klass = nil)
+      def add_dnx_sections(xml, section_data)
         section_data ||= []
         xml[:mets].dnx(xmlns: 'http://www.exlibrisgroup.com/dps/dnx') {
           (section_data).each do |section|
-            xml.section(id: section.tag(klass)) {
+            xml.section(id: section.tag) {
               xml.record {
                 section.each_pair do |key, value|
                   next if value.nil?

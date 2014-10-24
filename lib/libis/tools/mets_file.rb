@@ -176,6 +176,10 @@ module LIBIS
         tag 'fileFixity'
       end
 
+      class Rights < DnxSection
+        tag 'accessRightsPolicy'
+      end
+
       attr_reader :representations, :files, :divs, :maps
 
       def initialize
@@ -187,6 +191,26 @@ module LIBIS
 
       def dc_record=(xml)
         @dc_record = xml
+      end
+
+      def amd_info=(hash)
+        @dnx = {}
+        data = {
+            IEEntityType: hash[:entity_type],
+            UserDefinedA: hash[:user_a],
+            UserDefinedB: hash[:user_b],
+            UserDefinedC: hash[:user_c],
+            status: hash[:status],
+        }.cleanup
+        tech_data = []
+        tech_data << TechGeneral.new(data) unless data.empty?
+        @dnx[:tech] = tech_data unless tech_data.empty?
+        data = {
+            policyId: hash[:access_right]
+        }.cleanup
+        rights_data = []
+        rights_data << Rights.new(data) unless data.empty?
+        @dnx[:rights] = rights_data unless rights_data.empty?
       end
 
       def representation(hash = {})
@@ -218,8 +242,8 @@ module LIBIS
         ::LIBIS::Tools::XmlDocument.build do |xml|
           xml[:mets].mets(
               # 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-              # 'xmlns:mets' => 'http://www/loc.goc/METS/',
-              'xmlns:mets' => 'http://www.exlibrisgroup.com/xsd/dps/rosettaMets',
+              'xmlns:mets' => 'http://www/loc.goc/METS/',
+              # 'xmlns:mets' => 'http://www.exlibrisgroup.com/xsd/dps/rosettaMets',
           # 'xmlns:mets' => 'file:///home/kris/mets_rosetta.xsd',
           # 'xmlns:xlink' => 'http://www.w3.org/TR/xlink',
           # 'xmlns:mods' => 'http://www.loc.gov/mods/',
@@ -261,7 +285,8 @@ module LIBIS
       def add_amd(xml, object = nil)
         case object
           when NilClass
-            add_amd_section(xml, 'ie') # TODO: add AMD DNX data for IE
+            raise RuntimeError, 'No IE amd info present.' unless @dnx
+            add_amd_section(xml, 'ie', @dnx)
             @representations.values.each { |rep| add_amd(xml, rep) }
             @files.values.each { |file| add_amd(xml, file) }
           when File
@@ -305,7 +330,8 @@ module LIBIS
                 xml[:mets].FLocat(
                     LOCTYPE: 'URL',
                     'xmlns:xlin' => 'http://www.w3.org/1999/xlink',
-                    'xlin:href' => "file://#{object.location}",
+                    # 'xlin:href' => "file://#{object.location}",
+                    'xlin:href' => object.location,
                 )
               }
             end
@@ -360,11 +386,10 @@ module LIBIS
       def add_amd_section(xml, id, dnx_sections = {})
         xml[:mets].amdSec(ID: amd_id(id)) {
           [:tech, :rights, :source, :digiprov].each do |section_type|
-            next if dnx_sections[section_type].nil? || dnx_sections[section_type].empty?
             xml.send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
               xml[:mets].mdWrap(MDTYPE: 'OTHER', OTHERMDTYPE: 'dnx') {
                 xml[:mets].xmlData {
-                  add_dnx_sections(xml, dnx_sections[section_type])
+                  add_dnx_sections(xml, dnx_sections[section_type]) if dnx_sections[section_type]
                 }
               }
             }

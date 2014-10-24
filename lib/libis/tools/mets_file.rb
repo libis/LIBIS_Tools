@@ -66,7 +66,7 @@ module LIBIS
       class File
         include IdContainer
 
-        attr_accessor :label, :location, :entity_type, :representation, :dc_record
+        attr_accessor :label, :location, :mimetype, :entity_type, :representation, :dc_record
 
         def xml_id
           "fid#{id}"
@@ -110,7 +110,7 @@ module LIBIS
           tech_data = []
           data = {
               label: label,
-              # fileMIMEType: mimetype,
+              fileMIMEType: mimetype,
               fileOriginalName: orig_name,
               fileOriginalPath: orig_path,
               FileEntityType: entity_type,
@@ -364,6 +364,7 @@ module LIBIS
             if object.representation == representation
               h = {
                   ID: object.xml_id,
+                  MIMETYPE: object.mimetype,
                   ADMID: amd_id(object.xml_id),
                   GROUPID: object.group_id,
               }.cleanup

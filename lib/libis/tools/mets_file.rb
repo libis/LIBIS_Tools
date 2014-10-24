@@ -57,7 +57,6 @@ module LIBIS
               # DigitalOriginal: true,
           }.cleanup
           tech_data << TechGeneralRep.new(data) unless data.empty?
-          tag 'generalRepCharacteristics'
           dnx[:tech] = tech_data unless tech_data.empty?
           dnx
         end

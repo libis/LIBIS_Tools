@@ -94,15 +94,15 @@ module LIBIS
         end
 
         def orig_name
-          File.basename(location)
+          ::File.basename(location)
         end
 
         def orig_path
-          File.dirname(location)
+          ::File.dirname(location)
         end
 
         def target_location
-          "#{xml_id}#{File.extname(location)}"
+          "#{xml_id}#{::File.extname(location)}"
         end
 
         def amd
@@ -233,19 +233,19 @@ module LIBIS
       end
 
       def div(hash = {})
-        div = Div.new
+        div = LIBIS::Tools::MetsFile::Div.new
         div.set_from_hash hash
         @divs[div.id] = div
       end
 
       def file(hash = {})
-        file = File.new
+        file = LIBIS::Tools::MetsFile::File.new
         file.set_from_hash hash
         @files[file.id] = file
       end
 
       def map(rep, div)
-        map = Map.new
+        map = LIBIS::Tools::MetsFile::Map.new
         map.representation = rep
         map.div = div
         @maps[map.id] = map
@@ -286,7 +286,7 @@ module LIBIS
             add_dmd_section(xml, 'ie', @dc_record)
             # @representations.values.each { |rep| add_dmd(xml, rep) }
             @files.values.each { |file| add_dmd(xml, file) }
-          when File
+          when LIBIS::Tools::MetsFile::File
             add_dmd_section(xml, object.xml_id, object.dc_record)
           # when Representation
           #   add_dmd_section(xml, object.xml_id, object.dc_record)
@@ -302,10 +302,10 @@ module LIBIS
             add_amd_section(xml, 'ie', @dnx)
             @representations.values.each { |rep| add_amd(xml, rep) }
             @files.values.each { |file| add_amd(xml, file) }
-          when File
+          when LIBIS::Tools::MetsFile::File
             add_amd_section(xml, object.xml_id, object.amd)
             object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd) }
-          when Representation
+          when LIBIS::Tools::MetsFile::Representation
             add_amd_section(xml, object.xml_id, object.amd)
           else
             raise RuntimeError, "Unsupported object type: #{object.class}"
@@ -318,7 +318,7 @@ module LIBIS
             xml[:mets].fileSec {
               @representations.values.each { |rep| add_filesec(xml, rep) }
             }
-          when Representation
+          when LIBIS::Tools::MetsFile::Representation
             h = {
                 ID: object.xml_id,
                 USE: object.usage_type,
@@ -328,7 +328,7 @@ module LIBIS
             xml[:mets].fileGrp(h) {
               @files.values.each { |obj| add_filesec(xml, obj, object) }
             }
-          when File
+          when LIBIS::Tools::MetsFile::File
             if object.representation == representation
               h = {
                   ID: object.xml_id,
@@ -363,7 +363,7 @@ module LIBIS
                 add_struct_map(xml, map.div) if map.div
               }
             end
-          when Div
+          when LIBIS::Tools::MetsFile::Div
             h = {
                 LABEL: object.label,
             }.cleanup
@@ -371,7 +371,7 @@ module LIBIS
               object.files.each { |file| add_struct_map(xml, file) }
               object.divs.each { |div| add_struct_map(xml, div) }
             }
-          when File
+          when LIBIS::Tools::MetsFile::File
             h = {
                 LABEL: object.label,
                 TYPE: 'FILE',

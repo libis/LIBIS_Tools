@@ -66,7 +66,7 @@ module LIBIS
       class File
         include IdContainer
 
-        attr_accessor :label, :location, :path, :mimetype, :size, :fixity_type, :fixity_value, :representation, :dc_record
+        attr_accessor :label, :location, :mimetype, :size, :fixity_type, :fixity_value, :representation, :dc_record
 
         def xml_id
           "file-#{id}"
@@ -93,13 +93,26 @@ module LIBIS
           file.master = self
         end
 
+        def orig_name
+          File.basename(location)
+        end
+
+        def orig_path
+          File.dirname(location)
+        end
+
+        def target_location
+          "#{xml_id}#{File.extname(location)}"
+        end
+
         def amd
           dnx = {}
           tech_data = []
           data = {
               label: label,
               fileMIMEType: mimetype,
-              fileOriginalPath: path,
+              fileOriginalName: orig_name,
+              fileOriginalPath: orig_path,
               fileSizeBytes: size,
           }.cleanup
           tech_data << TechGeneral.new(data) unless data.empty?
@@ -330,8 +343,7 @@ module LIBIS
                 xml[:mets].FLocat(
                     LOCTYPE: 'URL',
                     'xmlns:xlin' => 'http://www.w3.org/1999/xlink',
-                    # 'xlin:href' => "file://#{object.location}",
-                    'xlin:href' => object.location,
+                    'xlin:href' => object.target_location,
                 )
               }
             end
@@ -362,6 +374,7 @@ module LIBIS
           when File
             h = {
                 LABEL: object.label,
+                TYPE: 'FILE',
             }.cleanup
             xml[:mets].div(h) {
               xml[:mets].fptr(FILEID: object.xml_id)

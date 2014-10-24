@@ -66,7 +66,7 @@ module LIBIS
       class File
         include IdContainer
 
-        attr_accessor :label, :location, :mimetype, :size, :fixity_type, :fixity_value, :representation, :dc_record
+        attr_accessor :label, :location, :mimetype, :size, :fixity_type, :fixity_value, :entity_type, :representation, :dc_record
 
         def xml_id
           "file-#{id}"
@@ -113,6 +113,7 @@ module LIBIS
               fileMIMEType: mimetype,
               fileOriginalName: orig_name,
               fileOriginalPath: orig_path,
+              fileEntityType: entity_type,
               fileSizeBytes: size,
           }.cleanup
           tech_data << TechGeneral.new(data) unless data.empty?
@@ -172,17 +173,24 @@ module LIBIS
       end
 
       class DnxSection < OpenStruct
-        def self.tag(value = nil)
-          value.nil? ? instance_variable_get('@tag') : instance_variable_set('@tag', value)
+        def self.tag(value = nil, klass = nil)
+          var_name = "@tag#{klass.to_s.capitalize}"
+          if value.nil?
+            var_name = instance_variables.include?(var_name) ? var_name : '@tag'
+            instance_variable_get(var_name)
+          else
+            instance_variable_set(var_name, value)
+          end
         end
 
-        def tag;
-          self.class.tag;
+        def tag(klass = nil)
+          self.class.tag(nil, klass)
         end
       end
 
       class TechGeneral < DnxSection
-        tag 'generalFileCharacteristics'
+        tag 'generalFileCharacteristics', :File
+        tag 'generalRepCharacteristics', :Representation
       end
 
       class TechFixity < DnxSection
@@ -313,10 +321,10 @@ module LIBIS
             @representations.values.each { |rep| add_amd(xml, rep) }
             @files.values.each { |file| add_amd(xml, file) }
           when LIBIS::Tools::MetsFile::File
-            add_amd_section(xml, object.xml_id, object.amd)
-            object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd) }
+            add_amd_section(xml, object.xml_id, object.amd, :File)
+            object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd, :File) }
           when LIBIS::Tools::MetsFile::Representation
-            add_amd_section(xml, object.xml_id, object.amd)
+            add_amd_section(xml, object.xml_id, object.amd, :Rep)
           else
             raise RuntimeError, "Unsupported object type: #{object.class}"
         end
@@ -406,13 +414,13 @@ module LIBIS
         }
       end
 
-      def add_amd_section(xml, id, dnx_sections = {})
+      def add_amd_section(xml, id, dnx_sections = {}, klass = nil)
         xml[:mets].amdSec(ID: amd_id(id)) {
           [:tech, :rights, :source, :digiprov].each do |section_type|
             xml.send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
               xml[:mets].mdWrap(MDTYPE: 'OTHER', OTHERMDTYPE: 'dnx') {
                 xml[:mets].xmlData {
-                  add_dnx_sections(xml, dnx_sections[section_type])
+                  add_dnx_sections(xml, dnx_sections[section_type], klass)
                 }
               }
             }
@@ -420,11 +428,11 @@ module LIBIS
         }
       end
 
-      def add_dnx_sections(xml, section_data)
+      def add_dnx_sections(xml, section_data, klass = nil)
         section_data ||= []
         xml[:mets].dnx(xmlns: 'http://www.exlibrisgroup.com/dps/dnx') {
           (section_data).each do |section|
-            xml.section(id: section.tag) {
+            xml.section(id: section.tag(klass)) {
               xml.record {
                 section.each_pair do |key, value|
                   next if value.nil?

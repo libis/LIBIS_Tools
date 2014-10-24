@@ -412,7 +412,7 @@ module LIBIS
             xml.send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
               xml[:mets].mdWrap(MDTYPE: 'OTHER', OTHERMDTYPE: 'dnx') {
                 xml[:mets].xmlData {
-                  add_dnx_sections(xml, dnx_sections[section_type]) if dnx_sections[section_type]
+                  add_dnx_sections(xml, dnx_sections[section_type])
                 }
               }
             }
@@ -425,10 +425,12 @@ module LIBIS
         xml[:mets].dnx(xmlns: 'http://www.exlibrisgroup.com/dps/dnx') {
           (section_data).each do |section|
             xml.section(id: section.tag) {
-              section.each_pair do |key, value|
-                next if value.nil?
-                xml.key(value, id: key)
-              end
+              xml.record {
+                section.each_pair do |key, value|
+                  next if value.nil?
+                  xml.key(value, id: key)
+                end
+              }
             }
           end
         }

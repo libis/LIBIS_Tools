@@ -226,24 +226,33 @@ module LIBIS
         @dnx[:rights] = rights_data unless rights_data.empty?
       end
 
+      # @param [Hash] hash
+      # @return [LIBIS::Tools::MetsFile::Representation]
       def representation(hash = {})
         rep = Representation.new
         rep.set_from_hash hash
         @representations[rep.id] = rep
       end
 
+      # @param [Hash] hash
+      # @return [LIBIS::Tools::MetsFile::Div]
       def div(hash = {})
         div = LIBIS::Tools::MetsFile::Div.new
         div.set_from_hash hash
         @divs[div.id] = div
       end
 
+      # @param [Hash] hash
+      # @return [LIBIS::Tools::MetsFile::File]
       def file(hash = {})
         file = LIBIS::Tools::MetsFile::File.new
         file.set_from_hash hash
         @files[file.id] = file
       end
 
+      # @param [LIBIS::Tools::MetsFile::Representation] rep
+      # @param [LIBIS::Tools::MetsFile::Div] div
+      # @return [LIBIS::Tools::MetsFile::Map]
       def map(rep, div)
         map = LIBIS::Tools::MetsFile::Map.new
         map.representation = rep
@@ -251,6 +260,7 @@ module LIBIS
         @maps[map.id] = map
       end
 
+      # @return [LIBIS::Tools::XmlDocument]
       def xml_doc
         ::LIBIS::Tools::XmlDocument.build do |xml|
           xml[:mets].mets(

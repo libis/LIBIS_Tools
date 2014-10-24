@@ -391,7 +391,9 @@ module LIBIS
                   ID: "#{map.representation.xml_id}-1",
                   TYPE: 'PHYSICAL',
               ) {
-                add_struct_map(xml, map.div) if map.div
+                xml[:mets].div(LABEL: map.representation.label) {
+                  add_struct_map(xml, map.div) if map.div
+                }
               }
             end
           when LIBIS::Tools::MetsFile::Div

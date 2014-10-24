@@ -200,7 +200,7 @@ module LIBIS
       end
 
       class RetentionPeriod < DnxSection
-        tag 'retentionPeriodPolicy'
+        tag 'retentionPolicy'
       end
 
       class TechFixity < DnxSection

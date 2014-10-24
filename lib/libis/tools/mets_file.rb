@@ -56,7 +56,8 @@ module LIBIS
               # RevisionNumber: 1,
               # DigitalOriginal: true,
           }.cleanup
-          tech_data << TechGeneral.new(data) unless data.empty?
+          tech_data << TechGeneralRep.new(data) unless data.empty?
+          tag 'generalRepCharacteristics'
           dnx[:tech] = tech_data unless tech_data.empty?
           dnx
         end
@@ -66,7 +67,7 @@ module LIBIS
       class File
         include IdContainer
 
-        attr_accessor :label, :location, :mimetype, :size, :fixity_type, :fixity_value, :entity_type, :representation, :dc_record
+        attr_accessor :label, :location, :entity_type, :representation, :dc_record
 
         def xml_id
           "file-#{id}"
@@ -110,18 +111,18 @@ module LIBIS
           tech_data = []
           data = {
               label: label,
-              fileMIMEType: mimetype,
+              # fileMIMEType: mimetype,
               fileOriginalName: orig_name,
               fileOriginalPath: orig_path,
-              fileEntityType: entity_type,
-              fileSizeBytes: size,
+              FileEntityType: entity_type,
+              # fileSizeBytes: size,
           }.cleanup
-          tech_data << TechGeneral.new(data) unless data.empty?
-          data = {
-              fixityType: fixity_type,
-              fixityValue: fixity_value,
-          }.cleanup
-          tech_data << TechFixity.new(data) unless data.empty?
+          tech_data << TechGeneralFile.new(data) unless data.empty?
+          # data = {
+          #     fixityType: fixity_type,
+          #     fixityValue: fixity_value,
+          # }.cleanup
+          # tech_data << TechFixity.new(data) unless data.empty?
           dnx[:tech] = tech_data unless tech_data.empty?
           dnx
         end
@@ -173,24 +174,30 @@ module LIBIS
       end
 
       class DnxSection < OpenStruct
-        def self.tag(value = nil, klass = nil)
-          var_name = "@tag#{klass.to_s.capitalize}"
+        def self.tag(value = nil)
+          var_name = '@tag'
           if value.nil?
-            var_name = instance_variables.include?(var_name) ? var_name : '@tag'
             instance_variable_get(var_name)
           else
             instance_variable_set(var_name, value)
           end
         end
 
-        def tag(klass = nil)
-          self.class.tag(nil, klass)
+        def tag
+          self.local_tag || self.class.tag
         end
       end
 
-      class TechGeneral < DnxSection
-        tag 'generalFileCharacteristics', :File
-        tag 'generalRepCharacteristics', :Representation
+      class TechGeneralIE < DnxSection
+        tag 'generalIECharacteristics'
+      end
+
+      class TechGeneralRep < DnxSection
+        tag 'generalRepCharacteristics'
+      end
+
+      class TechGeneralFile < DnxSection
+        tag 'generalFileCharacteristics'
       end
 
       class TechFixity < DnxSection
@@ -224,7 +231,7 @@ module LIBIS
             status: hash[:status],
         }.cleanup
         tech_data = []
-        tech_data << TechGeneral.new(data) unless data.empty?
+        tech_data << TechGeneralIE.new(data) unless data.empty?
         @dnx[:tech] = tech_data unless tech_data.empty?
         data = {
             policyId: hash[:access_right]

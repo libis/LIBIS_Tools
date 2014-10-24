@@ -44,7 +44,7 @@ module LIBIS
         attr_accessor :label, :preservation_type, :usage_type, :dc_record
 
         def xml_id
-          "rep-#{id}"
+          "rep#{id}"
         end
 
         def amd
@@ -69,11 +69,11 @@ module LIBIS
         attr_accessor :label, :location, :entity_type, :representation, :dc_record
 
         def xml_id
-          "file-#{id}"
+          "fid#{id}"
         end
 
         def group_id
-          "grp-#{master.id rescue id}"
+          "grp#{master.id rescue id}"
         end
 
         def master

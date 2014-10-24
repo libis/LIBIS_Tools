@@ -199,6 +199,10 @@ module LIBIS
         tag 'generalFileCharacteristics'
       end
 
+      class RetentionPeriod < DnxSection
+        tag 'retentionPeriodPolicy'
+      end
+
       class TechFixity < DnxSection
         tag 'fileFixity'
       end
@@ -222,6 +226,7 @@ module LIBIS
 
       def amd_info=(hash)
         @dnx = {}
+        tech_data = []
         data = {
             IEEntityType: hash[:entity_type],
             UserDefinedA: hash[:user_a],
@@ -229,8 +234,11 @@ module LIBIS
             UserDefinedC: hash[:user_c],
             status: hash[:status],
         }.cleanup
-        tech_data = []
         tech_data << TechGeneralIE.new(data) unless data.empty?
+        data = {
+            policyId: hash[:retention_id],
+        }.cleanup
+        tech_data << RetentionPeriod.new(data) unless data.empty?
         @dnx[:tech] = tech_data unless tech_data.empty?
         data = {
             policyId: hash[:access_right]

@@ -358,7 +358,6 @@ module LIBIS
                   ID: object.xml_id,
                   ADMID: amd_id(object.xml_id),
                   GROUPID: object.group_id,
-                  MIMETYPE: object.mimetype,
               }.cleanup
               h[:DMDID] = dmd_id(object.xml_id) if object.dc_record
 

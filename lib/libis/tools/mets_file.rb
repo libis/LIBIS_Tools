@@ -213,11 +213,96 @@ module LIBIS
 
       attr_reader :representations, :files, :divs, :maps
 
+      # noinspection RubyConstantNamingConvention
+      NS = {
+          mets: 'http://www.loc.gov/METS/',
+          dc: 'http://purl.org/dc/elements/1.1/',
+          dnx: 'http://www.exlibrisgroup.com/dps/dnx',
+          xlin: 'http://www.w3.org/1999/xlink',
+      }
+
       def initialize
         @representations = {}
         @files = {}
         @divs = {}
         @maps = {}
+      end
+
+      def self.parse(xml_string)
+        xml_doc = LIBIS::Tools::XmlDocument.parse(xml_string).document
+        dmd_sec = xml_doc.root.xpath('mets:dmdSec', NS).inject({}) do |hash_dmd, dmd|
+          hash_dmd[dmd[:ID]] = dmd.xpath('.//dc:record', NS).first.children.inject({}) do |h, c|
+            h[c.name] = c.content
+            h
+          end
+          hash_dmd
+        end
+        amd_sec = xml_doc.root.xpath('mets:amdSec', NS).inject({}) do |hash_amd, amd|
+          hash_amd[amd[:ID]] = [:tech, :rights, :source, :digiprov].inject({}) do |hash_sec, sec|
+            md = amd.xpath("mets:#{sec}MD", NS).first
+            return hash_sec unless md
+            # hash_sec[sec] = md.xpath('mets:mdWrap/dnx:dnx/dnx:section', NS).inject({}) do |hash_md, dnx_sec|
+            hash_sec[sec] = md.xpath('.//dnx:section', NS).inject({}) do |hash_md, dnx_sec|
+              h = {}
+              # dnx_sec.xpath('dnx:record/dnx:key', NS).each do |key|
+              dnx_sec.xpath('.//dnx:key', NS).each do |key|
+                h[key[:id]] = key.content
+              end
+              hash_md[dnx_sec[:id]] = h
+              hash_md
+            end
+            hash_sec
+          end
+          hash_amd
+        end
+        rep_sec = xml_doc.root.xpath('.//mets:fileGrp', NS).inject({}) do |hash_rep, rep|
+          hash_rep[rep[:ID]] = {
+              amd: amd_sec[rep[:ADMID]],
+              dmd: amd_sec[rep[:DMDID]]
+          }.cleanup.merge(
+              rep.xpath('mets:file', NS).inject({}) do |hash_file, file|
+                hash_file[file[:ID]] = {
+                    group: file[:GROUPID],
+                    amd: amd_sec[file[:ADMID]],
+                    dmd: dmd_sec[file[:DMDID]],
+                }.cleanup
+                hash_file
+              end
+          )
+          hash_rep
+        end
+        { amd: amd_sec['ie-amd'],
+          dmd: dmd_sec['ie-dmd'],
+        }.cleanup.merge(
+            xml_doc.root.xpath('.//mets:structMap[@TYPE="PHYSICAL"]', NS).inject({}) do |hash_map, map|
+              rep_id = map[:ID].gsub(/-\d+$/, '')
+              rep = rep_sec[rep_id]
+              div_parser = lambda do |div|
+                if div[:TYPE] == 'FILE'
+                  file_id = div.xpath('mets:fptr').first[:FILEID]
+                  {
+                      id: file_id
+                  }.merge rep[file_id]
+                else
+                  div.children.inject({}) do |hash, child|
+                    # noinspection RubyScope
+                    hash[child[:LABEL]] = div_parser.call(child)
+                    hash
+                  end
+                end
+              end
+              hash_map[map.xpath('mets:div').first[:LABEL]] = {
+                  id: rep_id,
+                  amd: rep_sec[rep_id][:amd],
+                  dmd: rep_sec[rep_id][:dmd],
+              }.cleanup.merge(
+                  map.xpath('mets:div', NS).inject({}) do |hash, div|
+                    hash[div[:LABEL]] = div_parser.call(div)
+                  end
+              )
+              hash_map
+            end
+        )
       end
 
       def dc_record=(xml)
@@ -286,13 +371,7 @@ module LIBIS
       def xml_doc
         ::LIBIS::Tools::XmlDocument.build do |xml|
           xml[:mets].mets(
-              # 'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-              'xmlns:mets' => 'http://www.loc.gov/METS/',
-              # 'xmlns:mets' => 'http://www.exlibrisgroup.com/xsd/dps/rosettaMets',
-          # 'xmlns:mets' => 'file:///home/kris/mets_rosetta.xsd',
-          # 'xmlns:xlink' => 'http://www.w3.org/TR/xlink',
-          # 'xmlns:mods' => 'http://www.loc.gov/mods/',
-          # 'xmlns' => 'file:///home/kris/mets_rosetta.xsd',
+              'xmlns:mets' => NS[:mets],
           ) {
             add_dmd(xml)
             add_amd(xml)
@@ -374,7 +453,7 @@ module LIBIS
                 # noinspection RubyStringKeysInHashInspection
                 xml[:mets].FLocat(
                     LOCTYPE: 'URL',
-                    'xmlns:xlin' => 'http://www.w3.org/1999/xlink',
+                    'xmlns:xlin' => NS[:xlin],
                     'xlin:href' => object.target_location,
                 )
               }
@@ -446,7 +525,7 @@ module LIBIS
 
       def add_dnx_sections(xml, section_data)
         section_data ||= []
-        xml[:mets].dnx(xmlns: 'http://www.exlibrisgroup.com/dps/dnx') {
+        xml[:mets].dnx(xmlns: NS[:dnx]) {
           (section_data).each do |section|
             xml.section(id: section.tag) {
               xml.record {
@@ -458,6 +537,20 @@ module LIBIS
             }
           end
         }
+      end
+
+      def parse_div(div, rep)
+        if div[:TYPE] == 'FILE'
+          file_id = div.children.first[:FILEID]
+          {
+              id: file_id
+          }.merge rep[file_id]
+        else
+          div.children.inject({}) do |hash, child|
+            hash[child[:LABEL]] = parse_div child, rep
+            hash
+          end
+        end
       end
 
     end

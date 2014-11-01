@@ -11,6 +11,8 @@ module LIBIS
 
       autoload :SharepointConnector, 'libis/tools/webservices/sharepoint_connector'
 
+      autoload :Rosetta, 'libis/tools/webservices/rosetta'
+
     end
   end
 end

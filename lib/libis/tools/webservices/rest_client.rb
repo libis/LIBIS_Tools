@@ -15,8 +15,13 @@ module LIBIS
           @client = ::RestClient::Resource.new(url, options)
         end
 
-        def get (path, params = {}, headers = {}, &block)
+        def get(path, params = {}, headers = {}, &block)
           response = client[path].get({params: params}.merge headers, &block)
+          parse_result response, &block
+        end
+
+        def post(path, params = {}, headers = {}, &block)
+          response = client[path].post({params: params}.merge headers, &block)
           parse_result response, &block
         end
 

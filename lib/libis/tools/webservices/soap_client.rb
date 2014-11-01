@@ -18,7 +18,7 @@ module LIBIS
           options = {
               wsdl: wsdl,
               raise_errors: false,
-              soap_version: 2,
+              soap_version: 1,
               filters: [:password],
               pretty_print_xml: true,
           }.merge options

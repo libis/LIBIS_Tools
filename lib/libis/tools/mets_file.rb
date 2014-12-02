@@ -66,7 +66,7 @@ module LIBIS
       class File
         include IdContainer
 
-        attr_accessor :label, :location, :mimetype, :entity_type, :representation, :dc_record
+        attr_accessor :label, :location, :target_location, :mimetype, :entity_type, :representation, :dc_record
 
         def xml_id
           "fid#{id}"
@@ -101,8 +101,11 @@ module LIBIS
           ::File.dirname(location)
         end
 
-        def target_location
-          "#{xml_id}#{::File.extname(location)}"
+        def target
+          if target_location.nil?
+            return "#{xml_id}#{::File.extname(location)}"
+          end
+          target_location
         end
 
         def amd
@@ -228,8 +231,20 @@ module LIBIS
         @maps = {}
       end
 
-      def self.parse(xml_string)
-        xml_doc = LIBIS::Tools::XmlDocument.parse(xml_string).document
+      def self.parse(xml)
+        xml_doc = case xml
+                    when String
+                      LIBIS::Tools::XmlDocument.parse(xml).document
+                    when Hash
+                      LIBIS::Tools::XmlDocument.from_hash(xml).document
+                    when LIBIS::Tools::XmlDocument
+                      xml.document
+                    when Nokogiri::XML::Document
+                      xml
+                    else
+                      raise ArgumentError, "LIBIS::Tools::MetsFile#parse does not accept input of type #{xml.class}"
+                  end
+
         dmd_sec = xml_doc.root.xpath('mets:dmdSec', NS).inject({}) do |hash_dmd, dmd|
           hash_dmd[dmd[:ID]] = dmd.xpath('.//dc:record', NS).first.children.inject({}) do |h, c|
             h[c.name] = c.content
@@ -243,12 +258,13 @@ module LIBIS
             return hash_sec unless md
             # hash_sec[sec] = md.xpath('mets:mdWrap/dnx:dnx/dnx:section', NS).inject({}) do |hash_md, dnx_sec|
             hash_sec[sec] = md.xpath('.//dnx:section', NS).inject({}) do |hash_md, dnx_sec|
-              h = {}
-              # dnx_sec.xpath('dnx:record/dnx:key', NS).each do |key|
-              dnx_sec.xpath('.//dnx:key', NS).each do |key|
-                h[key[:id]] = key.content
+              hash_md[dnx_sec[:id]] = dnx_sec.xpath('dnx:record', NS).inject([]) do |records, dnx_record|
+                records << dnx_record.xpath('dnx:key', NS).inject({}) do |record_hash, key|
+                  record_hash[key[:id]] = key.content
+                  record_hash
+                end
+                records
               end
-              hash_md[dnx_sec[:id]] = h
               hash_md
             end
             hash_sec

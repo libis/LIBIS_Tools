@@ -1,10 +1,18 @@
-# encoding: utf-8
+require 'backports/rails/hash'
 
 class Hash
 
   def cleanup
     self.delete_if { |_,v| v.nil? || (v.respond_to?(:empty?) ? v.empty? : false) }
   end unless method_defined? :cleanup
+
+  def recursive_cleanup
+    delete_proc = Proc.new do |_, v|
+      v.delete_if(&delete_proc) if v.kind_of?(Hash)
+      v.nil? || (v.respond_to?(:empty?) ? v.empty? : false)
+    end
+    self.delete_if &delete_proc
+  end unless method_defined? :recursive_cleanup
 
   def recursive_merge(other_hash)
     self.merge(other_hash) do |_, old_val, new_val|

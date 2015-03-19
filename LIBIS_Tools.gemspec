@@ -26,11 +26,14 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'simplecov'
 
   spec.add_runtime_dependency 'backports'
   spec.add_runtime_dependency 'savon', '~> 2.0'
   spec.add_runtime_dependency 'rest_client'
   spec.add_runtime_dependency 'write_xlsx'
   spec.add_runtime_dependency 'awesome_print'
+  spec.add_runtime_dependency 'settingslogic'
 
 end

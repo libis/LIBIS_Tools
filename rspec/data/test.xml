@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<patron>
+  <name>Harry Potter</name>
+  <barcode library="Hogwarts Library">1234567890</barcode>
+  <access_level>student</access_level>
+  <email>harry.potter@hogwarts.edu</email>
+  <email>hpotter@JKRowling.com</email>
+</patron>

@@ -17,7 +17,7 @@ class String
       end
     }
     result
-  end
+  end unless method_defined? :sort_form
 
   def underscore
     self.gsub(/::/, '/').
@@ -63,5 +63,18 @@ class String
   def decode_visual
     self.gsub(/_x([0-9a-f]{4})_/i) { [$1.to_i(16)].pack('U') }
   end unless method_defined? :decode_visual
+
+  def align_left
+    string = dup
+    relevant_lines = string.split(/\r\n|\r|\n/).select { |line| line.size > 0 }
+    indentation_levels = relevant_lines.map do |line|
+      match = line.match(/^( +)[^ ]+/)
+      match ? match[1].size : 0
+    end
+    indentation_level = indentation_levels.min
+    string.gsub! /^#{' ' * indentation_level}/, '' if indentation_level > 0
+    string
+  end unless method_defined? :align_left
+
 
 end

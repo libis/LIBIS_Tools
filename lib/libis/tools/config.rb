@@ -7,19 +7,19 @@ require 'logger'
 
 require 'libis/tools/extend/hash'
 
-module LIBIS
+module Libis
   module Tools
 
     # The Config class is a convenience method for easy configuration maintenance and loading.
     # It supports code defaults, loading configurations from multiple YAML files containing ERB statements.
     # The Config class follows the Singleton pattern and behaves like a Hash/OpenStruct/HashWithIndifferentAccess.
     # It also initializes a default Logger instance.
-    # The class also stores a system-wide {::Logger} instance that will be used by {::LIBIS::Tools::Logger}.
+    # The class also stores a system-wide {::Logger} instance that will be used by {::Libis::Tools::Logger}.
     #
     # The parameters can be accessed by getter/setter method or using the Hash syntax:
     #
     #         require 'libis/tools/config'
-    #         cfg = ::LIBIS::Tools::Config
+    #         cfg = ::Libis::Tools::Config
     #         cfg['my_value'] = 10
     #         p cfg.instance.my_value # => 10
     #         cfg.instance.my_text = 'abc'

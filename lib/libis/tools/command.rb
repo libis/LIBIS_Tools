@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'open3'
 
-module LIBIS
+module Libis
   module Tools
 
     module Command

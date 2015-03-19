@@ -4,7 +4,7 @@ require 'nokogiri'
 require 'gyoku'
 require 'nori'
 
-module LIBIS
+module Libis
   module Tools
 
     # noinspection RubyTooManyMethodsInspection
@@ -225,7 +225,7 @@ module LIBIS
       #
       # Example:
       #
-      #     xml_doc = ::LIBIS::Tools::XmlDocument.build do
+      #     xml_doc = ::Libis::Tools::XmlDocument.build do
       #       patron {
       #         name 'Harry Potter'
       #         barcode( '1234567890', library: 'Hogwarts Library')
@@ -260,7 +260,7 @@ module LIBIS
       #
       # Example:
       #
-      #       xml_doc = ::LIBIS::Tools::XmlDocument.new
+      #       xml_doc = ::Libis::Tools::XmlDocument.new
       #       xml_doc.valid? # => false
       #       xml_doc.add_node :patron
       #       xml_doc.add_node :name, 'Harry Potter'
@@ -446,7 +446,7 @@ module LIBIS
       #
       # Example:
       #
-      #       ::LIBIS::Tools::XmlDocument.get_content(xml_doc.xpath('//email')) # => "harry.potter@hogwarts.edu"
+      #       ::Libis::Tools::XmlDocument.get_content(xml_doc.xpath('//email')) # => "harry.potter@hogwarts.edu"
       #
       # @param [{Nokogiri::XML::NodeSet}] nodelist set of nodes to get content from
       # @return [String] content of the first node; always returns at least an empty string

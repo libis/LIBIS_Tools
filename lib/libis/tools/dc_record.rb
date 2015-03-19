@@ -2,7 +2,7 @@
 
 require_relative 'xml_document'
 
-module LIBIS
+module Libis
   module Tools
 
     class DCRecord < XmlDocument
@@ -19,7 +19,7 @@ module LIBIS
                 yield xml if block_given?
               }
             end
-          when ::LIBIS::Tools::XmlDocument
+          when ::Libis::Tools::XmlDocument
             @document = doc.document.dup
           when String
             if File.exist?(doc)

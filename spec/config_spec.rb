@@ -4,7 +4,7 @@ require 'libis/tools/config'
 
 describe 'Config' do
 
-  config = ::LIBIS::Tools::Config
+  config = ::Libis::Tools::Config
   config << { appname: 'LIBIS Default' }
 
   it 'should initialize' do

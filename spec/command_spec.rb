@@ -12,7 +12,7 @@ describe 'Command' do
 
   it 'should run ls command' do
 
-    result = LIBIS::Tools::Command.run('ls')
+    result = Libis::Tools::Command.run('ls')
 
     expect(result[:out]).to eq %w'test.data test.xml test.yml'
     expect(result[:err]).to eq []
@@ -22,7 +22,7 @@ describe 'Command' do
 
   it 'should run ls command with an option' do
 
-    result = LIBIS::Tools::Command.run('ls', '-l')
+    result = Libis::Tools::Command.run('ls', '-l')
 
     output = result[:out]
     expect(output.size).to be 4
@@ -38,7 +38,7 @@ describe 'Command' do
 
   it 'should run ls command with multiple options' do
 
-    result = LIBIS::Tools::Command.run('ls', '-l', '-a', '-p')
+    result = Libis::Tools::Command.run('ls', '-l', '-a', '-p')
 
     output = result[:out]
     expect(output.size).to be 6
@@ -56,7 +56,7 @@ describe 'Command' do
 
   it 'should capture error output and status' do
 
-    result = LIBIS::Tools::Command.run('ls', 'abc')
+    result = Libis::Tools::Command.run('ls', 'abc')
     expect(result[:out]).to eq []
     expect(result[:err].size).to be 1
     expect(result[:err][0]).to match /ls: cannot access abc: No such file or directory/

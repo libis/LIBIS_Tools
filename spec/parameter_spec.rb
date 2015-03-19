@@ -7,16 +7,16 @@ describe 'Parameter' do
   before :context do
     @parameter_types = %w'bool string int float datetime'
 
-    @bool_parameter = ::LIBIS::Tools::Parameter.new('BoolParam', true)
-    @string_parameter = ::LIBIS::Tools::Parameter.new('StringParam', 'default string')
-    @int_parameter = ::LIBIS::Tools::Parameter.new('IntParam', 5)
-    @float_parameter = ::LIBIS::Tools::Parameter.new('FloatParam', 1.0)
-    @datetime_parameter = ::LIBIS::Tools::Parameter.new('DateTimeParam', DateTime.now)
+    @bool_parameter = ::Libis::Tools::Parameter.new('BoolParam', true)
+    @string_parameter = ::Libis::Tools::Parameter.new('StringParam', 'default string')
+    @int_parameter = ::Libis::Tools::Parameter.new('IntParam', 5)
+    @float_parameter = ::Libis::Tools::Parameter.new('FloatParam', 1.0)
+    @datetime_parameter = ::Libis::Tools::Parameter.new('DateTimeParam', DateTime.now)
 
-    @constrained_bool_parameter = ::LIBIS::Tools::Parameter.new('BoolParam', true, nil, nil, true)
-    @constrained_string_parameter = ::LIBIS::Tools::Parameter.new('StringParam', 'default string', nil, nil, /^ABC.*XYZ$/i)
-    @constrained_int_parameter = ::LIBIS::Tools::Parameter.new('IntParam', 5, nil, nil, [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37])
-    @constrained_float_parameter = ::LIBIS::Tools::Parameter.new('FloatParam', 0.0, nil, nil, 1.0...3.1415927)
+    @constrained_bool_parameter = ::Libis::Tools::Parameter.new('BoolParam', true, nil, nil, true)
+    @constrained_string_parameter = ::Libis::Tools::Parameter.new('StringParam', 'default string', nil, nil, /^ABC.*XYZ$/i)
+    @constrained_int_parameter = ::Libis::Tools::Parameter.new('IntParam', 5, nil, nil, [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37])
+    @constrained_float_parameter = ::Libis::Tools::Parameter.new('FloatParam', 0.0, nil, nil, 1.0...3.1415927)
   end
 
   it 'should detect datatype from default value' do

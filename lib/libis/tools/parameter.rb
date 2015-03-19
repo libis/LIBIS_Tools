@@ -2,7 +2,7 @@
 require 'date'
 require 'libis/tools/extend/struct'
 
-module LIBIS
+module Libis
   module Tools
 
     # noinspection RubyConstantNamingConvention
@@ -169,4 +169,4 @@ module LIBIS
     end # ParameterContainer
 
   end # Tools
-end # LIBIS
+end # Libis

@@ -7,7 +7,7 @@ class TestCaItemInfo < Test::Unit::TestCase
   # to set up fixture information.
   def setup
 
-    @ca_client = ::LIBIS::Tools::Webservices::CollectiveAccess.new
+    @ca_client = ::Libis::Tools::Webservices::CollectiveAccess.new
     @ca_client.authenticate
     @object_label = 'TEST.0001.0001'
     @object = @ca_client.add_object @object_label

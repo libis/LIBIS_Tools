@@ -1,4 +1,4 @@
-module LIBIS
+module Libis
   module Tools
 
     autoload :Checksum, 'libis/tools/checksum'

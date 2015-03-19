@@ -6,7 +6,7 @@ class TestCaSearch < Test::Unit::TestCase
   # Called before every test method runs. Can be used
   # to set up fixture information.
   def setup
-    @ca = ::LIBIS::Tools::Webservices::CollectiveAccess.new
+    @ca = ::Libis::Tools::Webservices::CollectiveAccess.new
     @ca.authenticate
     @object_label = 'TEST.0001.0001'
     @object_id = @ca.add_object @object_label

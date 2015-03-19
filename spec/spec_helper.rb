@@ -2,7 +2,7 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'rspec'
-require 'LIBIS_Tools'
+require 'libis-tools'
 
 RSpec.configure do |config|
 

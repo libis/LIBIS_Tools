@@ -5,7 +5,7 @@ require 'uri'
 require 'libis/tools/extend/hash'
 require 'libis/tools/xml_document'
 
-module LIBIS
+module Libis
   module Tools
 
     # noinspection RubyTooManyMethodsInspection
@@ -149,7 +149,7 @@ module LIBIS
 
       def to_xml
 
-        xml_doc = LIBIS::Tools::XmlDocument.new
+        xml_doc = Libis::Tools::XmlDocument.new
 
         xml_doc.root = xml_doc.create_node('record')
 
@@ -168,7 +168,7 @@ module LIBIS
 
       def self.from_xml(xml_node)
 
-        record = LIBIS::Tools::SharepointRecord.new
+        record = Libis::Tools::SharepointRecord.new
 
         xml_node.element_children.each do |node|
           record[node.name.to_sym] = node.content
@@ -178,12 +178,12 @@ module LIBIS
 
       end
 
-      # @param [LIBIS::Tools::SharepointMapping] mapping
+      # @param [Libis::Tools::SharepointMapping] mapping
       def to_dc(mapping)
 
         return nil unless mapping and mapping.is_a? Hash
 
-        xml_doc = LIBIS::Tools::XmlDocument.new
+        xml_doc = Libis::Tools::XmlDocument.new
 
         #noinspection RubyStringKeysInHashInspection
         xml_doc.root = xml_doc.create_node(
@@ -209,7 +209,7 @@ module LIBIS
 
       end
 
-      # @param [LIBIS::Tools::SharepointMapping] mapping
+      # @param [Libis::Tools::SharepointMapping] mapping
       def to_sql(mapping)
         sql_fields = []
         sql_values = []

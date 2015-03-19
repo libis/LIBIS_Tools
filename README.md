@@ -1,4 +1,4 @@
-# LIBIS::Tools
+# Libis::Tools
 
 This gem contains some generic helper methods, classes and modules that should be easily reusable in other projects.
 
@@ -7,7 +7,7 @@ This gem contains some generic helper methods, classes and modules that should b
 Add this line to your application's Gemfile:
 
 ```ruby
-    gem 'LIBIS_Tools'
+    gem 'libis-tools'
 ```
 
 And then execute:
@@ -16,14 +16,14 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install LIBIS_Tools
+    $ gem install libis-tools
 
 ## Usage
 
-In order to make available all teh code the gem supplies a single file can be included:
+In order to make available all the code the gem supplies a single file can be included:
 
 ```ruby
-    require 'LIBIS_Tools'
+    require 'libis-tools'
 ```
 
 or:
@@ -69,8 +69,8 @@ and using a code block:
 
 ### Checksum
 
-The ::LIBIS::Tools::Checksum class offers a standardized interface for calculating checksums of file contents in
-different formats. The actual list of supported checksum formats is in ::LIBIS::Tools::Checksum.CHECKSUM_TYPES. It
+The ::Libis::Tools::Checksum class offers a standardized interface for calculating checksums of file contents in
+different formats. The actual list of supported checksum formats is in ::Libis::Tools::Checksum.CHECKSUM_TYPES. It
 contains MD5, SHA-1 and SHA-2 (in 256-bit, 384-bit and 512-bit variants).
 
 There are two ways this can be used: using a class instance or using class methods. When a class instance is used, the
@@ -88,13 +88,13 @@ Examples:
 
 ```ruby
     require 'libis/tools/checksum'
-    checksum = ::LIBIS::Tools::Checksum.new(:MD5)
+    checksum = ::Libis::Tools::Checksum.new(:MD5)
     puts "Checksum: #{checksum.hexdigest(file_name)} (MD5, hex)"
 ```
 
 ```ruby
     require 'libis/tools/checksum'
-    puts "Checksum: #{::LIBIS::Tools::Checksum.base64digest(file_name, :SHA384)} (SHA-2, 384 bit, base64)"
+    puts "Checksum: #{::Libis::Tools::Checksum.base64digest(file_name, :SHA384)} (SHA-2, 384 bit, base64)"
 ```
 
 ### Command
@@ -108,7 +108,7 @@ takes any number of arguments that will be used as command-line arguments. The m
 
 ```ruby
     require 'libis/tools/command'
-    result = ::LIBIS::Tools::Command.run('ls', '-l', File.absolute_path(__FILE__))
+    result = ::Libis::Tools::Command.run('ls', '-l', File.absolute_path(__FILE__))
     p result # => {out: [...], err: [...], status: 0}
 ```
 
@@ -116,7 +116,7 @@ or:
 
 ```ruby
     require 'libis/tools/command'
-    include ::LIBIS::Tools::Command
+    include ::Libis::Tools::Command
     result = run('ls', '-l', File.absolute_path(__FILE__))
     p result # => {out: [...], err: [...], status: 0}
 ```
@@ -137,7 +137,7 @@ Examples:
 
 ```ruby
     require 'libis/tools/config'
-    cfg = ::LIBIS::Tools::Config
+    cfg = ::Libis::Tools::Config
     cfg['my_value'] = 10
     p cfg.instance.my_value # => 10
     cfg.instance.my_text = 'abc'
@@ -147,12 +147,12 @@ Examples:
 
 ### Logger
 
-The Logger module adds logging functionality to any class. Just include the ::LIBIS::Tools::Logger module and the
+The Logger module adds logging functionality to any class. Just include the ::Libis::Tools::Logger module and the
 methods debug, info, warn, error and fatal will be available to the class instance. Each method takes a message argument
 and optional extra parameters. The methods all call the message method with the logging level as first argument and the
 supplied arguments appended.
 
-The default message method implementation uses the logger of ::LIBIS::Tools::Config. If extra parameters are supplied,
+The default message method implementation uses the logger of ::Libis::Tools::Config. If extra parameters are supplied,
 the message will be used as a format specification with the extra parameters applied to it. If an 'appname' parameter is
 defined in the Config object, it will be used as program name by the logger, otherwise the class name is taken.
 
@@ -164,7 +164,7 @@ Example:
 ```ruby
     require 'libis/tools/logger'
     class TestLogger
-      include ::LIBIS::Tools::Logger
+      include ::Libis::Tools::Logger
       attr_accessor :options, name
       def initialize
         @options = {}
@@ -175,11 +175,11 @@ Example:
     tl.debug 'message'
     tl.options[:quiet] = true
     tl.warn 'message'
-    ::LIBIS::Tools::Config.appname = 'TestApplication'
+    ::Libis::Tools::Config.appname = 'TestApplication'
     tl.error 'huge error: [%d] %s', 1000, 'Exit'
     tl.name = 'TestClass'
     tl.options[:quiet] = false
-    tl.info 'Running application: %s', ::LIBIS::Tools::Config.appname
+    tl.info 'Running application: %s', ::Libis::Tools::Config.appname
 ```
 produces:
     <pre>
@@ -198,7 +198,7 @@ an XML Schema and provides shorthand notations for accessing nodes and attribute
 Example:
 
 ```ruby
-    xml_doc = ::LIBIS::Tools::XmlDocument.parse(<<-END.align_left)
+    xml_doc = ::Libis::Tools::XmlDocument.parse(<<-END.align_left)
       <patron>
         <name>Harry Potter</name>
         <barcode library="Hogwarts Library">1234567890</barcode>
@@ -209,9 +209,9 @@ Example:
     END
     puts '---parse---', xml_doc.to_xml
     xml_doc.save('/tmp/test.xml')
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('/tmp/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('/tmp/test.xml')
     puts '---save/open---', xml_doc.to_xml
-    xml_doc = ::LIBIS::Tools::XmlDocument.build do
+    xml_doc = ::Libis::Tools::XmlDocument.build do
       patron {
         name 'Harry Potter'
         barcode( '1234567890', library: 'Hogwarts Library')
@@ -221,7 +221,7 @@ Example:
       }
     end
     puts '---build---', xml_doc.to_xml
-    xml_doc = ::LIBIS::Tools::XmlDocument.new
+    xml_doc = ::Libis::Tools::XmlDocument.new
     xml_doc.add_node :patron
     xml_doc.name = 'Harry Potter'
     xml_doc.barcode = '1234567890'

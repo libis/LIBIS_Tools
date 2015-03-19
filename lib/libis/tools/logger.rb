@@ -4,12 +4,12 @@ require 'backports'
 require 'libis/tools/config'
 require 'libis/tools/extend/string'
 
-module LIBIS
+module Libis
   module Tools
 
     # The Logger module adds logging functionality to any class.
     #
-    # Just include the ::LIBIS::Tools::Logger module and the methods debug, info, warn, error and fatal will be
+    # Just include the ::Libis::Tools::Logger module and the methods debug, info, warn, error and fatal will be
     # available to the class instance. Each method takes a message argument and optional extra parameters.
     #
     # The methods all call the {#message} method with the logging level as first argument and the supplied arguments
@@ -47,7 +47,7 @@ module LIBIS
           # If extra arguments are supplied, the message string is expected to be a format specification string and the
           # extra arguments will be applied to it.
           #
-          # This default message method implementation uses the logger of ::LIBIS::Tools::Config. If an 'appname'
+          # This default message method implementation uses the logger of ::Libis::Tools::Config. If an 'appname'
           # parameter is defined in the Config object, it will be used as program name by the logger, otherwise the
           # class name is taken.
           #

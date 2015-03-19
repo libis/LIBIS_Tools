@@ -6,8 +6,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'libis/tools/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'LIBIS_Tools'
-  spec.version       = ::LIBIS::Tools::VERSION
+  spec.name          = 'libis-tools'
+  spec.version       = ::Libis::Tools::VERSION
   spec.date          = Date.today.to_s
 
   spec.summary       = %q{LIBIS toolbox.}
@@ -24,16 +24,15 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ['lib']
 
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rspec'
-  spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'bundler', '~> 1.7'
+  spec.add_development_dependency 'rake', '~> 10.3'
+  spec.add_development_dependency 'rspec', '~> 3.1'
+  spec.add_development_dependency 'simplecov', '>= 0.9'
 
-  spec.add_runtime_dependency 'backports'
+  spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'savon', '~> 2.0'
-  spec.add_runtime_dependency 'rest_client'
-  spec.add_runtime_dependency 'write_xlsx'
-  spec.add_runtime_dependency 'awesome_print'
-  spec.add_runtime_dependency 'settingslogic'
+  spec.add_runtime_dependency 'nokogiri'
+  spec.add_runtime_dependency 'gyoku'
+  spec.add_runtime_dependency 'nori'
 
 end

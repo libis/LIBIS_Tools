@@ -20,7 +20,7 @@ describe 'XML Document' do
 
   it 'should create new empty XML document' do
 
-    xml_doc = ::LIBIS::Tools::XmlDocument.new
+    xml_doc = ::Libis::Tools::XmlDocument.new
 
     expect(xml_doc.document).not_to be_nil
     # noinspection RubyResolve
@@ -35,7 +35,7 @@ describe 'XML Document' do
   end
 
   it 'should load test file' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
     # noinspection RubyResolve
     expect(xml_doc).to be_valid
     expect(xml_doc.to_xml).to eq @xml_template
@@ -43,7 +43,7 @@ describe 'XML Document' do
   end
 
   it 'should parse XML from string' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.parse(<<-END.align_left)
+    xml_doc = ::Libis::Tools::XmlDocument.parse(<<-END.align_left)
       <patron>
         <name>Harry Potter</name>
         <barcode library="Hogwarts Library">1234567890</barcode>
@@ -57,7 +57,7 @@ describe 'XML Document' do
   end
 
   it 'should parse XML from Hash' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.from_hash({patron: {
+    xml_doc = ::Libis::Tools::XmlDocument.from_hash({patron: {
                                                         name: 'Harry Potter',
                                                         barcode: {
                                                             '@library' => 'Hogwarts Library',
@@ -74,7 +74,7 @@ describe 'XML Document' do
   end
 
   it 'should validate document against schema' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     expect(xml_doc.validates_against? 'test.xsd').to be_truthy
     # noinspection RubyResolve
@@ -83,7 +83,7 @@ describe 'XML Document' do
   end
 
   it 'should allow to add a processing instruction' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.parse '<patron/>'
+    xml_doc = ::Libis::Tools::XmlDocument.parse '<patron/>'
     xml_doc.add_processing_instruction 'xml-stylesheet', 'type="text/xsl" href="style.xsl"'
 
     expect(xml_doc.to_xml).to eq(<<-END.align_left)
@@ -94,7 +94,7 @@ describe 'XML Document' do
   end
 
   it 'should get the root node of the document' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
     root = xml_doc.root
 
     expect(root.name).to eq 'patron'
@@ -111,7 +111,7 @@ describe 'XML Document' do
   end
 
   it 'should set the root node of the document' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.new
+    xml_doc = ::Libis::Tools::XmlDocument.new
     patron = ::Nokogiri::XML::Node.new 'patron', xml_doc.document
     xml_doc.root = patron
 
@@ -123,7 +123,7 @@ describe 'XML Document' do
   end
 
   it 'should enable Nokogiri Build syntax' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     xml_doc.build(xml_doc.root) do
       # noinspection RubyResolve
@@ -149,7 +149,7 @@ describe 'XML Document' do
   end
 
   it 'should enable Nokogiri Build syntax for new document' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.build do
+    xml_doc = ::Libis::Tools::XmlDocument.build do
       # noinspection RubyResolve
       patron {
         name 'Harry Potter'
@@ -181,7 +181,7 @@ describe 'XML Document' do
   end
 
   it 'should add a new node to the document' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.new
+    xml_doc = ::Libis::Tools::XmlDocument.new
 
     xml_doc.add_node :patron
     xml_doc.add_node :name, 'Harry Potter'
@@ -216,7 +216,7 @@ describe 'XML Document' do
   end
 
   it 'should add attributes to a node' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     xml_doc.add_attributes xml_doc.root, status: 'active', id: '123456'
 
@@ -234,7 +234,7 @@ describe 'XML Document' do
   end
 
   it 'should add namespaces to a node' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     xml_doc.add_namespaces xml_doc.root, jkr: 'http://JKRowling.com', node_ns: 'jkr'
 
@@ -252,7 +252,7 @@ describe 'XML Document' do
   end
 
   it 'should search for nodes in the current document root' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     nodes = xml_doc.xpath('//email')
     expect(nodes.size).to be 2
@@ -261,34 +261,34 @@ describe 'XML Document' do
   end
 
   it 'should check if the XML document contains certain element(s)' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     expect(xml_doc.has_element? 'barcode[@library="Hogwarts Library"]').to be_truthy
 
   end
 
   it 'should return the content of the first element found' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     expect(xml_doc.value('//email')).to eq 'harry.potter@hogwarts.edu'
 
   end
 
   it 'should return the content of all elements found' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     expect(xml_doc.values('//email')).to eq %w'harry.potter@hogwarts.edu hpotter@JKRowling.com'
 
   end
 
   it 'should return the content of the first element in the set of nodes' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
-    expect(::LIBIS::Tools::XmlDocument.get_content(xml_doc.xpath('//email'))).to eq 'harry.potter@hogwarts.edu'
+    expect(::Libis::Tools::XmlDocument.get_content(xml_doc.xpath('//email'))).to eq 'harry.potter@hogwarts.edu'
   end
 
   it 'should Find a node and set its content' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     xml_doc['//access_level'] = 'postgraduate'
 
@@ -307,7 +307,7 @@ describe 'XML Document' do
 
   # noinspection RubyResolve
   it 'should allow node access by method name' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
 
     expect(xml_doc.email.content).to eq 'harry.potter@hogwarts.edu'
     expect(xml_doc.barcode 'library').to eq 'Hogwarts Library'
@@ -338,7 +338,7 @@ describe 'XML Document' do
   end
 
   it 'should work' do
-    xml_doc = ::LIBIS::Tools::XmlDocument.parse(<<-END.align_left)
+    xml_doc = ::Libis::Tools::XmlDocument.parse(<<-END.align_left)
       <patron>
         <name>Harry Potter</name>
         <barcode library="Hogwarts Library">1234567890</barcode>
@@ -363,11 +363,11 @@ describe 'XML Document' do
 
     xml_doc.save('/tmp/test.xml')
 
-    xml_doc = ::LIBIS::Tools::XmlDocument.open('/tmp/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open('/tmp/test.xml')
 
     expect(xml_doc.to_xml).to eq @xml_template
 
-    xml_doc = ::LIBIS::Tools::XmlDocument.build do
+    xml_doc = ::Libis::Tools::XmlDocument.build do
       # noinspection RubyResolve
       patron {
         name 'Harry Potter'
@@ -380,7 +380,7 @@ describe 'XML Document' do
 
     expect(xml_doc.to_xml).to eq @xml_template
 
-    xml_doc = ::LIBIS::Tools::XmlDocument.new
+    xml_doc = ::Libis::Tools::XmlDocument.new
     xml_doc.add_node :patron
     xml_doc.name = 'Harry Potter'
     # noinspection RubyResolve

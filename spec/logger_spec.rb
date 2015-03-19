@@ -6,7 +6,7 @@ require 'libis/tools/logger'
 describe 'Logger' do
 
   class TestLogger
-    include ::LIBIS::Tools::Logger
+    include ::Libis::Tools::Logger
     attr_accessor :options
     def initialize
       @options = {}
@@ -17,10 +17,10 @@ describe 'Logger' do
   end
 
   before(:example) do
-    ::LIBIS::Tools::Config[:appname] = ''
+    ::Libis::Tools::Config[:appname] = ''
     @logoutput = StringIO.new
-    ::LIBIS::Tools::Config.logger = ::Logger.new @logoutput
-    ::LIBIS::Tools::Config.logger.level = ::Logger::DEBUG
+    ::Libis::Tools::Config.logger = ::Logger.new @logoutput
+    ::Libis::Tools::Config.logger.level = ::Logger::DEBUG
     @test_logger = TestLogger.new
   end
 
@@ -89,7 +89,7 @@ describe 'Logger' do
   end
 
   it 'should display application name in log' do
-    ::LIBIS::Tools::Config[:appname] = 'Test Application'
+    ::Libis::Tools::Config[:appname] = 'Test Application'
     @test_logger.info 'Info message'
     output = @logoutput.string.lines.map(&:chomp)
     expect(output.size).to be 1

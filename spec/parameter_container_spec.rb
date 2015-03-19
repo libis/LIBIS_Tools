@@ -6,7 +6,7 @@ describe 'ParameterContainer' do
 
   before :context do
     class TestContainer
-      include ::LIBIS::Tools::ParameterContainer
+      include ::Libis::Tools::ParameterContainer
 
       parameter check: true
       parameter count: 0
@@ -25,7 +25,7 @@ describe 'ParameterContainer' do
 
   it 'class should return parameter if only name is given' do
     [:check, :count, :price, :name, :calendar, :clock, :timestamp].each do |v|
-      expect(TestContainer.parameter(v)).to be_a ::LIBIS::Tools::Parameter
+      expect(TestContainer.parameter(v)).to be_a ::Libis::Tools::Parameter
     end
   end
 

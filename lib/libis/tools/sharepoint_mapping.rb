@@ -5,7 +5,7 @@ require 'yaml'
 
 require 'libis/tools/extend/hash'
 
-module LIBIS
+module Libis
   module Tools
 
     class SharepointMapping < Hash

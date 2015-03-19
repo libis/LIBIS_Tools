@@ -2,7 +2,7 @@
 
 require 'digest'
 
-module LIBIS
+module Libis
   module Tools
 
     # Common interface for checksum calculations.

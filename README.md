@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools.svg?branch=master)](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools)
+[![Coverage Status](https://img.shields.io/coveralls/Kris-LIBIS/LIBIS_Tools.svg)](https://coveralls.io/r/Kris-LIBIS/LIBIS_Tools)
+
+
 # Libis::Tools
 
 This gem contains some generic helper methods, classes and modules that should be easily reusable in other projects.

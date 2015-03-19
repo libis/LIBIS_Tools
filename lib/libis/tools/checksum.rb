@@ -12,7 +12,11 @@ module Libis
     # therefore the instance methods do not have to specify the checksum type.
     #
     class Checksum
-      CHECKSUM_TYPES = [:MD5, :RMD160, :SHA1, :SHA256, :SHA384, :SHA512]
+      if defined? JRUBY_VERSION
+        CHECKSUM_TYPES = [:MD5, :SHA1, :SHA256, :SHA384, :SHA512]
+      else
+        CHECKSUM_TYPES = [:MD5, :RMD160, :SHA1, :SHA256, :SHA384, :SHA512]
+      end
 
       # Create instance for a given checksum algorithm.
       #

@@ -3,10 +3,21 @@ require_relative 'spec_helper'
 require 'libis/tools/xml_document'
 require 'libis/tools/extend/string'
 
+require 'rspec/matchers'
+require 'equivalent-xml'
+
 describe 'XML Document' do
 
   test_file = File.join(File.dirname(__FILE__), 'data', 'test.xml')
   test_xsd = File.join(File.dirname(__FILE__), 'test.xsd')
+
+  def match_xml(doc1, doc2)
+    doc1 = ::Nokogiri::XML(doc1) if doc1.is_a?(String)
+    doc2 = ::Nokogiri::XML(doc2) if doc2.is_a?(String)
+    # noinspection RubyResolve
+    # expect(doc1).to be_equivalent_to(doc2).respecting_element_order
+    expect(doc1).to be_equivalent_to(doc2)
+  end
 
   before :context do
     @xml_template = <<-END.align_left
@@ -31,7 +42,7 @@ describe 'XML Document' do
     # noinspection RubyResolve
     expect(xml_doc).to be_invalid
 
-    expect(xml_doc.to_xml).to eq <<-END.align_left
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
     END
 
@@ -41,7 +52,7 @@ describe 'XML Document' do
     xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
     # noinspection RubyResolve
     expect(xml_doc).to be_valid
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
   end
 
@@ -56,7 +67,7 @@ describe 'XML Document' do
       </patron>
     END
 
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
   end
 
   it 'should parse XML from Hash' do
@@ -72,7 +83,7 @@ describe 'XML Document' do
                                                     {:key_converter => :none}
     )
 
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
   end
 
@@ -89,7 +100,7 @@ describe 'XML Document' do
     xml_doc = ::Libis::Tools::XmlDocument.parse '<patron/>'
     xml_doc.add_processing_instruction 'xml-stylesheet', 'type="text/xsl" href="style.xsl"'
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <?xml-stylesheet type="text/xsl" href="style.xsl"?>
       <patron/>
@@ -101,7 +112,7 @@ describe 'XML Document' do
     root = xml_doc.root
 
     expect(root.name).to eq 'patron'
-    expect(root.to_xml).to eq(<<-END.align_left.chomp)
+    match_xml root.document, <<-END.align_left
       <patron>
         <name>Harry Potter</name>
         <barcode library="Hogwarts Library">1234567890</barcode>
@@ -118,7 +129,7 @@ describe 'XML Document' do
     patron = ::Nokogiri::XML::Node.new 'patron', xml_doc.document
     xml_doc.root = patron
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron/>
     END
@@ -135,7 +146,7 @@ describe 'XML Document' do
       end
     end
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron>
         <name>Harry Potter</name>
@@ -167,7 +178,7 @@ describe 'XML Document' do
       }
     end
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron>
         <name>Harry Potter</name>
@@ -188,17 +199,17 @@ describe 'XML Document' do
 
     xml_doc.add_node :patron
     xml_doc.add_node :name, 'Harry Potter'
-    books = xml_doc.add_node :books, nil, nil, namespaces: { jkr: 'http://JKRowling.com', node_ns: 'jkr' }
+    books = xml_doc.add_node :books, nil, nil, namespaces: { jkr: 'http://JKRowling.com' , node_ns: 'jkr' }
     xml_doc.add_node :book, nil, books,
                      title: 'Quidditch Through the Ages', author: 'Kennilworthy Whisp', due_date: '1992-4-23',
-                     namespaces: { node_ns: 'jkr' }
+                     namespaces: {node_ns: 'jkr'}
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron>
         <name>Harry Potter</name>
         <jkr:books xmlns:jkr="http://JKRowling.com">
-          <jkr:book title="Quidditch Through the Ages" author="Kennilworthy Whisp" due_date="1992-4-23"/>
+          <jkr:book author="Kennilworthy Whisp" due_date="1992-4-23" title="Quidditch Through the Ages"/>
         </jkr:books>
       </patron>
     END
@@ -207,11 +218,15 @@ describe 'XML Document' do
     expect(xml_doc.root.children.size).to be 2
     expect(xml_doc.root.children[0].name).to eq 'name'
     expect(xml_doc.root.children[0].content).to eq 'Harry Potter'
-    expect(xml_doc.root.children[1].name).to eq 'jkr:books'
+    expect(xml_doc.root.children[1].name).to eq 'books'
+    expect(xml_doc.root.children[1].namespace.prefix).to eq 'jkr'
+    expect(xml_doc.root.children[1].namespace.href).to eq 'http://JKRowling.com'
     expect(xml_doc.root.children[1].namespaces.size).to be 1
     expect(xml_doc.root.children[1].namespaces['xmlns:jkr']).to eq 'http://JKRowling.com'
     expect(xml_doc.root.children[1].children.size).to be 1
-    expect(xml_doc.root.children[1].children[0].name).to eq 'jkr:book'
+    expect(xml_doc.root.children[1].children[0].name).to eq 'book'
+    expect(xml_doc.root.children[1].children[0].namespace.prefix).to eq 'jkr'
+    expect(xml_doc.root.children[1].children[0].namespace.href).to eq 'http://JKRowling.com'
     expect(xml_doc.root.children[1].children[0]['title']).to eq 'Quidditch Through the Ages'
     expect(xml_doc.root.children[1].children[0]['author']).to eq 'Kennilworthy Whisp'
     expect(xml_doc.root.children[1].children[0]['due_date']).to eq '1992-4-23'
@@ -221,9 +236,9 @@ describe 'XML Document' do
   it 'should add attributes to a node' do
     xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
-    xml_doc.add_attributes xml_doc.root, status: 'active', id: '123456'
+    xml_doc.add_attributes xml_doc.root, id: '123456', status: 'active'
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron status="active" id="123456">
         <name>Harry Potter</name>
@@ -240,17 +255,24 @@ describe 'XML Document' do
     xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     xml_doc.add_namespaces xml_doc.root, jkr: 'http://JKRowling.com', node_ns: 'jkr'
+    # noinspection RubyResolve
+    xml_doc.add_namespaces xml_doc.barcode, nil => 'http://hogwarts.edu'
 
-    expect(xml_doc.to_xml).to eq(<<-END.align_left)
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <jkr:patron xmlns:jkr="http://JKRowling.com">
         <name>Harry Potter</name>
-        <barcode library="Hogwarts Library">1234567890</barcode>
+        <barcode library="Hogwarts Library" xmlns="http://hogwarts.edu">1234567890</barcode>
         <access_level>student</access_level>
         <email>harry.potter@hogwarts.edu</email>
         <email>hpotter@JKRowling.com</email>
       </jkr:patron>
     END
+
+    expect(xml_doc.document.root.namespace.prefix).to eq 'jkr'
+    expect(xml_doc.document.root.namespace.href).to eq 'http://JKRowling.com'
+    expect(xml_doc.document.root.elements[1].namespace.prefix).to be_nil
+    expect(xml_doc.document.root.elements[1].namespace.href).to eq 'http://hogwarts.edu'
 
   end
 
@@ -295,7 +317,7 @@ describe 'XML Document' do
 
     xml_doc['//access_level'] = 'postgraduate'
 
-    expect(xml_doc.to_xml).to eq <<-END.align_left
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron>
         <name>Harry Potter</name>
@@ -323,7 +345,7 @@ describe 'XML Document' do
       dates.member_since '1991-09-01'
     end
 
-    expect(xml_doc.to_xml).to eq <<-END.align_left
+    match_xml xml_doc.document, <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
       <patron>
         <name>Harry Potter</name>
@@ -351,24 +373,13 @@ describe 'XML Document' do
       </patron>
     END
 
-    # <<-END.align_left
-    #   <?xml version="1.0" encoding="utf-8"?>
-    #   <patron>
-    #     <name>Harry Potter</name>
-    #     <barcode library="Hogwarts Library">1234567890</barcode>
-    #     <access_level>student</access_level>
-    #     <email>harry.potter@hogwarts.edu</email>
-    #     <email>hpotter@JKRowling.com</email>
-    #   </patron>
-    # END
-
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
     xml_doc.save('/tmp/test.xml')
 
     xml_doc = ::Libis::Tools::XmlDocument.open('/tmp/test.xml')
 
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
     xml_doc = ::Libis::Tools::XmlDocument.build do
       # noinspection RubyResolve
@@ -381,7 +392,7 @@ describe 'XML Document' do
       }
     end
 
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
     xml_doc = ::Libis::Tools::XmlDocument.new
     xml_doc.add_node :patron
@@ -395,7 +406,7 @@ describe 'XML Document' do
     xml_doc.email = 'harry.potter@hogwarts.edu'
     xml_doc.add_node :email, 'hpotter@JKRowling.com'
 
-    expect(xml_doc.to_xml).to eq @xml_template
+    match_xml xml_doc.document, @xml_template
 
   end
 

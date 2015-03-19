@@ -52,7 +52,8 @@ module Libis
       # @return [XmlDocument] new instance
       def self.open(file)
         doc = XmlDocument.new
-        doc.document = Nokogiri::XML(File.open(file), &:noblanks)
+        doc.document = Nokogiri::XML(File.open(file))
+        # doc.document = Nokogiri::XML(File.open(file), &:noblanks)
         doc
       end
 
@@ -61,7 +62,8 @@ module Libis
       # @return [XmlDocument] new instance
       def self.parse(xml)
         doc = XmlDocument.new
-        doc.document = Nokogiri::XML.parse(xml, &:noblanks)
+        doc.document = Nokogiri::XML.parse(xml)
+        # doc.document = Nokogiri::XML.parse(xml, &:noblanks)
         doc
       end
 
@@ -377,13 +379,17 @@ module Libis
       def self.add_namespaces(node, namespaces)
 
         node_ns = namespaces.delete :node_ns
+        default_ns = namespaces.delete nil
 
         namespaces.each do |prefix, prefix_uri|
-          node.add_namespace prefix.to_s, prefix_uri unless prefix.nil?
-          node.default_namespace = prefix_uri if prefix.nil?
+          node.add_namespace prefix.to_s, prefix_uri
         end
 
-        node.name = node_ns + ':' + node.name if node_ns
+        node.namespace_scopes.each do |ns|
+          node.namespace = ns if ns.prefix == node_ns
+        end if node_ns
+
+        node.default_namespace = default_ns if default_ns
 
         node
 

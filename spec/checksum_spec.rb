@@ -32,18 +32,22 @@ describe 'Checksum' do
 
   it 'should calculate RMD160 checksum' do
 
-    checksum_type = :RMD160
+    unless defined? JRUBY_VERSION
 
-    digest = '17c9eaad9ccbaad0e030c2c5d60fd9d58255cc39'
-    expect(::Libis::Tools::Checksum.hexdigest(file, checksum_type)).to eq digest
-    expect(::Libis::Tools::Checksum.base64digest(file, checksum_type)).to eq hex2base64(digest)
-    expect(::Libis::Tools::Checksum.digest(file, checksum_type)).to eq hex2string(digest)
+      checksum_type = :RMD160
 
-    checksum = ::Libis::Tools::Checksum.new(checksum_type)
+      digest = '17c9eaad9ccbaad0e030c2c5d60fd9d58255cc39'
+      expect(::Libis::Tools::Checksum.hexdigest(file, checksum_type)).to eq digest
+      expect(::Libis::Tools::Checksum.base64digest(file, checksum_type)).to eq hex2base64(digest)
+      expect(::Libis::Tools::Checksum.digest(file, checksum_type)).to eq hex2string(digest)
 
-    expect(checksum.hexdigest(file)).to eq digest
-    expect(checksum.base64digest(file)).to eq hex2base64(digest)
-    expect(checksum.digest(file)).to eq hex2string(digest)
+      checksum = ::Libis::Tools::Checksum.new(checksum_type)
+
+      expect(checksum.hexdigest(file)).to eq digest
+      expect(checksum.base64digest(file)).to eq hex2base64(digest)
+      expect(checksum.digest(file)).to eq hex2string(digest)
+
+    end
 
   end
 

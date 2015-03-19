@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.3'
   spec.add_development_dependency 'rspec', '~> 3.1'
   spec.add_development_dependency 'simplecov', '>= 0.9'
+  spec.add_development_dependency 'equivalent-xml', '>= 0.5'
 
   spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'savon', '~> 2.0'

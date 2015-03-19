@@ -27,35 +27,35 @@ describe 'Logger' do
   it 'should log debug output' do
     @test_logger.debug 'Debug message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^D, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\] DEBUG -- TestLogger: Debug message$/
   end
 
   it 'should log info output' do
     @test_logger.info 'Info message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^I, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\]  INFO -- TestLogger: Info message$/
   end
 
   it 'should log warning output' do
     @test_logger.warn 'Warning message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^W, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\]  WARN -- TestLogger: Warning message$/
   end
 
   it 'should log error output' do
     @test_logger.error 'Error message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^E, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\] ERROR -- TestLogger: Error message$/
   end
 
   it 'should log fatal output' do
     @test_logger.fatal 'Fatal message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^F, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\] FATAL -- TestLogger: Fatal message$/
   end
 
@@ -92,7 +92,7 @@ describe 'Logger' do
     ::Libis::Tools::Config[:appname] = 'Test Application'
     @test_logger.info 'Info message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^I, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\]  INFO -- Test Application: Info message$/
   end
 
@@ -100,7 +100,7 @@ describe 'Logger' do
     @test_logger.define_singleton_method(:name) { 'Logger for testing' }
     @test_logger.info 'Info message'
     output = @logoutput.string.lines.map(&:chomp)
-    expect(output.size).to be 1
+    expect(output.size).to eq 1
     expect(output.first).to match /^I, \[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6} #\d+\]  INFO -- Logger for testing: Info message$/
   end
 

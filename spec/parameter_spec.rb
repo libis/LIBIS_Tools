@@ -21,13 +21,13 @@ describe 'Parameter' do
 
   it 'should detect datatype from default value' do
     @parameter_types.each do |dtype|
-      expect(eval("@#{dtype}_parameter").guess_datatype).to be == dtype
+      expect(eval("@#{dtype}_parameter").guess_datatype).to eq dtype
     end
   end
 
   it 'should return default value' do
     @parameter_types.each do |dtype|
-      expect(eval("@#{dtype}_parameter").parse).to be eval("@#{dtype}_parameter").default
+      expect(eval("@#{dtype}_parameter").parse).to eq eval("@#{dtype}_parameter").default
     end
   end
 

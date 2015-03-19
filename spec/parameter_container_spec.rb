@@ -31,12 +31,12 @@ describe 'ParameterContainer' do
 
   it 'should have default parameters' do
     expect(@test_container.parameter(:check)).to be_truthy
-    expect(@test_container.parameter(:count)).to be 0
-    expect(@test_container.parameter(:price)).to be 1.0
+    expect(@test_container.parameter(:count)).to eq 0
+    expect(@test_container.parameter(:price)).to eq 1.0
     expect(@test_container.parameter(:name)).to eq 'nobody'
-    expect(@test_container.parameter(:calendar).year).to be 2014
-    expect(@test_container.parameter(:calendar).month).to be 1
-    expect(@test_container.parameter(:calendar).day).to be 1
+    expect(@test_container.parameter(:calendar).year).to eq 2014
+    expect(@test_container.parameter(:calendar).month).to eq 1
+    expect(@test_container.parameter(:calendar).day).to eq 1
     expect(@test_container.parameter(:clock).hour).to eq 10
     expect(@test_container.parameter(:clock).min).to eq 10
     expect(@test_container.parameter(:clock).sec).to eq 0

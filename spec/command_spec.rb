@@ -17,7 +17,7 @@ describe 'Command' do
 
     expect(result[:out]).to eq %w'test.data test.xml test.yml'
     expect(result[:err]).to eq []
-    expect(result[:status]).to be 0
+    expect(result[:status]).to eq 0
 
   end
 
@@ -26,14 +26,14 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', '-l')
 
     output = result[:out]
-    expect(output.size).to be 4
+    expect(output.size).to eq 4
     expect(output.first).to match /^total \d+$/
     expect(output[1]).to match /^-[rwx-]{9}.+test.data$/
     expect(output[2]).to match /^-[rwx-]{9}.+test.xml$/
     expect(output[3]).to match /^-[rwx-]{9}.+test.yml$/
 
     expect(result[:err]).to eq []
-    expect(result[:status]).to be 0
+    expect(result[:status]).to eq 0
 
   end
 
@@ -42,7 +42,7 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', '-l', '-a', '-p')
 
     output = result[:out]
-    expect(output.size).to be 6
+    expect(output.size).to eq 6
     expect(output.first).to match /^total \d+$/
     expect(output[1]).to match /^d[rwx-]{9}.+\d+.+\.\/$/
     expect(output[2]).to match /^d[rwx-]{9}.+\d+.+\.\.\/$/
@@ -51,7 +51,7 @@ describe 'Command' do
     expect(output[5]).to match /^-[rwx-]{9}.+test.yml$/
 
     expect(result[:err]).to eq []
-    expect(result[:status]).to be 0
+    expect(result[:status]).to eq 0
 
   end
 
@@ -59,9 +59,9 @@ describe 'Command' do
 
     result = Libis::Tools::Command.run('ls', 'abc')
     expect(result[:out]).to eq []
-    expect(result[:err].size).to be 1
+    expect(result[:err].size).to eq 1
     expect(result[:err][0]).to match /ls: cannot access abc: No such file or directory/
-    expect(result[:status]).to be 2
+    expect(result[:status]).to eq 2
 
   end
 

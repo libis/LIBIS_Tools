@@ -5,9 +5,10 @@ require 'libis/tools/command'
 describe 'Command' do
 
   around(:example) do |test|
-    Dir.chdir('data')
+    dir = Dir.pwd
+    Dir.chdir(File.join(File.dirname(__FILE__),'data'))
     test.run
-    Dir.chdir('..')
+    Dir.chdir(dir)
   end
 
   it 'should run ls command' do

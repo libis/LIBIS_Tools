@@ -5,6 +5,9 @@ require 'libis/tools/extend/string'
 
 describe 'XML Document' do
 
+  test_file = File.join(File.dirname(__FILE__), 'data', 'test.xml')
+  test_xsd = File.join(File.dirname(__FILE__), 'test.xsd')
+
   before :context do
     @xml_template = <<-END.align_left
       <?xml version="1.0" encoding="utf-8"?>
@@ -35,7 +38,7 @@ describe 'XML Document' do
   end
 
   it 'should load test file' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
     # noinspection RubyResolve
     expect(xml_doc).to be_valid
     expect(xml_doc.to_xml).to eq @xml_template
@@ -74,11 +77,11 @@ describe 'XML Document' do
   end
 
   it 'should validate document against schema' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
-    expect(xml_doc.validates_against? 'test.xsd').to be_truthy
+    expect(xml_doc.validates_against? test_xsd).to be_truthy
     # noinspection RubyResolve
-    expect(xml_doc.validate 'test.xsd').to be_empty
+    expect(xml_doc.validate test_xsd).to be_empty
 
   end
 
@@ -94,7 +97,7 @@ describe 'XML Document' do
   end
 
   it 'should get the root node of the document' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
     root = xml_doc.root
 
     expect(root.name).to eq 'patron'
@@ -123,7 +126,7 @@ describe 'XML Document' do
   end
 
   it 'should enable Nokogiri Build syntax' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     xml_doc.build(xml_doc.root) do
       # noinspection RubyResolve
@@ -216,7 +219,7 @@ describe 'XML Document' do
   end
 
   it 'should add attributes to a node' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     xml_doc.add_attributes xml_doc.root, status: 'active', id: '123456'
 
@@ -234,7 +237,7 @@ describe 'XML Document' do
   end
 
   it 'should add namespaces to a node' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     xml_doc.add_namespaces xml_doc.root, jkr: 'http://JKRowling.com', node_ns: 'jkr'
 
@@ -252,7 +255,7 @@ describe 'XML Document' do
   end
 
   it 'should search for nodes in the current document root' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     nodes = xml_doc.xpath('//email')
     expect(nodes.size).to be 2
@@ -261,34 +264,34 @@ describe 'XML Document' do
   end
 
   it 'should check if the XML document contains certain element(s)' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     expect(xml_doc.has_element? 'barcode[@library="Hogwarts Library"]').to be_truthy
 
   end
 
   it 'should return the content of the first element found' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     expect(xml_doc.value('//email')).to eq 'harry.potter@hogwarts.edu'
 
   end
 
   it 'should return the content of all elements found' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     expect(xml_doc.values('//email')).to eq %w'harry.potter@hogwarts.edu hpotter@JKRowling.com'
 
   end
 
   it 'should return the content of the first element in the set of nodes' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     expect(::Libis::Tools::XmlDocument.get_content(xml_doc.xpath('//email'))).to eq 'harry.potter@hogwarts.edu'
   end
 
   it 'should Find a node and set its content' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     xml_doc['//access_level'] = 'postgraduate'
 
@@ -307,7 +310,7 @@ describe 'XML Document' do
 
   # noinspection RubyResolve
   it 'should allow node access by method name' do
-    xml_doc = ::Libis::Tools::XmlDocument.open('data/test.xml')
+    xml_doc = ::Libis::Tools::XmlDocument.open(test_file)
 
     expect(xml_doc.email.content).to eq 'harry.potter@hogwarts.edu'
     expect(xml_doc.barcode 'library').to eq 'Hogwarts Library'

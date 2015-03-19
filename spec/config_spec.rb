@@ -4,6 +4,7 @@ require 'libis/tools/config'
 
 describe 'Config' do
 
+  test_file = File.join(File.dirname(__FILE__), 'data', 'test.yml')
   config = ::Libis::Tools::Config
   config << { appname: 'LIBIS Default' }
 
@@ -19,7 +20,7 @@ describe 'Config' do
   end
 
   it 'should load from file' do
-    config << 'data/test.yml'
+    config << test_file
     expect(config.process).to eq 'Test Configuration'
   end
 

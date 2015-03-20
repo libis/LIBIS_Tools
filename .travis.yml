@@ -31,3 +31,7 @@ matrix:
 branches:
   only:
       - master
+addons:
+  code_climate:
+    repo_token: f6978964f55e6543befb82373651365f8195677816af6ff40ad70c82f7f22f09
+

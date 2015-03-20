@@ -29,8 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.1'
   spec.add_development_dependency 'simplecov', '>= 0.9'
   spec.add_development_dependency 'equivalent-xml', '>= 0.5'
-  spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.4.7'
-  spec.add_development_dependency 'coveralls', '~> 0.7.11'
 
   spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'savon', '~> 2.0'

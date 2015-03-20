@@ -1,7 +1,8 @@
 [![Build Status](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools.svg?branch=master)](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools)
+[![Coverage Status](https://img.shields.io/coveralls/Kris-LIBIS/LIBIS_Tools.svg)](https://coveralls.io/r/Kris-LIBIS/LIBIS_Tools)
+[![Dependency Status](https://gemnasium.com/Kris-LIBIS/LIBIS_Tools.svg)](https://gemnasium.com/Kris-LIBIS/LIBIS_Tools)
 [![Code Climate](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools/badges/gpa.svg)](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools)
 [![Test Coverage](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools/badges/coverage.svg)](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools)
-[![Coverage Status](https://img.shields.io/coveralls/Kris-LIBIS/LIBIS_Tools.svg)](https://coveralls.io/r/Kris-LIBIS/LIBIS_Tools)
 
 
 # Libis::Tools

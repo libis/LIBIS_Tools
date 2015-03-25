@@ -76,5 +76,10 @@ class String
     string
   end unless method_defined? :align_left
 
+end
 
+class NilClass
+  def blank?
+    true
+  end
 end

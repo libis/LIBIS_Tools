@@ -16,12 +16,17 @@ module Libis
       #         * +:out+ : the stdout output of the command
       #         * +:err+ : the stderr output of the command
       def self.run(cmd, *opts)
-
         result = {}
-        Open3.popen3(cmd, *opts) do |_, output, error, thread|
-          result[:out] = output.read.split("\n").map(&:chomp)
-          result[:err] = error.read.split("\n").map(&:chomp)
-          result[:status] = thread.value.exitstatus rescue nil
+        begin
+          Open3.popen3(cmd, *opts) do |_, output, error, thread|
+            result[:out] = output.read.split("\n").map(&:chomp)
+            result[:err] = error.read.split("\n").map(&:chomp)
+            result[:status] = thread.value.exitstatus rescue nil
+          end
+
+        rescue Exception
+          # ignored
+
         end
 
         result

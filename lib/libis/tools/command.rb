@@ -19,8 +19,10 @@ module Libis
         result = {}
         begin
           Open3.popen3(cmd, *opts) do |_, output, error, thread|
-            result[:out] = output.read.split("\n").map(&:chomp)
-            result[:err] = error.read.split("\n").map(&:chomp)
+            output = output.read
+            error = error.read
+            result[:out] = output.split("\n").map(&:chomp)
+            result[:err] = error.split("\n").map(&:chomp)
             result[:status] = thread.value.exitstatus rescue nil
           end
 

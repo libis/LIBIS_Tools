@@ -4,6 +4,7 @@ require 'set'
 require 'yaml'
 require 'erb'
 require 'logger'
+require 'backports'
 
 require 'libis/tools/extend/hash'
 
@@ -128,7 +129,7 @@ module Libis
 
       def method_missing(name, *args)
         key = name.to_s
-        if name.to_s =~ /^(.*)=$/
+        if name.to_s =~ /^(.*)(=)$/
           key = $1
         end
         if @data.has_key?(key)
@@ -143,7 +144,7 @@ module Libis
             END
           end
         end
-        key == name.to_s ? @data.fetch(key) : @data.store(key, args.first)
+        ($2.nil? || $2.empty?) ? (@data.fetch(key) rescue nil) : @data.store(key, args.first)
       end
 
       def initialize

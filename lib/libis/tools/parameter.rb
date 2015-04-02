@@ -16,6 +16,18 @@ module Libis
         self.options = {} unless self.options
       end
 
+      def [](key)
+        # noinspection RubySuperCallWithoutSuperclassInspection
+        return super(key) if VALID_PARAMETER_KEYS.include?(key)
+        self[:options][key]
+      end
+
+      def []=(key,value)
+        # noinspection RubySuperCallWithoutSuperclassInspection
+        return super(key,value) if VALID_PARAMETER_KEYS.include?(key)
+        self[:options][key] = value
+      end
+
       TRUE_BOOL = %w'true yes t y 1'
       FALSE_BOOL = %w'false no f n 0'
 
@@ -116,7 +128,7 @@ module Libis
             name = param_def.first.to_s.to_sym
             default = param_def.last
             parameters[name] = Parameter.new(name, default) if parameters[name].nil?
-            VALID_PARAMETER_KEYS.each { |key| parameters[name][key] = options[key] if options[key] }
+            options.each { |key, value| parameters[name][key] = value if value }
           else
             parameters[options]
           end

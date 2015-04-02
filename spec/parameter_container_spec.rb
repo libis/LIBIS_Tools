@@ -15,6 +15,7 @@ describe 'ParameterContainer' do
       parameter calendar: Date.new(2014, 01, 01)
       parameter clock: Time.parse('10:10')
       parameter timestamp: DateTime.new(2014, 01, 01, 10, 10)
+      parameter with_options: true, options: {a: 1, b: 2}, c: 3
 
     end
   end
@@ -78,6 +79,14 @@ describe 'ParameterContainer' do
     expect(@test_container.parameter(:timestamp).hour).to eq 14
     expect(@test_container.parameter(:timestamp).min).to eq 40
     expect(@test_container.parameter(:timestamp).sec).to eq 23
+  end
+
+  it 'should be able to define parameter with options' do
+    expect(@test_container.class.parameter(:with_options)[:options]).to eq a: 1, b: 2, c: 3
+    expect(@test_container.class.parameter(:with_options)[:options][:a]).to be 1
+    expect(@test_container.class.parameter(:with_options)[:a]).to be 1
+    expect(@test_container.class.parameter(:with_options)[:options][:c]).to be 3
+    expect(@test_container.class.parameter(:with_options)[:c]).to be 3
   end
 
 end

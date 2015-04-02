@@ -136,4 +136,13 @@ describe 'Parameter' do
 
   end
 
+  it 'should allow to set and get options' do
+
+    @bool_parameter[:my_value] = :dummy_value
+
+    expect(@bool_parameter[:my_value]).to be :dummy_value
+    expect(@bool_parameter[:options][:my_value]).to be :dummy_value
+
+  end
+
 end

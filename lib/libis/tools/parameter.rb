@@ -8,8 +8,6 @@ module Libis
     # noinspection RubyConstantNamingConvention
     Parameter = ::Struct.new(:name, :default, :datatype, :description, :constraint, :options) do
 
-      VALID_PARAMETER_KEYS = [:name, :default, :datatype, :description, :constraint, :options]
-
       def initialize(*args)
         # noinspection RubySuperCallWithoutSuperclassInspection
         super(*args)
@@ -18,14 +16,25 @@ module Libis
 
       def [](key)
         # noinspection RubySuperCallWithoutSuperclassInspection
-        return super(key) if VALID_PARAMETER_KEYS.include?(key)
+        return super(key) if members.include?(key)
         self[:options][key]
       end
 
       def []=(key,value)
         # noinspection RubySuperCallWithoutSuperclassInspection
-        return super(key,value) if VALID_PARAMETER_KEYS.include?(key)
+        return super(key,value) if members.include?(key)
         self[:options][key] = value
+      end
+
+      def self.from_hash(h)
+        h.each { |k,v| self[k.to_s.to_sym] = v }
+      end
+
+      def to_h
+        super.inject({}) do |hash, key, value|
+          key == :options ? value.each {|k,v| hash[k] = v} : hash[key] = value
+          hash
+        end
       end
 
       TRUE_BOOL = %w'true yes t y 1'

@@ -34,6 +34,10 @@ class Hash
     end
   end unless method_defined? :recursive_merge!
 
+  def key_strings_to_symbols!(opts = {})
+    self.replace self.key_strings_to_symbols opts
+  end unless method_defined? :key_strings_to_symbols!
+
   def key_strings_to_symbols(opts = {})
     opts = {resursive: false, upcase: false, downcase: false}.merge opts
 

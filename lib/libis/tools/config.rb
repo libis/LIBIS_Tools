@@ -102,8 +102,8 @@ module Libis
 
       protected
 
-      def initialize
-        super
+      def initialize(hash = nil, opts = {})
+        super(hash, opts)
         clear!
       end
 

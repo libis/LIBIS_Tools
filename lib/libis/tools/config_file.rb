@@ -33,8 +33,8 @@ module Libis
       # passed to the {#<<} method after initialization.
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
-      def initialize(file_or_hash = nil)
-        super
+      def initialize(file_or_hash = nil, opt = {})
+        super({}, opt)
         self << file_or_hash
       end
 
@@ -48,7 +48,7 @@ module Libis
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
       def <<(file_or_hash)
-        return self if file_or_hash.nil?
+        return self if file_or_hash.nil? || (file_or_hash.respond_to?(:empty?) && file_or_hash.empty?)
         hash = case file_or_hash
                  when Hash
                    yield file_or_hash if block_given?

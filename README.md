@@ -1,9 +1,7 @@
+[![Gem Version](https://badge.fury.io/rb/libis-tools.svg)](http://badge.fury.io/rb/libis-tools)
 [![Build Status](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools.svg?branch=master)](https://travis-ci.org/Kris-LIBIS/LIBIS_Tools)
 [![Coverage Status](https://img.shields.io/coveralls/Kris-LIBIS/LIBIS_Tools.svg)](https://coveralls.io/r/Kris-LIBIS/LIBIS_Tools)
 [![Dependency Status](https://gemnasium.com/Kris-LIBIS/LIBIS_Tools.svg)](https://gemnasium.com/Kris-LIBIS/LIBIS_Tools)
-<!--[![Code Climate](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools/badges/gpa.svg)](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools)
-[![Test Coverage](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools/badges/coverage.svg)](https://codeclimate.com/github/Kris-LIBIS/LIBIS_Tools)
--->
 
 # Libis::Tools
 
@@ -131,11 +129,33 @@ or:
 Note that the Command class uses Open3#popen3 internally. All arguments supplied to Command#run are passed to the popen3
 call. Unfortunately JRuby has some known issues with popen3. Please use and test carefully in JRuby environments.
 
+### DeepStruct
+
+A class that derives from OpenStruct through the RecursiveOpenStruct. A RecursiveOpenStruct is derived from stdlib's
+OpenStruct, but can be made recursive. DeepStruct enforces this behaviour and adds a clear! method.
+
+### ConfigFile
+
+A base class for Config, but useable on it's own. It extends the DeepStruct with << and >> methods that supports
+loading and saving of configuration values from and to files. Note that ERB commands will get lost during a round-trip.
+ 
+```ruby
+    require 'libis/tools/config_file'
+    cfg_file = ::Libis::Tools::ConfigFile.new
+    cfg_file << {foo: 'bar'}
+    cfg_file.my_value = 10
+    p cfg_file[:my_value] # => 10
+    cfg_file{:my_text] = 'abc'
+    p cfg_file['my_text'] # => 'abc'
+    p cfg_file.to_hash # => { :foo => 'bar', 'my_value' => 10, :my_text => 'abc' }
+    cfg >> 'my_config.yml'
+```
 ### Config
 
-The Config class is a convenience method for easy configuration maintenance and loading. It supports code defaults,
-loading configurations from multiple YAML files containing ERB statements. The Config class follows the Singleton
-pattern and behaves like a Hash/OpenStruct/HashWithIndifferentAccess. It also initializes a default Logger instance.
+The Config class is a convenience class for easy configuration maintenance and loading. Based on ConfigFile and 
+DeepStruc, it supports code defaults and loading configurations from multiple YAML files containing ERB statements.
+The Config class follows the Singleton pattern and behaves like a Hash/OpenStruct/HashWithIndifferentAccess with 
+recursion over hashes and arrays. It also initializes a default Logger instance.
 
 For each configuration parameter, the value can be accessed via the class or the Singleton instance through a method
 call or via the Hash operator using the parameter name either as a string or a symbol.
@@ -145,6 +165,7 @@ Examples:
 ```ruby
     require 'libis/tools/config'
     cfg = ::Libis::Tools::Config
+    cfg << 'my_config.yml'
     cfg['my_value'] = 10
     p cfg.instance.my_value # => 10
     cfg.instance.my_text = 'abc'

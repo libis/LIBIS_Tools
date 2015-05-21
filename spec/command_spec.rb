@@ -4,18 +4,22 @@ require 'libis/tools/command'
 
 describe 'Command' do
 
-  around(:example) do |test|
-    dir = Dir.pwd
-    Dir.chdir(File.join(File.dirname(__FILE__),'data'))
-    test.run
-    Dir.chdir(dir)
-  end
+  let!(:dir) { Dir.pwd }
+  let(:entries) {
+    Dir.entries('.').inject([]) do |array, value|
+      array << value unless File.directory?(value)
+      array
+    end.sort
+  }
+
+  before(:each) { Dir.chdir(File.join(File.dirname(__FILE__),'data')) }
+  after(:each) { Dir.chdir(dir) }
 
   it 'should run ls command' do
 
     result = Libis::Tools::Command.run('ls')
 
-    expect(result[:out]).to eq %w'test.data test.xml test.yml'
+    expect(result[:out].sort).to match entries
     expect(result[:err]).to eq []
     expect(result[:status]).to eq 0
 
@@ -23,15 +27,11 @@ describe 'Command' do
 
   it 'should run ls command with an option' do
 
-    result = Libis::Tools::Command.run('ls', '-l')
+    result = Libis::Tools::Command.run('ls', '-1')
 
     output = result[:out]
-    expect(output.size).to eq 4
-    expect(output.first).to match /^total \d+$/
-    expect(output[1]).to match /^-[rwx-]{9}.+test.data$/
-    expect(output[2]).to match /^-[rwx-]{9}.+test.xml$/
-    expect(output[3]).to match /^-[rwx-]{9}.+test.yml$/
-
+    expect(output.size).to eq (entries.size)
+    expect(output.sort).to match entries
     expect(result[:err]).to eq []
     expect(result[:status]).to eq 0
 
@@ -39,17 +39,13 @@ describe 'Command' do
 
   it 'should run ls command with multiple options' do
 
-    result = Libis::Tools::Command.run('ls', '-l', '-a', '-p')
+    result = Libis::Tools::Command.run('ls', '-1', '-a', '-p')
 
     output = result[:out]
-    expect(output.size).to eq 6
-    expect(output.first).to match /^total \d+$/
-    expect(output[1]).to match /^d[rwx-]{9}.+\d+.+\.\/$/
-    expect(output[2]).to match /^d[rwx-]{9}.+\d+.+\.\.\/$/
-    expect(output[3]).to match /^-[rwx-]{9}.+test.data$/
-    expect(output[4]).to match /^-[rwx-]{9}.+test.xml$/
-    expect(output[5]).to match /^-[rwx-]{9}.+test.yml$/
-
+    expect(output.size).to eq (entries.size + 2)
+    expect(output[0]).to eq './'
+    expect(output[1]).to eq '../'
+    expect(output[2..-1].sort).to match entries
     expect(result[:err]).to eq []
     expect(result[:status]).to eq 0
 

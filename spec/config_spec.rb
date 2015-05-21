@@ -4,83 +4,109 @@ require 'libis/tools/config'
 
 describe 'Config' do
 
-  test_file = File.join(File.dirname(__FILE__), 'data', 'test.yml')
-  config = ::Libis::Tools::Config
-  config << { appname: 'LIBIS Default' }
+  before(:all) do
+    ::Libis::Tools::Config << {appname: 'LIBIS Default'}
+  end
 
-  it 'should initialize' do
-    expect(config.appname).to eq 'LIBIS Default'
+  subject(:config) { ::Libis::Tools::Config.clear! }
+
+  it 'has defaults set' do
     expect(config.logger).to be_a ::Logger
   end
 
-  # noinspection RubyResolve
-  it 'should define setters' do
-    config[:test_value] = 5
-    expect(config.test_value).to eq 5
+  it 'clears all values' do
+    # noinspection RubyResolve
+    config.test_value = 5
+    config.logger.level = ::Logger::FATAL
+    # noinspection RubyResolve
+    expect(config.test_value).to be 5
+    expect(config.logger.level).to be ::Logger::FATAL
+
+    config.clear!
+    # noinspection RubyResolve
+    expect(config.test_value).to be_nil
+    expect(config.logger.level).to be ::Logger::DEBUG
   end
 
-  it 'should load from file' do
-    config << test_file
-    expect(config.process).to eq 'Test Configuration'
+  context 'adding values with setters' do
+
+    it 'by symbol' do
+      config[:test_value] = 5
+      expect(config['test_value']).to be 5
+    end
+
+    it 'by name' do
+      config['test_value'] = 6
+      # noinspection RubyResolve
+      expect(config.test_value).to be 6
+    end
+
+    it 'by method' do
+      # noinspection RubyResolve
+      config.test_value = 7
+      expect(config[:test_value]).to be 7
+    end
+
+    it 'allows to set on instance' do
+      config.instance[:test_value] = :abc
+      # noinspection RubyResolve
+      expect(config.test_value).to be :abc
+    end
+
+    it 'allows to set on class' do
+      # noinspection RubyResolve
+      config.test_value = :def
+      expect(config.instance[:test_value]).to be :def
+    end
+
   end
 
-  # noinspection RubyResolve
-  it 'should allow to set and get in different ways' do
-    config.test_value = 10
-    expect(config.test_value).to be 10
-    expect(config['test_value']).to be 10
-    expect(config[:test_value]).to be 10
-    expect(config.instance.test_value).to be 10
-    expect(config.instance['test_value']).to be 10
-    expect(config.instance[:test_value]).to be 10
+  context 'loading from file' do
 
-    config[:test_value] = 11
-    expect(config.test_value).to be 11
-    expect(config['test_value']).to be 11
-    expect(config[:test_value]).to be 11
-    expect(config.instance.test_value).to be 11
-    expect(config.instance['test_value']).to be 11
-    expect(config.instance[:test_value]).to be 11
+    let(:test_file) { File.join(File.dirname(__FILE__), 'data', 'test.yml') }
+    subject(:config) { Libis::Tools::Config.clear! << test_file }
 
-    config['test_value'] = 12
-    expect(config.test_value).to be 12
-    expect(config['test_value']).to be 12
-    expect(config[:test_value]).to be 12
-    expect(config.instance.test_value).to be 12
-    expect(config.instance['test_value']).to be 12
-    expect(config.instance[:test_value]).to be 12
+    it 'has configuration parameters set' do
+      expect(config.process).to eq 'Test Configuration'
+    end
+
+    it 'resets only values loaded from file' do
+      config[:process] = 'foo'
+      config[:bar] = 'qux'
+
+      expect(config.process).to eq 'foo'
+      expect(config.bar).to eq 'qux'
+
+      config.reload
+      expect(config.process).to eq 'Test Configuration'
+      expect(config.bar).to eq 'qux'
+    end
+
+    it 'resets all values' do
+      config[:process] = 'foo'
+      config[:bar] = 'qux'
+
+      expect(config.process).to eq 'foo'
+      expect(config.bar).to eq 'qux'
+
+      config.reload!
+      expect(config.process).to eq 'Test Configuration'
+      expect(config.bar).to be_nil
+    end
+
+    it 'clears all values' do
+      config[:process] = 'foo'
+      config[:bar] = 'qux'
+
+      expect(config.process).to eq 'foo'
+      expect(config.bar).to eq 'qux'
+
+      config.clear!
+      expect(config.process).to be_nil
+      expect(config.bar).to be_nil
+      # noinspection RubyResolve
+      expect(config.to_h).to be_empty
+    end
+
   end
-
-  it 'should allow to set and get on class and instance' do
-    expect(config.appname).to be config.instance.appname
-    expect(config['appname']).to be config.instance.appname
-    expect(config[:appname]).to be config.instance.appname
-    expect(config.instance['appname']).to be config.instance.appname
-    expect(config.instance[:appname]).to be config.instance.appname
-
-    config.instance[:appname] = 'Test App'
-    expect(config.appname).to be == 'Test App'
-  end
-
-  # noinspection RubyResolve
-  it 'should reset only values loaded from file' do
-    config[:appname] = 'foo'
-    config[:process] = 'bar'
-    config[:baz] = 'qux'
-
-    expect(config.appname).to eq 'foo'
-    expect(config.process).to eq 'bar'
-    expect(config.baz).to eq 'qux'
-
-    config.reload
-    expect(config.appname).to eq 'LIBIS Default'
-    expect(config.process).to eq 'Test Configuration'
-    expect(config.baz).to eq 'qux'
-
-    config.reload!
-    expect(config.appname).to eq 'LIBIS Default'
-    expect(config.process).to eq 'Test Configuration'
-    expect(config.baz).to be_nil
-  end
-
 end

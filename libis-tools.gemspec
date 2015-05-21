@@ -36,6 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'
   spec.add_runtime_dependency 'gyoku',  '~> 1.2'
   spec.add_runtime_dependency 'nori', '~> 2.4'
-  spec.add_runtime_dependency 'recursive-open-struct', '~>0.6'
+  spec.add_runtime_dependency 'recursive-open-struct', '~>0.6.4'
 
 end

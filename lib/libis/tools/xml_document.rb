@@ -280,13 +280,19 @@ module Libis
       #               </jkr:books>
       #           </patron>
       #
-      # @param [String] name tag for the new node
-      # @param [String] value optional content for new node; empty if nil
-      # @param [Node] parent optional parent node for new node; root if nil; xml document if root is not defined
-      # @param [Hash] attributes a Hash containing tag-value pairs for each attribute; the special key ':namespaces'
-      #     contains a Hash of namespace definitions as in {#add_namespaces}
+      # @param [Array] args arguments being:
+      #     - tag for the new node
+      #     - optional content for new node; empty if nil or not present
+      #     - optional parent node for new node; root if nil or not present; xml document if root is not defined
+      #     - a Hash containing tag-value pairs for each attribute; the special key ':namespaces'
+      #       contains a Hash of namespace definitions as in {#add_namespaces}
       # @return [Nokogiri::XML::Node] the new node
-      def add_node(name, value = nil, parent = nil, attributes = {})
+      def add_node(*args)
+        attributes = {}
+        attributes = args.pop if args.last.is_a? Hash
+        name, value, parent = *args
+
+        return nil if name.nil?
 
         node = Nokogiri::XML::Node.new name.to_s, @document
         node.content = value
@@ -386,7 +392,7 @@ module Libis
         end
 
         node.namespace_scopes.each do |ns|
-          node.namespace = ns if ns.prefix == node_ns
+          node.namespace = ns if ns.prefix == node_ns.to_s
         end if node_ns
 
         node.default_namespace = default_ns if default_ns

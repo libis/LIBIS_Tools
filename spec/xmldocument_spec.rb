@@ -199,7 +199,7 @@ describe 'XML Document' do
 
     xml_doc.add_node :patron
     xml_doc.add_node :name, 'Harry Potter'
-    books = xml_doc.add_node :books, nil, nil, namespaces: { jkr: 'http://JKRowling.com' , node_ns: 'jkr' }
+    books = xml_doc.add_node :books, namespaces: { jkr: 'http://JKRowling.com' , node_ns: 'jkr' }
     xml_doc.add_node :book, nil, books,
                      title: 'Quidditch Through the Ages', author: 'Kennilworthy Whisp', due_date: '1992-4-23',
                      namespaces: {node_ns: 'jkr'}

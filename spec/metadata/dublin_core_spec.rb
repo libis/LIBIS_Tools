@@ -2,9 +2,12 @@
 require_relative '../spec_helper'
 require 'libis/tools/metadata/dublin_core_record'
 
+require 'rspec/matchers'
+require 'equivalent-xml'
+
 describe 'DublinCoreRecord' do
 
-  let(:header) { ['<?xml version="1.0" encoding="utf-8"?>'] }
+  let(:header) { '<?xml version="1.0" encoding="utf-8"?>' }
 
   subject(:dc) { Libis::Tools::Metadata::DublinCoreRecord.new(data) {} }
 
@@ -16,13 +19,11 @@ describe 'DublinCoreRecord' do
     "<dcterms:#{tag}#{attributes.sort.each{|k,v| " #{k}=\"#{v}\""}.join}>#{value}</dcterms:#{tag}>"
   end
 
-  def cmp_text(txt, other)
-    other_array = (other.is_a?(Array) ? other : other.split("\n"))
-    txt_array = txt.split("\n")
-    expect(txt_array.size).to be other_array.size
-    txt_array.each_with_index do |t, i|
-      expect(t).to match Regexp.new(Regexp.escape(other_array[i]), Regexp::EXTENDED)
-    end
+  def match_xml(doc1, doc2)
+    xml1 = doc1.is_a?(::Libis::Tools::XmlDocument) ? doc1.document : ::Nokogiri::XML(doc1.to_s)
+    xml2 = doc2.is_a?(::Libis::Tools::XmlDocument) ? doc2.document : ::Nokogiri::XML(doc2.to_s)
+    # noinspection RubyResolve
+    expect(xml1).to be_equivalent_to(xml2).respecting_element_order
   end
 
   context 'Empty record' do
@@ -35,31 +36,29 @@ STR
     }
     let(:record_start) { root + '>' }
     let(:record_end) { '</record>' }
-    let(:empty_record) { header.dup << (root + '/>') }
+    let(:empty_record) { header + root + '/>' }
 
 
     it 'contains emtpy record' do
-      cmp_text(dc.to_xml, empty_record)
+      match_xml dc.document, empty_record
     end
 
     it 'add dc:title' do
       dc.title = 'abc'
-      xml = header.dup
-      xml << record_start << dc_xml('title', 'abc') << record_end
-      cmp_text(dc.to_xml, xml )
+      match_xml dc.document, header + record_start + dc_xml('title', 'abc') + record_end
     end
 
     it 'add dc:date' do
       dc.date = '2001'
       dc.dcdate = '2002'
       dc.dc_date = '2003'
-      xml = header.dup
-      xml << record_start <<
-          dc_xml('date', '2001') <<
-          dc_xml('date', '2002') <<
-          dc_xml('date', '2003') <<
-          record_end
-      cmp_text(dc.to_xml, xml )
+      match_xml dc.document,
+                header +
+                    record_start +
+                    dc_xml('date', '2001') +
+                    dc_xml('date', '2002') +
+                    dc_xml('date', '2003') +
+                    record_end
     end
 
     it 'add dcterms:date' do
@@ -67,14 +66,14 @@ STR
       dc.dctermsdate = '2002'
       dc.terms_date = '2003'
       dc.dcterms_date = '2004'
-      xml = header.dup
-      xml << record_start <<
-          dcterms_xml('date', '2001') <<
-          dcterms_xml('date', '2002') <<
-          dcterms_xml('date', '2003') <<
-          dcterms_xml('date', '2004') <<
-          record_end
-      cmp_text(dc.to_xml, xml )
+      match_xml dc.document,
+                header +
+                    record_start +
+                    dcterms_xml('date', '2001') +
+                    dcterms_xml('date', '2002') +
+                    dcterms_xml('date', '2003') +
+                    dcterms_xml('date', '2004') +
+                    record_end
     end
 
   end

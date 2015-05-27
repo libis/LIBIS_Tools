@@ -362,7 +362,7 @@ describe 'XML Document' do
 
   end
 
-  it 'should work' do
+  it 'allows to parse xml string, save and reload' do
     xml_doc = ::Libis::Tools::XmlDocument.parse(<<-END.align_left)
       <patron>
         <name>Harry Potter</name>
@@ -381,6 +381,10 @@ describe 'XML Document' do
 
     match_xml xml_doc.document, @xml_template
 
+  end
+
+  it 'supports build to create XML document' do
+
     xml_doc = ::Libis::Tools::XmlDocument.build do
       # noinspection RubyResolve
       patron {
@@ -393,6 +397,10 @@ describe 'XML Document' do
     end
 
     match_xml xml_doc.document, @xml_template
+
+  end
+
+  it 'supports different ways to create nodes' do
 
     xml_doc = ::Libis::Tools::XmlDocument.new
     xml_doc.add_node :patron

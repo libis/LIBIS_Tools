@@ -436,12 +436,24 @@ module Libis
       #       xml_doc.value('//email') # => "harry.potter@hogwarts.edu"
       #
       # @param [String] path the name or XPath term to search the node(s)
+      # @param [Node] parent parent node; document if nil
       # @return [String] content or nil if not found
-      def value(path)
-        xpath(path).first.content rescue nil
+      def value(path, parent = nil)
+        parent ||= document
+        parent.xpath(path).first.content rescue nil
       end
 
-      alias_method :[], :value
+      # Return the content of the first element found.
+      #
+      # Example:
+      #
+      #       xml_doc['email'] # => "harry.potter@hogwarts.edu"
+      #
+      # @param [String] path the name or XPath term to search the node(s)
+      # @return [String] content or nil if not found
+      def [](path)
+        xpath(path).first.content rescue nil
+      end
 
       # Return the content of all elements found.
       # Example:
@@ -553,8 +565,6 @@ module Libis
         end
         node
       end
-
-      protected
 
       # Get the first node matching the tag. The node will be seached with XPath search term = "//#{tag}".
       #

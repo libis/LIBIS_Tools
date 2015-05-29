@@ -34,8 +34,7 @@ module Libis
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
       def initialize(file_or_hash = nil, opt = {})
-        super({}, opt)
-        self << file_or_hash
+        super _file_to_hash(file_or_hash), opt
       end
 
       # Load configuration parameters from a YAML file or Hash.
@@ -48,7 +47,21 @@ module Libis
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
       def <<(file_or_hash)
-        return self if file_or_hash.nil? || (file_or_hash.respond_to?(:empty?) && file_or_hash.empty?)
+        _file_to_hash(file_or_hash).each { |key, value| self[key] = value }
+        self
+      end
+
+      # Save configuration parameters in a YAML file.
+      #
+      # @param [String] file path of the YAML file to save the configuration to.
+      def >>(file)
+        File.open(file, 'w') { |f| f.write to_hash.to_yaml }
+      end
+
+      protected
+
+      def _file_to_hash(file_or_hash)
+        return {} if file_or_hash.nil? || (file_or_hash.respond_to?(:empty?) && file_or_hash.empty?)
         hash = case file_or_hash
                  when Hash
                    yield file_or_hash if block_given?
@@ -61,16 +74,8 @@ module Libis
                  else
                    {}
                end
-        return self unless hash.is_a? Hash
-        hash.each { |key, value| self[key] = value }
-        self
-      end
-
-      # Save configuration parameters in a YAML file.
-      #
-      # @param [String] file path of the YAML file to save the configuration to.
-      def >>(file)
-        File.open(file, 'w') { |f| f.write to_hash.to_yaml }
+        hash = {} unless hash.is_a? Hash
+        hash
       end
 
     end

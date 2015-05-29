@@ -30,6 +30,45 @@ describe ::Libis::Tools::ConfigFile do
       expect(subject.to_hash).to eq hash
     end
 
+    it 'loads a hash' do
+      subject << hash
+      expect(subject.to_hash).to eq hash
+    end
+
+    it 'allows to change sub-hash' do
+      subject << hash
+      # noinspection RubyResolve
+      subject.b.v = 1
+      hash[:b]['v'] = 1
+      expect(subject.to_hash).to eq hash
+    end
+
+    it 'allows to change hash in array' do
+      subject << hash
+      # noinspection RubyResolve
+      subject.c[0][0].a[0].v = 1
+      hash[:c][0][0][:a][0]['v'] = 1
+      expect(subject.to_hash).to eq hash
+    end
+
+  end
+
+  context 'initialization with hash' do
+    subject { ::Libis::Tools::ConfigFile.new hash }
+
+    it 'has hash' do
+      expect(subject.to_hash).to eq hash
+    end
+
+  end
+
+  context 'initialization with file' do
+    subject { ::Libis::Tools::ConfigFile.new test_file }
+
+    it 'has hash' do
+      expect(subject.to_hash).to eq hash
+    end
+
   end
 
 end

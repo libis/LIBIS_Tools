@@ -46,8 +46,8 @@ module Libis
       # derived classes such as ::Libis::Tools::Config.
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
-      def <<(file_or_hash)
-        _file_to_hash(file_or_hash).each { |key, value| self[key] = value }
+      def <<(file_or_hash, &block)
+        _file_to_hash(file_or_hash, &block).each { |key, value| self[key] = value }
         self
       end
 

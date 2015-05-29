@@ -73,7 +73,7 @@ module Libis
 
       # Clear all data.
       #
-      # Not only all configuration parameters are deleted, but also the memoirized list of loaded files
+      # Not only all configuration parameters are deleted, but also the memorized list of loaded files
       # and hashes are cleared and the logger configuration is reset to it's default status.
       def clear!
         super

@@ -139,7 +139,9 @@ module Libis
             parameters[name] = Parameter.new(name, default) if parameters[name].nil?
             options.each { |key, value| parameters[name][key] = value if value }
           else
-            parameters[options]
+            param_def = parameters[options]
+            return param_def unless param_def.nil?
+            self.superclass.parameter(options) rescue nil
           end
         end
 

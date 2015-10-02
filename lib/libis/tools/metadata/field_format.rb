@@ -4,7 +4,7 @@ module Libis
   module Tools
     module Metadata
 
-      class FieldSpec
+      class FieldFormat
 
         attr_accessor :parts
         attr_accessor :prefix
@@ -25,8 +25,8 @@ module Libis
             end
           end
           @join = options[:join] if options[:join]
-          @prefix = FieldSpec::from(options[:prefix]) if options[:prefix]
-          @postfix = FieldSpec::from(options[:postfix]) if options[:postfix]
+          @prefix = FieldFormat::from(options[:prefix]) if options[:prefix]
+          @postfix = FieldFormat::from(options[:postfix]) if options[:postfix]
           self
         end
 
@@ -40,21 +40,21 @@ module Libis
 
         def [](*parts)
           options = parts.last.is_a?(Hash) ? parts.pop : {}
-          parts.each { |x| add x }
+          add parts
           x = options.delete(:parts)
           add x if x
           add_options options
         end
 
         def self.from(*h)
-          FieldSpec.new(*h)
+          self.new(*h)
         end
 
         def to_s
           @parts.delete_if { |x|
             x.nil? or
                 (x.is_a? String and x.empty?) or
-                (x.is_a? FieldSpec and x.to_s.empty?)
+                (x.is_a? Libis::Tools::Metadata::FieldFormat and x.to_s.empty?)
           }
           result = @parts.join(@join)
           unless result.empty?
@@ -66,7 +66,7 @@ module Libis
         def add(part)
           case part
             when Hash
-              @parts << FieldSpec::from(part)
+              @parts << Libis::Tools::Metadata::FieldFormat::from(part)
             when Array
               part.each { |x| add x }
             else

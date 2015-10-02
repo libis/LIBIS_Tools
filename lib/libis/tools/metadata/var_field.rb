@@ -2,6 +2,8 @@
 
 require 'libis/tools/assert'
 
+require_relative 'parser/subfield_criteria_parser'
+
 module Libis
   module Tools
     module Metadata
@@ -11,13 +13,17 @@ module Libis
         attr_reader :tag
         attr_reader :ind1
         attr_reader :ind2
-        attr_reader :subfield
+        attr_reader :subfield_data
 
-        def initialize(tag, ind1, ind2, subfield = {})
+        def initialize(tag, ind1, ind2)
           @tag = tag
-          @ind1 = ind1 || ' '
-          @ind2 = ind2 || ' '
-          @subfield = subfield || {}
+          @ind1 = ind1 || ''
+          @ind2 = ind2 || ''
+          @subfield_data = Hash.new { |h, k| h[k] = Array.new   }
+        end
+
+        def add_subfield(name, value)
+          @subfield_data[name] << value
         end
 
         # dump the contents
@@ -25,7 +31,7 @@ module Libis
         # @return [String] debug output to inspect the contents of the VarField
         def dump
           output = "#{@tag}:#{@ind1}:#{@ind2}:\n"
-          @subfield.each { |s, t| output += "\t#{s}:#{t}\n" }
+          @subfield_data.each { |s, t| output += "\t#{s}:#{t}\n" }
           output
         end
 
@@ -34,7 +40,7 @@ module Libis
         # @return [String] debug output to inspect the contents of the VarField - Single line version
         def dump_line
           output = "#{@tag}:#{@ind1}:#{@ind2}:"
-          @subfield.each { |s, t| output += "$#{s}#{t}" }
+          @subfield_data.each { |s, t| output += "$#{s}#{t}" }
           output
         end
 
@@ -42,57 +48,57 @@ module Libis
         #
         # @return [Array] a list of all subfield codes
         def keys
-          @subfield.keys
+          @subfield_data.keys
         end
 
         # get the first (or only) subfield value for the given code
         #
         # @return [String] the first or only entry of a subfield or nil if not present
         # @param s [Character] the subfield code
-        def field(s)
-          field_array(s).first
+        def subfield(s)
+          subfield_array(s).first
         end
 
         # get a list of all subfield values for a given code
         #
         # @return [Array] all the entries of a repeatable subfield
         # @param s [Character] the subfield code
-        def field_array(s)
+        def subfield_array(s)
           assert(s.is_a?(String) && (s =~ /^[\da-z]$/) == 0, 'method expects a lower case alphanumerical char')
-          @subfield.has_key?(s) ? @subfield[s].dup : []
+          @subfield_data.has_key?(s) ? @subfield_data[s].dup : []
         end
 
-        # get a list of the first subfield value for all the codes in the given string
+        # get a list of the first subfield values for all the codes in the given string
         #
         # @return [Array] list of the first or only entries of all subfield codes in the input string
-        # @param s [String] subfield code specification (see match_fieldspec?)
+        # @param s [String] subfield code specification (see match)
         #
-        # The subfield codes are cleaned and sorted first (see fieldspec_to_sorted_array)
-        def fields(s)
+        # The subfield codes are cleaned (see criteria_to_array)
+        def subfields(s)
           assert(s.is_a?(String), 'method expects a string')
-          return [] unless (match_array = match_fieldspec?(s))
-          fieldspec_to_array(match_array.join(' ')).collect { |i| send(:field, i) }.flatten.compact
+          return [] unless (match_array = match(s))
+          criteria_to_array(match_array.join(' ')).collect { |i| send(:subfield, i) }.flatten.compact
         end
 
         # get a list of all the subfield values for all the codes in the given string
         #
         # @return [Array] list of the all the entries of all subfield codes in the input string
-        # @param s [String] subfield code specification (see match_fieldspec?)
+        # @param s [String] subfield code criteria (see match)
         #
-        # The subfield codes are cleaned and sorted first (see fieldspec_to_sorted_array)
+        # The subfield codes are cleaned (see criteria_to_array)
 
-        def fields_array(s)
+        def subfields_array(s)
           assert(s.is_a?(String), 'method expects a string')
-          return [] unless (match_array = match_fieldspec?(s))
-          fieldspec_to_array(match_array.join(' ')).collect { |i| send(:field_array, i) }.flatten.compact
+          return [] unless (match_array = match(s))
+          criteria_to_array(match_array.join(' ')).collect { |i| send(:subfield_array, i) }.flatten.compact
         end
 
-        # check if the current VarField matches the given field specification.
+        # check if the current VarField matches the given subfield criteria.
         #
-        # @return [String] The matching part(s) of the specification or nil if no match
-        # @param fieldspec [String] field specification: sequence of alternative set of subfield codes that should-shouldn't be present
+        # @return [String] The matching part(s) of the criteria or nil if no match
+        # @param criteria [String] subfield criteria: sequence of alternative set of subfield codes that should-shouldn't be present
         #
-        # The fieldspec consists of groups of characters. At least one of these groups should match for the test to succeed
+        # The subfield criteria consists of groups of characters. At least one of these groups should match for the test to succeed
         # Within the group sets of codes may be divided by a hyphen (-). The first set of codes must all be present;
         # the second set of codes must all <b>not</b> be present. Either set may be empty.
         #
@@ -123,30 +129,34 @@ module Libis
         #                     '$c...$d...'            => nil
         #                     '$b...$c...$d...'       => nil
         #                     '$a...$b...$c...$d...'  => nil
-        def match_fieldspec?(fieldspec)
-          return [] if fieldspec.empty?
-          result = fieldspec.split.collect { |fs|
-            fa = fs.split '-'
-            assert(fa.size <= 2, 'more than one "-" is not allowed in a fieldspec')
-            must_match = (fa[0] || '').split ''
-            must_not_match = (fa[1] || '').split ''
-            next unless (must_match == (must_match & keys)) && (must_not_match & keys).empty?
-            fs
-          }.compact
-          return nil if result.empty?
-          result
+        def match(criteria)
+          begin
+            parser = Libis::Tools::Metadata::SubfieldCriteriaParser.new
+            tree = parser.parse(criteria)
+            return [] if tree.is_a? String
+            tree = [tree] unless tree.is_a? Array
+            result = tree.map do |selection|
+              next unless parser.match_selection(selection, keys)
+              parser.selection_to_s(selection)
+            end.compact
+            return nil if result.empty?
+            result
+          rescue Parslet::ParseFailed => failure
+            failure.cause.set_label(criteria)
+            raise failure
+          end
         end
 
         private
 
         # @return [Array] cleaned up version of the input string
-        # @param fieldspec [String] subfield code specification
+        # @param subfields [String] subfield code specification
         # cleans the subfield code specification and splits it into an array of characters
         # Duplicates will be removed from the array and the order will be untouched.
-        def fieldspec_to_array(fieldspec)
+        def criteria_to_array(subfields)
 
           # note that we remove the '-xxx' part as it is only required for matching
-          fieldspec.gsub(/ |-\w*/, '').split('').uniq
+          subfields.gsub(/ |-\w*/, '').split('').uniq
         end
 
         def sort_helper(x)
@@ -186,7 +196,7 @@ module Libis
         #   # equivalent to: t.fields_array('9ab')
         #
         # Note that it is not possible to use a fieldspec for the sequence of subfield codes. Spaces and '-' are not allowed
-        # in method calls. If you want this, use the #field(s) and #field(s)_array methods.
+        # in method calls. If you want this, use the #subfield(s) and #subfield(s)_array methods.
         #
         def method_missing(name, *args)
           operation, subfields = name.to_s.split('_')
@@ -197,15 +207,15 @@ module Libis
           case operation
             when 'f'
               if subfields.size > 1
-                operation = :fields
+                operation = :subfields
               else
-                operation = :field
+                operation = :subfield
               end
             when 'a'
               if subfields.size > 1
-                operation = :fields_array
+                operation = :subfields_array
               else
-                operation = :field_array
+                operation = :subfield_array
               end
             else
               throw "Unknown method invocation: '#{name}' with: #{args}"

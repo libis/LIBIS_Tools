@@ -42,6 +42,7 @@ module Libis
                         raise ArgumentError, "Invalid argument: #{doc.inspect}"
                     end
           @document = xml_doc.document if xml_doc
+          raise ArgumentError, 'XML document not valid.' if self.invalid?
         end
 
         def all
@@ -52,7 +53,6 @@ module Libis
           m = /^([\/.]*\/)?(dc(terms)?:)?(.*)/.match(path.to_s)
           return [] unless m[4]
           path = (m[1] || '') + ('dc:' || m[2]) + m[4]
-          raise ArgumentError, 'XML document not valid.' if self.invalid?
           @document.xpath(path.to_s)
         end
 

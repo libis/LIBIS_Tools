@@ -14,7 +14,7 @@ module Libis
 
         def get_all_records
 
-          @all_records = Hash.new { |h, k| h[k] = [] }
+          @all_records.clear
 
           @node.xpath('.//leader').each { |f|
             @all_records['LDR'] << FixField.new('LDR', f.content)
@@ -31,10 +31,11 @@ module Libis
             tag = v['tag']
             tag = '%03d' % tag.to_i if tag.size < 3
 
-            subfields = Hash.new { |h, k| h[k] = [] }
-            v.xpath('.//subfield').each { |s| subfields[s['code']] << CGI::escapeHTML(s.content) }
+            varfield = VarField.new(tag, v['ind1'].to_s, v['ind2'].to_s)
 
-            @all_records[tag] << VarField.new(tag, v['ind1'].to_s, v['ind2'].to_s, subfields)
+            v.xpath('.//subfield').each { |s| varfield.add_subfield(s['code'], CGI::escapeHTML(s.content)) }
+
+            @all_records[tag] << varfield
 
           }
 

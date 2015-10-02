@@ -8,58 +8,105 @@ require 'libis/tools/assert'
 
 require_relative 'fix_field'
 require_relative 'var_field'
-require_relative 'field_spec'
+require_relative 'field_format'
 
 module Libis
   module Tools
     module Metadata
 
       # noinspection RubyTooManyMethodsInspection
+
+      # Base class for reading MARC based records.
+      #
+      # For indicator selection: '#' or '' (empty) is wildcard; '_' or ' ' (space) is blank.
       class MarcRecord
 
+        # Create a new MarcRecord object
+        #
+        # @param [XML node] xml_node XML node from Nokogiri or XmlDocument that contains child nodes with the data for
+        #         one MARC record.
         def initialize(xml_node)
           @node = xml_node
+          @node.document.remove_namespaces!
+          @all_records = Hash.new { |h, k| h[k] = Array.new }
         end
 
+        # Access to the XML node that was supplied to the constructor
+        # @return [XML node]
         def to_raw
           @node
         end
 
+        # Returns the internal data structure (a Hash) with all the MARC data.
+        #
+        # The internal structure is a Hash with the tag as key and as value an Array of either FixField or VarField
+        # instances.
+        #
+        # @return [Hash] internal data structure
         def all
-          # noinspection RubyResolve
-          @all_records ||= get_all_records
+          return @all_records unless @all_records.empty?
+          @all_records = get_all_records
         end
 
+        # Iterates over all the MARC fields.
+        #
+        # If a block is supplied it will be called for each field in the MARC record. The supplied argument will be the
+        # FixField or VarField instance for each field.
+        #
+        # @return [Array] The list of the field data or return values for each block call.
         def each
-          all.each do |k, v|
-            yield k, v
+          all.map { |_, field_array| field_array }.flatten.map do |field|
+            block_given? ? yield(field) : field
           end
         end
 
-        def all_tags(tag, subfields = '')
-          tag_, ind1, ind2 = tag =~ /^\d{3}/ ? [tag[0..2], tag[3], tag[4]] : [tag, nil, nil]
-          result = get_records(tag_, ind1, ind2, subfields)
+        # Get all fields matching search criteria.
+        #
+        # A block with one parameter can be supplied when calling this method. Each time a match is found, the block
+        # will be called with the field data as argument and the return value of the block will be added to the method's
+        # return value. This could for example be used to narrow the selection of the fields:
+        #
+        #     # Only select 700 tags where $4 subfield contains 'abc', 'def' or 'xyz'
+        #     record.all_tags('700') { |v| v.subfield['4'] =~ /^(abc|def|xyz)$/ ? v : nil }.compact
+        #
+        # @param [String] tag Tag selection string. Tag name with indicators, '#' for wildcard, '_' for blank. If an
+        #     extra subfield name is added, a result will be created for each instance found of that subfield.
+        # @param [String] subfields Subfield specification. See FieldFormat class for more info; ignored for controlfields.
+        # @param [Proc] select_block block that will be executed once for each field found. The block takes one argument
+        #     (the field) and should return true or false. True selects the field, false rejects it.
+        # @return [Array] If a block was supplied to the method call, the array will contain the result of the block
+        #     for each tag found. Otherwise the array will just contain the data for each matching tag.
+        def all_tags(tag, subfields = '', select_block = Proc.new { |_| true})
+          t, ind1, ind2, subfield = tag =~ /^\d{3}/ ? [tag[0..2], tag[3], tag[4], tag[5]] : [tag, nil, nil, nil]
+          result = get_records(t, ind1, ind2, subfield, subfields, &select_block)
           return result unless block_given?
           result.map { |record| yield record }
-          result.size > 0
         end
 
-        def first_tag(t, subfields = '')
-          result = all_tags(t, subfields).first
+        alias_method :each_tag, :all_tags
+
+        def select_fields(tag, select_block = nil, &block)
+          all_tags(tag, nil, select_block, &block)
+        end
+
+        # Find the first field matching the criteria.
+        #
+        # If a block is supplied, it will be called with the found field data. The return value will be whatever the
+        # block returns. If no block is supplied, the field data will be returned. If nothing was found, the return
+        # value is nil.
+        #
+        # @param [String] tag Tag selection string. Tag name with indicators, '#' for wildcard, '_' for blank.
+        # @param [String] subfields Subfield specification. See FieldFormat class for more info; ignored for controlfields.
+        # @return [Object] nil if nothing found; field data or whatever block returns.
+        def first_tag(tag, subfields = '')
+          result = all_tags(tag, subfields).first
+          return nil unless result
           return result unless block_given?
-          return false unless result
           yield result
-          true
         end
 
-        def each_tag(t, s = '')
-          all_tags(t, s).each do |record|
-            yield record
-          end
-        end
-
-        def all_fields(t, s)
-          r = all_tags(t, s).collect { |tag| tag.fields_array(s) }.flatten.compact
+        def all_fields(tag, subfields)
+          r = all_tags(tag, subfields).collect { |tag| tag.subfields_array(subfields) }.flatten.compact
           return r unless block_given?
           r.map { |field| yield field }
           r.size > 0
@@ -116,11 +163,11 @@ module Libis
           record = ''
           doc_number = tag('001').datas
 
-          all.select { |t| t.is_a? FixField }.each { |t| record += "#{format('%09s', doc_number)} #{t.tag}   L #{t.datas}\n" }
-          all.select { |t| t.is_a? VarField }.each { |t|
+          all.select { |t| t.is_a? Libis::Tools::Metadata::FixField }.each { |t| record += "#{format('%09s', doc_number)} #{t.tag}   L #{t.datas}\n" }
+          all.select { |t| t.is_a? Libis::Tools::Metadata::VarField }.each { |t|
             record += "#{format('%09s', doc_number)} #{t.tag}#{t.ind1}#{t.ind2} L "
             t.keys.each { |k|
-              t.field_array(k).each { |f|
+              t.subfield_array(k).each { |f|
                 record += "$$#{k}#{CGI::unescapeHTML(f)}"
               }
             }
@@ -134,37 +181,37 @@ module Libis
 
         def element(*parts)
           opts = options parts
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def list_s(*parts)
           opts = options parts, join: ' '
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def list_c(*parts)
           opts = options parts, join: ', '
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def list_d(*parts)
           opts = options parts, join: ' - '
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def repeat(*parts)
           opts = options parts, join: '; '
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def opt_r(*parts)
           opts = options parts, fix: '()'
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def opt_s(*parts)
           opts = options parts, fix: '[]'
-          field_spec(opts, *parts)
+          field_format(opts, *parts)
         end
 
         def odis_link(group, id, label)
@@ -177,11 +224,11 @@ module Libis
           default.merge(args.last.is_a?(::Hash) ? args.pop : {})
         end
 
-        def field_spec(default_options, *parts)
-          FieldSpec.new(*parts).add_default_options(default_options).to_s
+        def field_format(default_options, *parts)
+          Libis::Tools::Metadata::FieldFormat.new(*parts).add_default_options(default_options).to_s
         end
 
-        def get_records(tag, ind1 = '', ind2 = '', subfields = '')
+        def get_records(tag, ind1 = '', ind2 = '', subfield = nil, subfields = '', &block)
 
           ind1 ||= ''
           ind2 ||= ''
@@ -193,13 +240,25 @@ module Libis
           ind2.tr!('_', ' ')
           ind2.tr!('#', '')
 
-          all[tag].select do |v|
-            v.is_a?(FixField) ||
+          found = all[tag].select do |v|
+            result = v.is_a?(Libis::Tools::Metadata::FixField) ||
                 ((ind1.empty? or v.ind1 == ind1) &&
                     (ind2.empty? or v.ind2 == ind2) &&
-                    v.match_fieldspec?(subfields)
+                    v.match(subfields)
                 )
+            result &&= block.call(v) if block
+            result
           end
+
+          return found unless subfield
+
+          # duplicate tags for subfield instances
+          found.map do |field|
+            next unless field.is_a? Libis::Tools::Metadata::FixField
+            field.subfield_data[subfield].map do |sfield|
+              field.dup.subfield_data[subfield] = [sfield]
+            end
+          end.compact.flatten
 
         end
 

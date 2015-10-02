@@ -300,6 +300,25 @@ produces:
       <email>harry.potter@hogwarts.edu</email>
       <email>hpotter@JKRowling.com</email>
     </patron>
+    
+## Metadata
+
+This gem also provides some modules and classes that assist in working with metadata. There are classes that allow to 
+create and/or read metadata for MARC(21), Dublin Core and SharePoint. These classes all live in the 
+Libis::Tools::Metadata namespace.
+
+### MARC
+
+The classes Libis::Tools::Metadata::MarcRecord and it's child class Libis::Tools::Metadata::Marc21Record are mainly
+built for reading MARC(21) records. Most of the class logic is in the base class MarcRecord, which is incomplete and
+should be considered an abstract class. Marc21Record on the other hand only contains the logic to parse the XML data 
+into the internal structure. A MarcRecord is created by supplying it an XML node (from Nokogiri or 
+Libis::Tools::XmlDocument) that contains child nodes with the MARC data of a single record. The code will strip
+namespaces from the input in order to greatly simplify working with the XML.
+ 
+
+
+
 
 ## Contributing
 

@@ -64,7 +64,9 @@ describe 'Config' do
   context 'loading from file' do
 
     let(:test_file) { File.join(File.dirname(__FILE__), 'data', 'test.yml') }
-    subject(:config) { Libis::Tools::Config.clear! << test_file }
+    subject(:config) {
+      Libis::Tools::Config.clear! << test_file
+    }
 
     it 'has configuration parameters set' do
       expect(config.process).to eq 'Test Configuration'

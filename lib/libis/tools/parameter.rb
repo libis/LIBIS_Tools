@@ -73,6 +73,10 @@ module Libis
             'float'
           when DateTime, Date, Time
             'datetime'
+          when Array
+            'array'
+          when Hash
+            'hash'
           else
             send(:default).class.name.downcase
         end
@@ -95,9 +99,17 @@ module Libis
           when 'datetime'
             return v.to_datetime if v.respond_to? :to_datetime
             return DateTime.parse(v)
+          when 'array'
+            return v if v.is_a?(Array)
+            return v.split(/[,;|\s]+/) if v.is_a?(String)
+            return v.to_a if v.respond_to?(:to_a)
+          when 'hash'
+            return v when v.is_a?(Hash)
+            return Hash[(0...v.size).zip(v)] when v.is_a?(Array)
           else
             raise RuntimeError, "Datatype not supported: '#{dtype}'"
         end
+        nil
       end
 
       def check_constraint(v, constraint = nil)
@@ -144,8 +156,6 @@ module Libis
             self.superclass.parameter(options) rescue nil
           end
         end
-
-        protected
 
         def parameters
           @parameters ||= Hash.new

@@ -5,7 +5,9 @@ rvm:
   - 2.1.0
   - 2.2.0
   - ruby-head
-  - jruby-19mode
+  - jruby-1.7.20
+  - jruby-9.0.0.0
+  - jruby-head
 jdk:
   - openjdk7
   - oraclejdk7
@@ -34,4 +36,3 @@ branches:
 addons:
   code_climate:
     repo_token: f6978964f55e6543befb82373651365f8195677816af6ff40ad70c82f7f22f09
-

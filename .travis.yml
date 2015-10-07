@@ -24,6 +24,11 @@ matrix:
       jdk: oraclejdk7
     - rvm: ruby-head
       jdk: oraclejdk8
+  allow_failures:
+    - rvm: 2.1.0
+    - rvm: 2.2.0
+    - rvm: ruby-head
+    - rvm: jruby-9.0.1.0
 branches:
   only:
       - master

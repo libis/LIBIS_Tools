@@ -2,23 +2,16 @@ language: ruby
 cache: bundler
 sudo: false
 rvm:
-  - 1.9.3
   - 2.1.0
   - 2.2.0
   - ruby-head
-  - jruby-1.7.20
   - jruby-9.0.1.0
-  - jruby-head
 jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
 matrix:
   exclude:
-    - rvm: 1.9.3
-      jdk: oraclejdk7
-    - rvm: 1.9.3
-      jdk: oraclejdk8
     - rvm: 2.1.0
       jdk: oraclejdk7
     - rvm: 2.1.0

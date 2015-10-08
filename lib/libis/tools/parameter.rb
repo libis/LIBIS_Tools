@@ -17,7 +17,7 @@ module Libis
         # noinspection RubySuperCallWithoutSuperclassInspection
         super(*args)
         self[:options] ||= {}
-        self[:datatype] ||= guess_datatype if args[1]
+        self[:datatype] ||= guess_datatype
       end
 
       def dup
@@ -99,8 +99,8 @@ module Libis
             raise ParameterValidationError, "No boolean information in '#{v.to_s}'. " +
                                               "Valid values are: '#{TRUE_BOOL.join('\', \'')}" +
                                               "' and '#{FALSE_BOOL.join('\', \'')}'."
-          when 'string'
-            return v.to_s.gsub('%s', Time.now.strftime('%Y%m%d%H%M%S'))
+          when 'string', nil
+            return v.to_s
           when 'int'
             return Integer(v)
           when 'float'

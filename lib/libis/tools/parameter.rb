@@ -5,13 +5,26 @@ require 'libis/tools/extend/struct'
 module Libis
   module Tools
 
+    class ParameterValidationError < RuntimeError;
+    end
+    class ParameterFrozenError < RuntimeError;
+    end
+
     # noinspection RubyConstantNamingConvention
-    Parameter = ::Struct.new(:name, :default, :datatype, :description, :constraint, :options) do
+    Parameter = ::Struct.new(:name, :default, :datatype, :description, :constraint, :frozen, :options) do
 
       def initialize(*args)
         # noinspection RubySuperCallWithoutSuperclassInspection
         super(*args)
-        self.options = {} unless self.options
+        self[:options] ||= {}
+        self[:datatype] ||= guess_datatype if args[1]
+      end
+
+      def dup
+        new_obj = super
+        # noinspection RubyResolve
+        new_obj[:options] = Marshal.load(Marshal.dump(self[:options]))
+        new_obj
       end
 
       def [](key)
@@ -20,19 +33,19 @@ module Libis
         self[:options][key]
       end
 
-      def []=(key,value)
+      def []=(key, value)
         # noinspection RubySuperCallWithoutSuperclassInspection
-        return super(key,value) if members.include?(key)
+        return super(key, value) if members.include?(key)
         self[:options][key] = value
       end
 
       def self.from_hash(h)
-        h.each { |k,v| self[k.to_s.to_sym] = v }
+        h.each { |k, v| self[k.to_s.to_sym] = v }
       end
 
       def to_h
         super.inject({}) do |hash, key, value|
-          key == :options ? value.each {|k,v| hash[k] = v} : hash[key] = value
+          key == :options ? value.each { |k, v| hash[k] = v } : hash[key] = value
           hash
         end
       end
@@ -41,12 +54,7 @@ module Libis
       FALSE_BOOL = %w'false no f n 0'
 
       def parse(value = nil)
-        result = if value.nil?
-                   send(:default)
-                 else
-                     dtype = guess_datatype.to_s.downcase
-                     convert(dtype, value)
-                 end
+        result = value.nil? ? self[:default] : convert(value)
         check_constraint(result)
         result
       end
@@ -60,36 +68,37 @@ module Libis
         true
       end
 
-      def guess_datatype
-        return send(:datatype) if send(:datatype)
-        case send(:default)
-          when TrueClass, FalseClass
-            'bool'
-          when NilClass
-            'string'
-          when Integer
-            'int'
-          when Float
-            'float'
-          when DateTime, Date, Time
-            'datetime'
-          when Array
-            'array'
-          when Hash
-            'hash'
-          else
-            send(:default).class.name.downcase
-        end
-      end
-
       private
 
-      def convert(dtype, v)
-        case dtype.to_s.downcase
+      def guess_datatype
+        self[:datatype] || case self[:default]
+                             when TrueClass, FalseClass
+                               'bool'
+                             when NilClass
+                               'string'
+                             when Integer
+                               'int'
+                             when Float
+                               'float'
+                             when DateTime, Date, Time
+                               'datetime'
+                             when Array
+                               'array'
+                             when Hash
+                               'hash'
+                             else
+                               self[:default].class.name.downcase
+                           end
+      end
+
+      def convert(v)
+        case self[:datatype]
           when 'boolean', 'bool'
             return true if TRUE_BOOL.include?(v.to_s.downcase)
             return false if FALSE_BOOL.include?(v.to_s.downcase)
-            raise ArgumentError, "No boolean information in '#{v.to_s}'. Valid values are: '#{TRUE_BOOL.join('\', \'')}' and '#{FALSE_BOOL.join('\', \'')}'."
+            raise ParameterValidationError, "No boolean information in '#{v.to_s}'. " +
+                                              "Valid values are: '#{TRUE_BOOL.join('\', \'')}" +
+                                              "' and '#{FALSE_BOOL.join('\', \'')}'."
           when 'string'
             return v.to_s.gsub('%s', Time.now.strftime('%Y%m%d%H%M%S'))
           when 'int'
@@ -105,17 +114,19 @@ module Libis
             return v.to_a if v.respond_to?(:to_a)
           when 'hash'
             return v when v.is_a?(Hash)
-            return Hash[(0...v.size).zip(v)] when v.is_a?(Array)
+                       return Hash[(0...v.size).zip(v)] when v.is_a?(Array)
           else
-            raise RuntimeError, "Datatype not supported: '#{dtype}'"
+            raise ParameterValidationError, "Datatype not supported: '#{self[:datatype]}'"
         end
         nil
       end
 
       def check_constraint(v, constraint = nil)
-        constraint ||= send(:constraint)
+        constraint ||= self[:constraint]
         return if constraint.nil?
-        raise ArgumentError, "Value '#{v}' is not allowed (constraint: #{constraint})." unless constraint_checker(v, constraint)
+        unless constraint_checker(v, constraint)
+          raise ParameterValidationError, "Value '#{v}' is not allowed (constraint: #{constraint})."
+        end
       end
 
       def constraint_checker(v, constraint)
@@ -142,23 +153,30 @@ module Libis
 
       module ClassMethods
 
-        def parameter(options = {})
-          if options.is_a? Hash
-            return nil if options.keys.empty?
-            param_def = options.shift
-            name = param_def.first.to_s.to_sym
-            default = param_def.last
-            parameters[name] = Parameter.new(name, default) if parameters[name].nil?
-            options.each { |key, value| parameters[name][key] = value if value }
-          else
-            param_def = parameters[options]
-            return param_def unless param_def.nil?
-            self.superclass.parameter(options) rescue nil
+        def parameter_defs
+          return @parameters if @parameters
+          @parameters = Hash.new
+          begin
+            self.superclass.parameter_defs.
+                each_with_object(@parameters) do |(name, param), hash|
+              hash[name] = param.dup
+            end
+          rescue NoMethodError
+            # ignored
           end
+          @parameters
         end
 
-        def parameters
-          @parameters ||= Hash.new
+        def parameter(options = {})
+          return self.parameter_defs[options] unless options.is_a? Hash
+          return nil if options.keys.empty?
+          param_def = options.shift
+          name = param_def.first.to_s.to_sym
+          default = param_def.last
+          param = (self.parameter_defs[name] ||= Parameter.new(name, default))
+          options[:default] = default
+          options.each { |key, value| param[key] = value if value }
+          param
         end
 
       end
@@ -177,6 +195,9 @@ module Libis
           param_def.parse(param_value)
         else
           return NO_VALUE unless param_def.valid_value?(value)
+          if param_def[:frozen]
+            raise ParameterFrozenError, "Parameter '#{param_def[:name]}' is frozen in '#{self.class.name}'"
+          end
           parameters[name] = value
         end
       end
@@ -187,16 +208,18 @@ module Libis
 
       def []=(name, value)
         parameter name, value
+      rescue ParameterFrozenError
+        # ignored
       end
 
       protected
 
       def parameters
-        @parameters ||= Hash.new
+        @parameter_values ||= Hash.new
       end
 
       def get_parameter_definition(name)
-        self.class.parameter(name)
+        self.class.parameter_defs[name]
       end
 
     end # ParameterContainer

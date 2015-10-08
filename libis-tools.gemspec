@@ -32,7 +32,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'awesome_print'
 
   spec.add_runtime_dependency 'backports', '~> 3.6'
-  spec.add_runtime_dependency 'savon', '~> 2.0'
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'
   spec.add_runtime_dependency 'gyoku',  '~> 1.2'
   spec.add_runtime_dependency 'nori', '~> 2.4'

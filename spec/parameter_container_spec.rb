@@ -7,10 +7,10 @@ describe 'ParameterContainer' do
   class TestContainer
     include ::Libis::Tools::ParameterContainer
 
-    parameter check: true
-    parameter count: 0
-    parameter price: 1.0
-    parameter name: 'nobody'
+    parameter check: true, description: 'check parameter'
+    parameter count: 0, description: 'count parameter'
+    parameter price: 1.0, description: 'price parameter'
+    parameter name: 'nobody', description: 'name parameter'
     parameter calendar: Date.new(2014, 01, 01)
     parameter clock: Time.parse('10:10')
     parameter timestamp: DateTime.new(2014, 01, 01, 10, 10)
@@ -19,12 +19,18 @@ describe 'ParameterContainer' do
   end
 
   class DerivedContainer < TestContainer
-    parameter name: 'somebody'
-    parameter check: 'yes'
+    parameter name: 'somebody', description: 'derived name parameter', frozen: true
+    parameter check: 'no'
+    parameter new_derived_param: false
   end
 
-  class DerivedDerivedContainer < DerivedContainer; end
-  class DerivedDerivedDerivedContainer < DerivedDerivedContainer; end
+  class DerivedDerivedContainer < DerivedContainer
+    parameter price: 2.0, description: 'derived derived price parameter'
+  end
+
+  class DerivedDerivedDerivedContainer < DerivedDerivedContainer
+    parameter price: 3.0, description: 'derived derived derived price parameter'
+  end
 
   let(:test_container) { TestContainer.new }
   let(:derived_container) { DerivedContainer.new }
@@ -96,17 +102,51 @@ describe 'ParameterContainer' do
     expect(test_container.class.parameter(:with_options)[:c]).to be 3
   end
 
-  it 'derived class should override parameter values from parent class' do
-    expect(derived_container.parameter(:name)).to eq 'somebody'
-    expect(derived_container.parameter(:check)).to eq 'yes'
+  it 'derived class should inherit parameters of the parent class' do
+    expect(derived_container.parameter(:price)).to eq 1.0
+    expect(derived_container.class.parameter(:price)[:description]).to eq 'price parameter'
   end
 
-  it 'derived class should be able to access parameters of parent class' do
-    expect(derived_container.parameter(:price)).to eq 1.0
+  it 'derived class should override parameter values and propertiesfrom parent class' do
+    expect(derived_container.parameter(:name)).to eq 'somebody'
+    expect(derived_container.parameter(:check)).to eq 'no'
+  end
+
+  it 'overrides in the derived classes should not change values in the parent classes' do
+    expect(test_container.parameter(:check)).to eq true
+    expect(test_container.parameter(:price)).to eq 1.0
+    expect(test_container.class.parameter(:price)[:description]).to eq 'price parameter'
   end
 
   it 'derivation should be supported over multiple levels' do
-    expect(derived_derived_derived_container.parameter(:price)).to eq 1.0
+    expect(derived_container.parameter(:price)).to eq 1.0
+    expect(derived_derived_container.parameter(:price)).to eq 2.0
+    expect(derived_derived_derived_container.parameter(:price)).to eq 3.0
+    expect(derived_container.class.parameter(:price)[:description]).to eq 'price parameter'
+    expect(derived_derived_container.class.parameter(:price)[:description]).to eq 'derived derived price parameter'
+    expect(derived_derived_derived_container.class.parameter(:price)[:description]).to eq 'derived derived derived price parameter'
+  end
+
+  it 'frozen parameters should be read-only' do
+    expect {
+      derived_container.parameter(:name, 'anybody')
+    }.to raise_error(::Libis::Tools::ParameterFrozenError)
+    expect(derived_container.parameter(:name)).to eq 'somebody'
+    expect {
+      derived_container[:name] = 'anybody'
+    }.not_to raise_error
+    expect(derived_container[:name]).to eq 'somebody'
+  end
+
+  it 'frozen state should not affect parameter in parent class' do
+    expect {
+      test_container.parameter(:name, 'anybody')
+    }.not_to raise_error
+    expect(test_container.parameter(:name)).to eq 'anybody'
+    expect {
+      test_container[:name] = 'everybody'
+    }.not_to raise_error
+    expect(test_container[:name]).to eq 'everybody'
   end
 
 end

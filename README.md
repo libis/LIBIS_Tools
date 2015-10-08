@@ -316,9 +316,70 @@ into the internal structure. A MarcRecord is created by supplying it an XML node
 Libis::Tools::XmlDocument) that contains child nodes with the MARC data of a single record. The code will strip
 namespaces from the input in order to greatly simplify working with the XML.
  
+## Parameter
 
+The class ::Libis::Tools::Parameter and the ::Libis::Tools::ParameterContainer module provide a simple framework for
+instance variables that are type-safe and can easily be documented and provide defaults.
+ 
+To use these parameters a class should include the ::Libis::Tools::ParameterContainer module and add 'parameter' 
+statements to the body of the class definition. It takes only one mandatory argument which is a Hash. The first entry is
+interpreted as '<name> => <default>'. The name for the parameter should be unique and the default value can be any value
+of type TrueClass, FalseClass, String, Integer, Float, Date, Time, DateTime, Array, Hash or NilClass.
 
+The second up to last Hash entries are optional properties for the parameter. These are:
 
+* datatype: the type of values the parameter will accept. Valid values are:
+
+    * 'bool' or 'boolean'
+    * 'string'
+    * 'int'
+    * 'float'
+    * 'datetime'
+    * 'array'
+    * 'hash'
+
+    Any other value will raise a RuntimeError when the parameter is used. The value is case-insensitive and if not present, 
+    the datatype will be derived from the default value with 'string' being the default for NilClass. In any case the 
+    parameter will try its best to convert supplied values to the proper data type. For instance, an Integer parameter will 
+    accept 3, 3.1415, '3' and Rational(10/3) as valid values and store them as the integer value 3. Likewise DateTime 
+    parameters will try to interprete date and time strings.
+
+* description: any descriptive text you want to add to clarify what this parameter is used for. Any tool can ask the
+class for its parameters and - for instance - can use this property to provide help in a GUI when asking the user for
+input.
+
+* constraint: adds a validation condition to the parameter. The condition value can be: 
+
+    * an array: only values that convert to a value in the list are considered valid.
+    * a range: only values that convert to a value in the given range are considered valid.
+    * a regular expression: only values that match the regular expression are considered valid.
+    * a string: only values that are '==' to the constraint are considered valid.
+    
+* frozen: if set to true, prevents the class instance to set the parameter to any value other than the default. Mostly
+useful when a derived class needs a parameter in the parent class to be set to a specific value. Setting a value on 
+a frozen parameter with the 'parameter(name,value)' method throws a ::Libis::Tools::ParameterFrozenError. The '[]=' 
+method silently ignores the exception. In any case the default value will not be changed.
+
+* options: a hash with any additional properties that you want to associate to the parameter. Any key-value pair in this
+hash is added to the retrievable properties of the parameter. Likewise any property defined, that is not in the list of 
+known properties is added to the options hash. In this aspect the ::Libis::Tools::Parameter class behaves much like an
+OpenStruct even though it is implemented as a Struct.
+
+Besides enabling the 'parameter' class method to define parameters, the ::Libis::Tools::ParameterContainer add the class
+method 'parameters' that will return a Hash with parameter names as keys and their respective parameter definitions as
+values. On each class instance the 'parameter' method is added and serves as both getter and setter for parameter values:
+With only one argument (the parameter name) it returns the current value for the parameter, but the optional second 
+argument will cause the method to set the parameter value. If the parameter is not available or the given value is not 
+a valid value for the parameter, the method will return the special constant ::Libis::ParameterContainer::NO_VALUE. The 
+methods '[]' and '[]=' serve as aliases for the getter and setter calls.
+
+Additionally two protected methods are available on the instance:
+* 'parameters': returns the Hash that keeps track of the current parameter values for the instance.
+* 'get_parameter_defintion': retrieves the parameter definition from the instance's class for the given parameter name.
+
+Any class that derives from a class that included the ::Libis::Tools::ParameterContainer module will automatically 
+inherit all parameter definitions from all of it's base classes and can override any of these parameter definitions e.g. 
+to change the default values for the parameter.
 
 ## Contributing
 

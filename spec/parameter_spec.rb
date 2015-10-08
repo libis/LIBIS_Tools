@@ -21,7 +21,7 @@ describe 'Parameter' do
 
   it 'should detect datatype from default value' do
     @parameter_types.each do |dtype|
-      expect(eval("@#{dtype}_parameter").guess_datatype).to eq dtype
+      expect(eval("@#{dtype}_parameter").send(:guess_datatype)).to eq dtype
     end
   end
 

@@ -31,7 +31,7 @@ module Libis
           end
 
         rescue StandardError => e
-          result[err] = [e.class.name, e.message]
+          result[:err] = [e.class.name, e.message]
 
         end
 

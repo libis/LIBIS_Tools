@@ -932,7 +932,7 @@ module Libis
         xml[:mets].amdSec(ID: amd_id(id)) {
           dnx_sections.each do |section_type, data|
             if section_type.to_s =~ /^source-(.*)-\d+$/
-              xml.send('sourceMD', ID: "#{amd_id(id)}-#{section_type.to_s}") {
+              xml[:mets].send('sourceMD', ID: "#{amd_id(id)}-#{section_type.to_s}") {
                 xml[:mets].mdWrap(MDTYPE: $1) {
                   xml[:mets].xmlData {
                     xml << data
@@ -940,7 +940,7 @@ module Libis
                 }
               }
             else
-              xml.send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
+              xml[:mets].send("#{section_type}MD", ID: "#{amd_id(id)}-#{section_type.to_s}") {
                 xml[:mets].mdWrap(MDTYPE: 'OTHER', OTHERMDTYPE: 'dnx') {
                   xml[:mets].xmlData {
                     add_dnx_sections(xml, data)

@@ -215,7 +215,7 @@ module Libis
       def build(at_node = nil, options = {}, &block)
         options = {encoding: 'utf-8' }.merge options
         if at_node
-          Nokogiri::XML::Builder.new(options,at_node, &block)
+            Nokogiri::XML::Builder.new(options,at_node, &block)
         else
           xml = Nokogiri::XML::Builder.new(options, &block)
           @document = xml.doc

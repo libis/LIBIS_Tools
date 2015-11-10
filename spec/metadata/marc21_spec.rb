@@ -93,7 +93,7 @@ describe 'Marc21Record' do
       record.extend Libis::Tools::Metadata::Mappers::Kuleuven
       xml_doc = Libis::Tools::XmlDocument.parse <<STR
 <?xml version="1.0" encoding="utf-8"?>
-<record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+<dc:record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
   <dc:identifier>urn:ControlNumber:9921543960101471</dc:identifier>
   <dc:identifier>(BeLVLBS)002154396LBS01-Aleph</dc:identifier>
   <dc:identifier>8389207</dc:identifier>
@@ -103,7 +103,7 @@ describe 'Marc21Record' do
   <dc:date>1722 - 1724</dc:date>
   <dcterms:extent>8o: 4 v.; [22], 298, [8]; [16], 354, [1]; [16], 299, [7]; [16], 271, [5] p.</dcterms:extent>
   <dc:language/>
-</record>
+</dc:record>
 STR
       expect(record.to_dc.root).to be_equivalent_to(xml_doc.root).respecting_element_order
       record.to_dc.elements.each_with_index do |element, i|

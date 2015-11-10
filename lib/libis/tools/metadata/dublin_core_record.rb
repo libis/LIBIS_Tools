@@ -32,10 +32,10 @@ module Libis
                         Libis::Tools::XmlDocument.from_hash(doc)
                       when NilClass
                         Libis::Tools::XmlDocument.new.build do |xml|
-                          xml.record('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                          xml[:dc].record('xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                                      'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
                                      'xmlns:dcterms' => 'http://purl.org/dc/terms/') {
-                            yield xml
+                            yield xml if block_given?
                           }
                         end
                       else

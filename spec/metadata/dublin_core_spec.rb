@@ -29,13 +29,13 @@ describe 'DublinCoreRecord' do
   context 'Empty record' do
     let(:data) { nil }
     let(:root) { <<STR.chomp
-<record \
+<dc:record \
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
 xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
 STR
     }
     let(:record_start) { root + '>' }
-    let(:record_end) { '</record>' }
+    let(:record_end) { '</dc:record>' }
     let(:empty_record) { header + root + '/>' }
 
 

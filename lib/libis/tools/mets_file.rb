@@ -14,7 +14,7 @@ module Libis
       module IdContainer
 
         def set_from_hash(h)
-          h.each { |k, v| send "#{k}=", v }
+          h.each { |k, v| send "#{k}=", v if respond_to?(k) }
         end
 
         def id
@@ -41,9 +41,10 @@ module Libis
       class Representation
         include IdContainer
 
-        attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :priority, :order,
+        attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
+                      :user_a, :user_b, :user_c,
+                      :group_id, :priority, :order,
                       :digital_original, :content, :context, :hardware, :carrier, :original_name,
-                      :user_a, :user_b, :user_c, :group_id,
                       :preservation_levels, :env_dependencies, :hardware_ids, :software_ids,
                       :hardware_infos, :software_infos, :relationship_infos, :environments,
                       :dc_record, :source_metadata
@@ -200,7 +201,7 @@ module Libis
           # Rights section
           rights_data = []
           data = {
-              policyId: hash[:access_right]
+              policyId: access_right_id
           }.cleanup
           rights_data << Rights.new(data) unless data.empty?
           dnx[:rights] = rights_data unless rights_data.empty?
@@ -218,20 +219,20 @@ module Libis
       class File
         include IdContainer
 
-        attr_accessor :label, :note, :location, :target_location, :mimetype, :entity_type,
+        attr_accessor :label, :note, :location, :target_location, :mimetype, :size, :entity_type,
                       :creation_date, :modification_date, :composition_level, :group_id,
+                      :checksum_MD5, :checksum_SHA1, :checksum_SHA256,:checksum_SHA384,:checksum_SHA512,
                       :fixity_type, :fixity_value,
                       :preservation_levels, :inhibitors, :env_dependencies, :hardware_ids, :software_ids,
                       :signatures, :hardware_infos, :software_infos, :relationship_infos, :environments, :applications,
-                      :dc_record, :source_metadata
-        :representation
+                      :dc_record, :source_metadata, :representation
 
         def xml_id
           "fid#{id}"
         end
 
-        def group_id
-          "grp#{master.id rescue id}"
+        def make_group_id
+          "grp#{group_id || master.id rescue id}"
         end
 
         def master
@@ -289,14 +290,18 @@ module Libis
           }.cleanup
           tech_data << TechGeneralFile.new(data) unless data.empty?
           # Fixity
-          data = {
-              fixityType: fixity_type,
-              fixityValue: fixity_value,
-          }.cleanup
-          tech_data << TechFixity.new(data) unless data.empty?
+          %w'MD5 SHA1 SHA256 SHA384 SHA512'.each do |checksum_type|
+            if (checksum = self.send("checksum_#{checksum_type}"))
+              data = {
+                  fixityType: checksum_type,
+                  fixityValue: checksum,
+              }.cleanup
+              tech_data << TechFixity.new(data) unless data.empty?
+            end
+          end
           # Object characteristics
           data = {
-              groupID: group_id
+              groupID: make_group_id
           }.cleanup
           tech_data << TechObjectChars.new(data) unless data.empty?
           # Preservation level
@@ -864,7 +869,7 @@ module Libis
                   ID: object.xml_id,
                   MIMETYPE: object.mimetype,
                   ADMID: amd_id(object.xml_id),
-                  GROUPID: object.group_id,
+                  GROUPID: object.make_group_id,
               }.cleanup
               h[:DMDID] = dmd_id(object.xml_id) if object.dc_record
 
@@ -891,7 +896,7 @@ module Libis
                   TYPE: 'PHYSICAL',
               ) {
                 xml[:mets].div(LABEL: map.representation.label) {
-                  add_struct_map(xml, map.diqv) if map.div
+                  add_struct_map(xml, map.div) if map.div
                 }
               }
             end

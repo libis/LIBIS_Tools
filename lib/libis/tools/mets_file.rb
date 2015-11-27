@@ -559,6 +559,10 @@ module Libis
         tag 'webHarvesting'
       end
 
+      class CollectionInfo   < DnxSection
+        tag 'Collection'
+      end
+
       class PreservationLevel < DnxSection
         tag 'preservationLevel'
       end
@@ -745,6 +749,10 @@ module Libis
             harvestTime: hash[:harvest_time],
         }.cleanup
         tech_data << WebHarvesting.new(data) unless data.empty?
+        data = {
+            collectionId: hash[:collection_id]
+        }.cleanup
+        tech_data << Collection.new(data) unless data.empty?
         @dnx[:tech] = tech_data unless tech_data.empty?
         data = {
             policyId: hash[:access_right]

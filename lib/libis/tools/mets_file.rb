@@ -219,7 +219,7 @@ module Libis
       class File
         include IdContainer
 
-        attr_accessor :label, :note, :location, :target_location, :mimetype, :size, :entity_type,
+        attr_accessor :label, :note, :location, :target_location, :mimetype, :puid, :size, :entity_type,
                       :creation_date, :modification_date, :composition_level, :group_id,
                       :checksum_MD5, :checksum_SHA1, :checksum_SHA256,:checksum_SHA384,:checksum_SHA512,
                       :fixity_type, :fixity_value,
@@ -286,7 +286,7 @@ module Libis
               fileExtension: ::File.extname(orig_name),
               fileMIMEType: mimetype,
               fileSizeBytes: size,
-
+              formatLibraryId: puid
           }.cleanup
           tech_data << TechGeneralFile.new(data) unless data.empty?
           # Fixity

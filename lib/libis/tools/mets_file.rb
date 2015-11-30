@@ -752,7 +752,7 @@ module Libis
         data = {
             collectionId: hash[:collection_id]
         }.cleanup
-        tech_data << Collection.new(data) unless data.empty?
+        tech_data << CollectionInfo.new(data) unless data.empty?
         @dnx[:tech] = tech_data unless tech_data.empty?
         data = {
             policyId: hash[:access_right]

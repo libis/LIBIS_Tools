@@ -21,10 +21,22 @@ module Libis
       end
 
       def dup
+        # noinspection RubySuperCallWithoutSuperclassInspection
         new_obj = super
         # noinspection RubyResolve
         new_obj[:options] = Marshal.load(Marshal.dump(self[:options]))
         new_obj
+      end
+
+      def merge!(other)
+        other.each do |k,v|
+          if k == :options
+            self[:options].merge!(v)
+          else
+            self[k] = v
+          end
+        end
+        self
       end
 
       def [](key)
@@ -44,6 +56,7 @@ module Libis
       end
 
       def to_h
+        # noinspection RubySuperCallWithoutSuperclassInspection
         super.inject({}) do |hash, key, value|
           key == :options ? value.each { |k, v| hash[k] = v } : hash[key] = value
           hash
@@ -159,7 +172,11 @@ module Libis
           begin
             self.superclass.parameter_defs.
                 each_with_object(@parameters) do |(name, param), hash|
-              hash[name] = param.dup
+              if hash.has_key?(name)
+                hash[name].merge!(param)
+              else
+                hash[name] = param.dup
+              end
             end
           rescue NoMethodError
             # ignored

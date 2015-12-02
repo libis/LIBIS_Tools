@@ -25,7 +25,7 @@ module Libis
     #         p cfg[:my_text] # => 'abc'
     #         p cfg.logger.warn('message') # => W, [2015-03-16T12:51:01.180548 #28935]  WARN -- : message
     #
-    class Config < ConfigFile
+    class Config
       include Singleton
 
       class << self
@@ -40,12 +40,18 @@ module Libis
 
       end
 
+      def method_missing(name, *args, &block)
+        result = config.send(name, *args, &block)
+        self === config ? self : result
+      end
+
       # Load configuration parameters from a YAML file or Hash.
       #
       # The file paths and Hashes are memorised and loaded again by the {#reload} methods.
       # @param [String,Hash] file_or_hash
       def <<(file_or_hash)
-        super(file_or_hash) { |data| @sources << data }
+        @config.send('<<', (file_or_hash)) { |data| @sources << data }
+        self
       end
 
       # Load all files and Hashes again.
@@ -59,15 +65,13 @@ module Libis
         self
       end
 
-      alias_method :deep_struct_clear!, :clear!
-
       # Clear data and load all files and Hashes again.
       #
       # All configuration parameters are first deleted which means that any parameters
       # added directly (not via file or hash) will no longer be available. Parameters set explicitly that also exist in
       # the files or hashes will be reset to the values in those files and hashes.
       def reload!
-        deep_struct_clear!
+        @config.clear!
         reload
       end
 
@@ -76,7 +80,7 @@ module Libis
       # Not only all configuration parameters are deleted, but also the memorized list of loaded files
       # and hashes are cleared and the logger configuration is reset to it's default status.
       def clear!
-        super
+        @config.clear!
         @sources = Array.new
         @logger = ::Logger.new(STDOUT)
         set_log_formatter
@@ -98,13 +102,13 @@ module Libis
         end
       end
 
-      attr_accessor :logger
+      attr_accessor :logger, :config, :sources
 
       protected
 
       def initialize(hash = nil, opts = {})
-        super(hash, opts)
-        clear!
+        @config = ConfigFile.new(hash, opts)
+        self.clear!
       end
 
     end

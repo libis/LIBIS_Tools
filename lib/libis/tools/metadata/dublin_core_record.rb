@@ -68,19 +68,22 @@ module Libis
           parent ||= root
           m = /^([\/\.]*\/)?(dc(?:terms)?:)?(.*)/.match(tag.to_s)
           return [] unless m[3]
-          path = (m[1] || '') + ('dc:' || m[2]) + m[3]
+          path = (m[1] || '')
+          ns, tag = get_namespace(tag)
+          path += "#{ns}:" if ns
+          path += tag
           parent.xpath(path)
         end
 
         def get_namespace(tag)
           m = /^((dc)?(terms)?(?:_|:)?)?([a-zA-Z_][-_.0-9a-zA-Z]+)(.*)/.match tag
-          ns = if m[1].nil?
+          ns = if m[1].blank?
                    if DC_ELEMENTS.include?(m[4])
                      :dc
                    else
                      DCTERMS_ELEMENTS.include?(m[4]) ? :dcterms : nil
                    end
-               elsif m[3].nil?
+               elsif m[3].blank?
                  :dc
                else
                  :dcterms

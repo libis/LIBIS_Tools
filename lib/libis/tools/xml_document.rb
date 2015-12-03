@@ -542,20 +542,19 @@ module Libis
       #
       #
       def method_missing(method, *args, &block)
-        super unless method.to_s =~ /^([a-z_][a-z_0-9]*)(=)?$/i
+        super unless method.to_s =~ /^([a-z_][a-z_0-9]*)(!|=)?$/i
         node = get_node($1)
-        node = add_node($1) unless node
+        node = add_node($1) if node.nil? || $2 == '!'
         case args.size
           when 0
-            node = get_node($1)
             if block_given?
               build(node, &block)
             end
           when 1
-            if $2
-              node.content = args.first.to_s
-            else
+            if $2.blank?
               return node[args.first.to_s]
+            else
+              node.content = args.first.to_s
             end
           when 2
             node[args.first.to_s] = args[1].to_s

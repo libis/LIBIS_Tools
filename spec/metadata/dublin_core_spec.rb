@@ -50,8 +50,8 @@ STR
 
     it 'add dc:date' do
       dc.date = '2001'
-      dc.dcdate = '2002'
-      dc.dc_date = '2003'
+      dc.dcdate! '2002'
+      dc.dc_date! '2003'
       match_xml dc.document,
                 header +
                     record_start +
@@ -62,10 +62,10 @@ STR
     end
 
     it 'add dcterms:date' do
-      dc.termsdate = '2001'
-      dc.dctermsdate = '2002'
-      dc.terms_date = '2003'
-      dc.dcterms_date = '2004'
+      dc.termsdate! '2001'
+      dc.dctermsdate! '2002'
+      dc.terms_date! '2003'
+      dc.dcterms_date! '2004'
       match_xml dc.document,
                 header +
                     record_start +

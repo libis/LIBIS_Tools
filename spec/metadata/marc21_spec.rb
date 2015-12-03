@@ -106,7 +106,7 @@ describe 'Marc21Record' do
 </dc:record>
 STR
       expect(record.to_dc.root).to be_equivalent_to(xml_doc.root).respecting_element_order
-      record.to_dc.elements.each_with_index do |element, i|
+      record.to_dc.root.elements.each_with_index do |element, i|
         expect(element).to be_equivalent_to(xml_doc.root.elements[i])
       end
     end

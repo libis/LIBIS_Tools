@@ -12,7 +12,7 @@ module Libis
         hash = {} unless hash
         opts = {} unless opts
         hash = {default: hash} unless hash.is_a? Hash
-        super(hash, {recurse_over_arrays: true}.merge(opts))
+        super(hash, {recurse_over_arrays: true, preserve_original_keys: true}.merge(opts))
       end
 
       # Delete all data fields

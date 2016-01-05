@@ -1,3 +1,5 @@
+require_relative 'tools/version'
+
 module Libis
   module Tools
 

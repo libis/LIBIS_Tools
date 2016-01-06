@@ -29,19 +29,19 @@ module Libis
       #
       # @param [String] file_path_or_string path of the file to calculate the digest for
       def digest(file_path_or_string)
-        @hasher.file(file_path_or_string).digest!
+        hashit(file_path_or_string).digest!
       end
 
       # Calculate the hexadecimal digest of a file.
       # @param (see #digest)
       def hexdigest(file_path_or_string)
-        @hasher.file(file_path_or_string).hexdigest!
+        hashit(file_path_or_string).hexdigest!
       end
 
       # Calculate the base64 digest of a file.
       # @param (see #digest)
       def base64digest(file_path_or_string)
-        @hasher.file(file_path_or_string).base64digest!
+        hashit(file_path_or_string).base64digest!
       end
 
       # Calculate the binary digest of a file.
@@ -75,7 +75,12 @@ module Libis
       private
 
       def hashit(file_path_or_string)
-        @hasher.file(file_path_or_string)
+        if File.exist?(file_path_or_string)
+          @hasher.file(file_path_or_string)
+        else
+          @hasher.reset.update(file_path_or_string)
+        end
+        @hasher
       end
 
     end

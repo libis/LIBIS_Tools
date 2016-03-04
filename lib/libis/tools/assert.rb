@@ -19,6 +19,17 @@ class Object
   #
   # Examples:
   #
+  #     require 'libis/tools/assert'
+  #     assert(value > 0, 'value should be positive number')
+  #
+  #     # using a code block:
+  #     require 'libis/tools/assert'
+  #     assert 'database is not idle' do
+  #       db = get_database
+  #       db.status == :IDLE
+  #     end
+  #
+  #     # using $DEBUG:
   #     $DEBUG = nil
   #     assert false, 'assert 1'        # nothing happens
   #     $DEBUG = true

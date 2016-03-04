@@ -8,8 +8,15 @@ module Libis
       module Mappers
 
         # noinspection RubyResolve
+
+        # Mixin for {::Libis::Tools::Metadata::MarcRecord} to enable conversion into
+        # {Libis::Tools::Metadata::DublinCoreRecord}. This module implements the conversion mapping for Flandrica by
+        # extending the version for {::Libis::Tools::Metadata::Mappers::Kuleuven KU Leuven} and overwriting what's
+        # different. This means any change to the KU Leuven mapping may have effect on this mapping as well.
         module Flandrica
-          include Libis::Tools::Metadata::Mappers::Kuleuven
+          extend Libis::Tools::Metadata::Mappers::Kuleuven
+
+          protected
 
           def marc2dc_identifier(xml)
             Libis::Tools::Metadata::Mappers::Kuleuven.marc2dc_identifier(xml)

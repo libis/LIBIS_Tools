@@ -9,6 +9,8 @@ module Libis
   module Tools
 
     # noinspection RubyTooManyMethodsInspection
+
+    # Copy of the old SharepointRecord class. Needs inspection and probably a mayor update.
     class SharepointRecord < Hash
 
       attr_accessor :node

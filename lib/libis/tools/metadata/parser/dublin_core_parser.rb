@@ -7,8 +7,9 @@ require_relative 'basic_parser'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class DublinCoreParser < Libis::Tools::Metadata::BasicParser
         rule(:namespace) { match('[^:]').repeat(1).as(:namespace) >> str(':') }
         rule(:namespace?) { namespace.maybe }

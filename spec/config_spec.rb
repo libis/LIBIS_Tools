@@ -11,21 +11,20 @@ describe 'Config' do
   subject(:config) { ::Libis::Tools::Config.clear! }
 
   it 'has defaults set' do
-    expect(config.logger).to be_a ::Logger
+    expect(config.logger).to be_a ::Logging::Logger
   end
 
   it 'clears all values' do
     # noinspection RubyResolve
     config.test_value = 5
-    config.logger.level = ::Logger::FATAL
+    config.logger.level = :FATAL
     # noinspection RubyResolve
     expect(config.test_value).to be 5
-    expect(config.logger.level).to be ::Logger::FATAL
+    expect(config.logger.level).to be ::Logging::level_num(:FATAL)
 
     config.clear!
     # noinspection RubyResolve
     expect(config.test_value).to be_nil
-    expect(config.logger.level).to be ::Logger::DEBUG
   end
 
   context 'adding values with setters' do

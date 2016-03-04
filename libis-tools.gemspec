@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 
   spec.require_paths = ['lib']
+  spec.has_rdoc = 'yard'
 
   spec.add_development_dependency 'bundler', '~> 1.6'
   spec.add_development_dependency 'rake', '~> 10.3'
@@ -35,9 +36,12 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'
-  spec.add_runtime_dependency 'gyoku',  '~> 1.2'
-  spec.add_runtime_dependency 'nori', '~> 2.4'
+  spec.add_runtime_dependency 'gyoku',  '~> 1.3'
+  spec.add_runtime_dependency 'nori', '~> 2.6'
   spec.add_runtime_dependency 'recursive-open-struct', '~> 1.0'
   spec.add_runtime_dependency 'parslet', '~> 1.7'
   spec.add_runtime_dependency 'simple_xlsx_reader', '~> 1.0'
+  spec.add_runtime_dependency 'logging', '~> 2.0'
+  spec.add_runtime_dependency 'concurrent-ruby', '~> 1.0'
+  spec.add_runtime_dependency 'yard', '~> 0.8'
 end

@@ -2,7 +2,6 @@
 require 'singleton'
 require 'yaml'
 require 'erb'
-require 'logger'
 
 require 'libis/tools/deep_struct'
 

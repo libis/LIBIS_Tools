@@ -9,21 +9,19 @@ module Libis
 
     # noinspection RubyTooManyMethodsInspection
 
-
     # This class embodies most used features of Nokogiri, Nori and Gyoku in one convenience class. The Nokogiri document
     # is stored in the class variable 'document' and can be accessed and manipulated directly - if required.
     #
     # In the examples we assume the following XML code:
     #
-    #           <?xml version="1.0" encoding="utf-8"?>
-    #           <patron>
-    #               <name>Harry Potter</name>
-    #               <barcode library='Hogwarts Library'>1234567890</barcode>
-    #               <access_level>student</access_level>
-    #               <email>harry.potter@hogwarts.edu</email>
-    #               <email>hpotter@JKRowling.com</email>
-    #           </patron>
-
+    #     <?xml version="1.0" encoding="utf-8"?>
+    #     <patron>
+    #       <name>Harry Potter</name>
+    #       <barcode library='Hogwarts Library'>1234567890</barcode>
+    #       <access_level>student</access_level>
+    #       <email>harry.potter@hogwarts.edu</email>
+    #       <email>hpotter@JKRowling.com</email>
+    #     </patron>
     class XmlDocument
 
       attr_accessor :document
@@ -38,8 +36,9 @@ module Libis
         !invalid?
       end
 
-      # Create new XmlDocument instance. The object will contain a new and emtpy Nokogiri XML Document. The object will
-      # not be valid until a root node is added.
+      # Create new XmlDocument instance.
+      # The object will contain a new and emtpy Nokogiri XML Document.
+      # The object will not be valid until a root node is added.
       # @param [String] encoding character encoding for the XML content; default value is 'utf-8'
       # @return [XmlDocument] new instance
       def initialize(encoding = 'utf-8')
@@ -53,7 +52,6 @@ module Libis
       def self.open(file)
         doc = XmlDocument.new
         doc.document = Nokogiri::XML(File.open(file))
-        # doc.document = Nokogiri::XML(File.open(file), &:noblanks)
         doc
       end
 
@@ -63,7 +61,6 @@ module Libis
       def self.parse(xml)
         doc = XmlDocument.new
         doc.document = Nokogiri::XML.parse(xml)
-        # doc.document = Nokogiri::XML.parse(xml, &:noblanks)
         doc
       end
 
@@ -83,7 +80,6 @@ module Libis
       # @param [String] file name of the file to save to
       # @param [Integer] indent amount of space for indenting; default 2
       # @param [String] encoding character encoding; default 'utf-8'
-      # @return [nil]
       def save(file, indent = 2, encoding = 'utf-8')
         fd = File.open(file, 'w')
         @document.write_xml_to(fd, :indent => indent, :encoding => encoding)
@@ -92,7 +88,7 @@ module Libis
 
       # Export the XML Document to an XML string.
       # @param [Hash] options options passed to the underlying Nokogiri::XML::Document#to_xml; default is:
-      #  {indent: 2, encoding: 'utf-8'}
+      #     !{indent: 2, encoding: 'utf-8'}
       # @return [String] a string
       def to_xml(options = {})
         options = {indent: 2, encoding: 'utf-8', save_with: Nokogiri::XML::Node::SaveOptions::DEFAULT_XML}.merge(options)
@@ -102,7 +98,8 @@ module Libis
       # Export the XML Document to a Hash.
       #
       # @note The hash is generated using the Nori gem. The options passed to this call are used to configure Nori in
-      #       the constructor call. For content and syntax see the {Nori} documentation. Nori also uses an enhanced
+      #       the constructor call. For content and syntax see the
+      #       {http://www.rubydoc.info/gems/nori/2.6.0 Nori documentation}. Nori also uses an enhanced
       #       String class with an extra method #attributes that will return a Hash containing tag-value pairs for each
       #       attribute of the XML element.
       #
@@ -252,6 +249,7 @@ module Libis
       #               <book title="Quidditch Through the Ages" author="Kennilworthy Whisp" due_date="1992-4-23"/>
       #           </books>
       #           </patron>
+      #
       # @param [Code block] block Build instructions
       # @return [XmlDocument] the new XML Document
       def self.build(&block)
@@ -333,7 +331,7 @@ module Libis
       #
       # @param [Nokogiri::XML::Node] node node to add the attributes to
       # @param [Hash] attributes a Hash with tag - value pairs for each attribute
-      # @return [{Nokogiri::XML::Node}] the node
+      # @return [Nokogiri::XML::Node] the node
       def add_attributes(node, attributes)
         XmlDocument.add_attributes node, attributes
       end
@@ -373,10 +371,6 @@ module Libis
       # @param [Hash] namespaces a Hash with prefix - URI pairs for each namespace definition that should be added. The
       #     special key +:node_ns+ is reserved for specifying the prefix for the node itself. To set the default
       #     namespace, use the prefix +nil+
-      # Example:
-      #     node = xml_doc.create_text_node 'address', 'content'
-      #     xml_doc.add_namespaces node, node_ns: 'abc', abc: 'http://abc.org', xyz: 'http://xyz.org'
-      #     # node => <abc:sample abc="http://abc.org" xyz="http://xyz.org">content</abc:sample>
       def add_namespaces(node, namespaces)
         XmlDocument.add_namespaces node, namespaces
       end
@@ -565,7 +559,7 @@ module Libis
         node
       end
 
-      # Get the first node matching the tag. The node will be seached with XPath search term = "//#{tag}".
+      # Get the first node matching the tag. The node will be seached with XPath search term = "//#!{tag}".
       #
       # @param [String] tag XML tag to look for; XPath syntax is allowed
       # @param [Node] parent
@@ -573,7 +567,7 @@ module Libis
         get_nodes(tag, parent).first
       end
 
-      # Get all the nodes matching the tag. The node will be seached with XPath search term = "//#{tag}".
+      # Get all the nodes matching the tag. The node will be seached with XPath search term = "//#!{tag}".
       #
       # @param [String] tag XML tag to look for; XPath syntax is allowed
       # @param [Node] parent

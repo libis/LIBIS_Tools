@@ -43,27 +43,27 @@ describe 'METS File' do
 
     let(:marc_record) {
       Libis::Tools::XmlDocument.parse <<-STR
-      <?xml version="1.0" encoding="UTF-8"?>
-      <record xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"
-        xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <leader>abcdefghiljklmnopqrstuvwxyz</leader>
-        <controlfield tag="001">1234567890</controlfield>
-        <datafield tag="010" ind1="a" ind2="b">
-          <subfield code="a">abc</subfield>
-          <subfield code="b">xyz</subfield>
-        </datafield>
-      </record>
-      STR
+        <?xml version="1.0" encoding="UTF-8"?>
+        <record xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"
+          xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <leader>abcdefghiljklmnopqrstuvwxyz</leader>
+          <controlfield tag="001">1234567890</controlfield>
+          <datafield tag="010" ind1="a" ind2="b">
+            <subfield code="a">abc</subfield>
+            <subfield code="b">xyz</subfield>
+          </datafield>
+        </record>
+        STR
     }
 
     let(:src_record) {
       Libis::Tools::XmlDocument.parse <<-STR
-      <my_description xmlns="http://www.libis.be/description/">
-        <title>Title</title>
-        <importance>high</importance>
-        <location>here</location>
-      </my_description>
-      STR
+        <my_description xmlns="http://www.libis.be/description/">
+          <title>Title</title>
+          <importance>high</importance>
+          <location>here</location>
+        </my_description>
+        STR
     }
 
     let(:target) {

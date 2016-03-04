@@ -6,10 +6,17 @@ module Libis
   module Tools
     module Metadata
 
+      # Conveniece class to create and read DC records.
+      # Most of the functionality is derived from the {::Libis::Tools::XmlDocument} base class. This class puts its
+      # focus on supporting the <dc:xxx> and <dcterms:xxx> namespaces. For most tags the namespaces are added
+      # automatically by checking which tag you want to add. In some cases the same tag exists in both namespaces and
+      # you may want to state the namespace explicitely. Even then things are made as easily as possible.
       class DublinCoreRecord < Libis::Tools::XmlDocument
 
+        # List of known tags in the DC namespace
         DC_ELEMENTS = %w'contributor coverage creator date description format identifier language' +
             %w'publisher relation rights source subject title type'
+        # List of known tags in the DCTERMS namespace
         DCTERMS_ELEMENTS = %w'abstract accessRights accrualMethod accrualPeriodicity accrualPolicy alternative' +
             %w'audience available bibliographicCitation conformsTo contributor coverage created creator date' +
             %w'dateAccepted dateCopyrighted dateSubmitted description educationLevel extent format hasFormat' +
@@ -18,6 +25,11 @@ module Libis
             %w'references relation replaces requires rights rightsHolder source spatial subject tableOfContents' +
             %w'temporal title type valid'
 
+        # Create new DC document.
+        # If the doc parameter is nil a new empty DC document will be created with the dc:record root element and all
+        # required namespaces defined.
+        # @note The input document is not checked if it is a valid DC record XML.
+        # @param [::Libis::Tools::XmlDocument,String,IO,Hash] doc optional document to read.
         def initialize(doc = nil)
           super()
           xml_doc = case doc
@@ -45,10 +57,9 @@ module Libis
           raise ArgumentError, 'XML document not valid.' if self.invalid?
         end
 
-        def all
-          @all_records ||= get_all_records
-        end
-
+        # Search the document with xpath.
+        # If no namespace is present, the 'dc:' namespace will be added.
+        # @param [String] path any valid XPath expression
         def xpath(path)
           m = /^([\/.]*\/)?(dc(terms)?:)?(.*)/.match(path.to_s)
           return [] unless m[4]
@@ -56,6 +67,13 @@ module Libis
           @document.xpath(path.to_s)
         end
 
+        # Add a node.
+        # You can omit the namespace in the name parameter. The method will add the correct namespace for you. If using
+        # symbols for name, an underscore ('_') can be used as separator instead of the colon (':').
+        # @param [String,Symbol] name tag name of the element
+        # @param [String] value content of the new element
+        # @param [Nokogiri::XML::Node] parent the new element will be attached to this node
+        # @param [Hash] attributes list of <attribute_name>, <attribute_value> pairs for the new element
         def add_node(name, value = nil, parent = nil, attributes = {})
           ns, tag = get_namespace(name.to_s)
           (attributes[:namespaces] ||= {})[:node_ns] ||= ns if ns

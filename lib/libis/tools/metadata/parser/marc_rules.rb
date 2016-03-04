@@ -5,8 +5,9 @@ require 'parslet'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       module MarcRules
         include Parslet
 

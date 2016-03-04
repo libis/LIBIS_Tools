@@ -7,6 +7,8 @@ module Libis
   module Tools
     module Metadata
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class BasicParser < Parslet::Parser
         # space
         rule(:space) { match('\s') }

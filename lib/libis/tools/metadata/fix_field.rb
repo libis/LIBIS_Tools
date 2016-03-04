@@ -4,15 +4,20 @@ module Libis
   module Tools
     module Metadata
 
+      # Helper class for implementing a fixed field for MARC
       class FixField
 
         attr_reader :tag
         attr_accessor :datas
 
+        # Create new fixed field
+        # @param [String] tag tag
+        # @param [String] datas field data
         def initialize(tag, datas)
           @tag = tag
           @datas = datas || ''
         end
+
 
         def [](from = nil, to = nil)
           return @datas unless from

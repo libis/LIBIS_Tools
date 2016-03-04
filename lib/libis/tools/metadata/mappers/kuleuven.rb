@@ -8,10 +8,15 @@ module Libis
   module Tools
     module Metadata
       module Mappers
-
         # noinspection RubyResolve
+
+        # Mixin for {::Libis::Tools::Metadata::MarcRecord} to enable conversion into
+        # {Libis::Tools::Metadata::DublinCoreRecord}. This module implements the conversion mapping for KU Leuven.
         module Kuleuven
 
+          # Main conversion method.
+          # @param [String] label optional extra identified to add to the DC record.
+          # @return [::Libis::Tools::Metadata::DublinCoreRecord]
           def to_dc(label = nil)
             assert(self.is_a? Libis::Tools::Metadata::MarcRecord)
 
@@ -1400,7 +1405,6 @@ module Libis
             if DOLLAR4TABLE[data.tag].has_key? code
               return DOLLAR4TABLE[data.tag][code][1]
             end
-            Application.logger.warn(self.class) { "Did not find $4 value in lookuptable: #{data.dump_line}" }
             :contributor
           end
 

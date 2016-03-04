@@ -8,8 +8,9 @@ require_relative 'marc_rules'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class Marc21Parser < Libis::Tools::Metadata::BasicParser
 
         root(:marc21)

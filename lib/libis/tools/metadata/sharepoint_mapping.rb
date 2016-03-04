@@ -8,6 +8,7 @@ require 'libis/tools/extend/hash'
 module Libis
   module Tools
 
+    # Copy of old Sharepoint mapping class. Needs inspection and probably a mayor update.
     class SharepointMapping < Hash
 
       def initialize(mapping_file)

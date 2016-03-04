@@ -1,3 +1,4 @@
+# New style parsers and converters for metadata. New, not finished and untested.
 class Parslet::Pattern
 
   def element_match_hash(tree, exp, bindings)

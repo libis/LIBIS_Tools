@@ -8,6 +8,7 @@ module Libis
   module Tools
     module Metadata
 
+      # Helper class implementing a variable field for MARC
       class VarField
 
         attr_reader :tag
@@ -15,6 +16,10 @@ module Libis
         attr_reader :ind2
         attr_reader :subfield_data
 
+        # Create new variable field with given tag and indicators
+        # @param [String] tag tag
+        # @param [String] ind1 first indicator. nil will be translated into empty string.
+        # @param [String] ind2 second indicator. nil will be translated into empty string.
         def initialize(tag, ind1, ind2)
           @tag = tag
           @ind1 = ind1 || ''
@@ -22,6 +27,9 @@ module Libis
           @subfield_data = Hash.new { |h, k| h[k] = Array.new   }
         end
 
+        # Add subfield to variable field
+        # @param [String] name subfield indicator without '$'
+        # @param [String] value content of the subfield
         def add_subfield(name, value)
           @subfield_data[name] << value
         end

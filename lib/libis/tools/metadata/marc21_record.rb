@@ -8,6 +8,7 @@ module Libis
   module Tools
     module Metadata
 
+      # This class implements the missing private method 'get_all_records' to accomodate for the MARC-XML format.
       class Marc21Record < Libis::Tools::Metadata::MarcRecord
 
         private

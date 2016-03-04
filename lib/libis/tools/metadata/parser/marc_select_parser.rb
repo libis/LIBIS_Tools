@@ -8,8 +8,9 @@ require_relative 'marc_rules'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class MarcSelectParser < Libis::Tools::Metadata::BasicParser
         include Libis::Tools::Metadata::MarcRules
         root(:MARC)

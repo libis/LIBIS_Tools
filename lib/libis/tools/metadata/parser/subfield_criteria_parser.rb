@@ -7,8 +7,9 @@ require_relative 'basic_parser'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class SubfieldCriteriaParser < Libis::Tools::Metadata::BasicParser
 
         root(:criteria)

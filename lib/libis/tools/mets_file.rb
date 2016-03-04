@@ -3,613 +3,43 @@ require 'ostruct'
 
 require 'libis/tools/extend/hash'
 require_relative 'xml_document'
+require_relative 'thread_safe'
+require_relative 'mets_dnx'
+require_relative 'mets_objects'
 
 module Libis
   module Tools
 
     # noinspection RubyResolve
-    # noinspection RubyClassVariableUsageInspection
+
+    # This class supports creating METS files in a friendlier way than by creating an XML file.
+    #
+    # There are sub-classes that represent {Representation}s, {File}s, {Div}isions and {Map}s.
+    # These are simple container classes that take care of assigning proper ids and accept most known attributes.
+    # Each of the container classes have a corresponding method on the METS class that takes a Hash with attributes
+    # and returns the created object.
+    #
+    # {Div} and {File} instances can be added to a {Div} instance and a Div can be associated with a {Representation},
+    # thus creating a structmap.
+    #
+    # The {#amd_info=} method on the {MetsFile} class sets the main amd parameters and
+    #
+    # With the help of the {DnxSection} class and it's derived classes, the container classes can generate the amd
+    # sections for the METS file.
     class MetsFile
 
-      module IdContainer
-
-        def set_from_hash(h)
-          h.each { |k, v| send "#{k}=", v if respond_to?(k) }
-        end
-
-        def id
-          return @id if @id
-          @id = self.class.instance_variable_get('@id') || 1
-          self.class.instance_variable_set('@id', @id + 1)
-          @id
-        end
-
-        def to_s
-          "#{self.class}:\n" +
-              self.instance_variables.map do |var|
-                v = self.instance_variable_get(var)
-                v = "#{v.class}-#{v.id}" if v.is_a? IdContainer
-                v = v.map do |x|
-                  x.is_a?(IdContainer) ? "#{x.class}-#{x.id}" : x.to_s
-                end.join(',') if v.is_a? Array
-                " - #{var.to_s.gsub(/^@/, '')}: #{v}"
-              end.join("\n")
-        end
-
-      end
-
-      class Representation
-        include IdContainer
-
-        attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
-                      :user_a, :user_b, :user_c,
-                      :group_id, :priority, :order,
-                      :digital_original, :content, :context, :hardware, :carrier, :original_name,
-                      :preservation_levels, :env_dependencies, :hardware_ids, :software_ids,
-                      :hardware_infos, :software_infos, :relationship_infos, :environments,
-                      :dc_record, :source_metadata
-
-        def xml_id
-          "rep#{id}"
-        end
-
-        def amd
-          dnx = {}
-          tech_data = []
-          # General characteristics
-          data = {
-              preservationType: preservation_type,
-              usageType: usage_type,
-              DigitalOriginal: digital_original,
-              label: label,
-              representationEntityType: entity_type,
-              contentType: content,
-              contextType: context,
-              hardwareUsed: hardware,
-              physicalCarrierMedia: carrier,
-              deliveryPriority: priority,
-              orderingSequence: order,
-              RepresentationCode: representation_code,
-              RepresentationOriginalName: original_name,
-              UserDefinedA: user_a,
-              UserDefinedB: user_b,
-              UserDefinedC: user_c,
-          }.cleanup
-          tech_data << TechGeneralRep.new(data) unless data.empty?
-          # Object characteristics
-          data = {
-              groupID: group_id
-          }.cleanup
-          tech_data << TechObjectChars.new(data) unless data.empty?
-          # Preservation level
-          if preservation_levels
-            data_list = []
-            preservation_levels.each do |preservation_level|
-              data = {
-                  preservationLevelValue: preservation_level[:value],
-                  preservationLevelRole: preservation_level[:role],
-                  preservationLevelRationale: preservation_level[:rationale],
-                  preservationLevelDateAssigned: preservation_level[:date],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << PreservationLevel.new(array: data_list) unless data_list.empty?
-          end
-          # Dependencies
-          if env_dependencies
-            data_list = []
-            env_dependencies.each do |dependency|
-              data = {
-                  dependencyName: dependency[:name],
-                  dependencyIdentifierType1: dependency[:type1],
-                  dependencyIdentifierValue1: dependency[:value1],
-                  dependencyIdentifierType2: dependency[:type2],
-                  dependencyIdentifierValue2: dependency[:value2],
-                  dependencyIdentifierType3: dependency[:type3],
-                  dependencyIdentifierValue3: dependency[:value3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvDeps.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware registry id
-          if hardware_ids
-            data_list = []
-            hardware_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << HardwareId.new(array: data_list) unless data_list.empty?
-          end
-          # Software registry id
-          if software_ids
-            data_list = []
-            software_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << SoftwareId.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware
-          if hardware_infos
-            data_list = []
-            hardware_infos.each do |hardware|
-              data = {
-                  hardwareName: hardware[:name],
-                  hardwareType: hardware[:type],
-                  hardwareOtherInformation: hardware[:info],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << HardwareInfo.new(array: data_list) unless data_list.empty?
-          end
-          # Software
-          if software_infos
-            data_list = []
-            software_infos.each do |software|
-              data = {
-                  softwareName: software[:name],
-                  softwareVersion: software[:version],
-                  softwareType: software[:type],
-                  softwareOtherInformation: software[:info],
-                  softwareDependancy: software[:dependency],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << SoftwareInfo.new(array: data_list) unless data_list.empty?
-          end
-          # Relationship
-          if relationship_infos
-            data_list = []
-            relationship_infos.each do |relationship|
-              data = {
-                  relationshipType: relationship[:type],
-                  relationshipSubType: relationship[:subtype],
-                  relatedObjectIdentifierType1: relationship[:type1],
-                  relatedObjectIdentifierValue1: relationship[:id1],
-                  relatedObjectSequence1: relationship[:seq1],
-                  relatedObjectIdentifierType2: relationship[:type2],
-                  relatedObjectIdentifierValue2: relationship[:id2],
-                  relatedObjectSequence2: relationship[:seq2],
-                  relatedObjectIdentifierType3: relationship[:type3],
-                  relatedObjectIdentifierValue3: relationship[:id3],
-                  relatedObjectSequence3: relationship[:seq3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << RelationShip.new(array: data_list) unless data_list.empty?
-          end
-          # Environment
-          if environments
-            data_list = []
-            environments.each do |environment|
-              data = {
-                  environmentCharacteristic: environment[:characteristic],
-                  environmentPurpose: environment[:purpose],
-                  environmentNote: environment[:note],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Environment.new(array: data_list) unless data_list.empty?
-          end
-          # Finally assemble technical section
-          dnx[:tech] = tech_data unless tech_data.empty?
-          # Rights section
-          rights_data = []
-          data = {
-              policyId: access_right_id
-          }.cleanup
-          rights_data << Rights.new(data) unless data.empty?
-          dnx[:rights] = rights_data unless rights_data.empty?
-          # Source metadata
-          if source_metadata
-            source_metadata.each_with_index do |metadata, i|
-              dnx["source-#{metadata[:type].to_s.upcase}-#{i}"] = metadata[:data]
-            end
-          end
-          dnx
-        end
-
-      end
-
-      class File
-        include IdContainer
-
-        attr_accessor :label, :note, :location, :target_location, :mimetype, :puid, :size, :entity_type,
-                      :creation_date, :modification_date, :composition_level, :group_id,
-                      :checksum_MD5, :checksum_SHA1, :checksum_SHA256,:checksum_SHA384,:checksum_SHA512,
-                      :fixity_type, :fixity_value,
-                      :preservation_levels, :inhibitors, :env_dependencies, :hardware_ids, :software_ids,
-                      :signatures, :hardware_infos, :software_infos, :relationship_infos, :environments, :applications,
-                      :dc_record, :source_metadata, :representation
-
-        def xml_id
-          "fid#{id}"
-        end
-
-        def make_group_id
-          "grp#{group_id || master.id rescue id}"
-        end
-
-        def master
-          @master ||= nil
-        end
-
-        def master=(file)
-          @master = file
-        end
-
-        def manifestations
-          @manifestations ||= Array.new
-        end
-
-        def add_manifestation(file)
-          manifestations << file
-          file.master = self
-        end
-
-        def orig_name
-          ::File.basename(location)
-        end
-
-        def orig_path
-          ::File.dirname(location)
-        end
-
-        def target
-          if target_location.nil?
-            return "#{xml_id}#{::File.extname(location)}"
-          end
-          target_location
-        end
-
-        def amd
-          dnx = {}
-          tech_data = []
-          # General File charateristics
-          data = {
-              label: label,
-              note: note,
-              fileCreationDate: creation_date,
-              fileModificationDate: modification_date,
-              FileEntityType: entity_type,
-              compositionLevel: composition_level,
-              # fileLocationType: 'FILE',
-              # fileLocation: '',
-              fileOriginalName: orig_name,
-              fileOriginalPath: orig_path,
-              fileOriginalID: location,
-              fileExtension: ::File.extname(orig_name),
-              fileMIMEType: mimetype,
-              fileSizeBytes: size,
-              formatLibraryId: puid
-          }.cleanup
-          tech_data << TechGeneralFile.new(data) unless data.empty?
-          # Fixity
-          %w'MD5 SHA1 SHA256 SHA384 SHA512'.each do |checksum_type|
-            if (checksum = self.send("checksum_#{checksum_type}"))
-              data = {
-                  fixityType: checksum_type,
-                  fixityValue: checksum,
-              }.cleanup
-              tech_data << TechFixity.new(data) unless data.empty?
-            end
-          end
-          # Object characteristics
-          data = {
-              groupID: make_group_id
-          }.cleanup
-          tech_data << TechObjectChars.new(data) unless data.empty?
-          # Preservation level
-          if preservation_levels
-            data_list = []
-            preservation_levels.each do |preservation_level|
-              data = {
-                  preservationLevelValue: preservation_level[:value],
-                  preservationLevelRole: preservation_level[:role],
-                  preservationLevelRationale: preservation_level[:rationale],
-                  preservationLevelDateAssigned: preservation_level[:date],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << PreservationLevel.new(array: data_list) unless data_list.empty?
-          end
-          # Inhibitor
-          if inhibitors
-            data_list = []
-            inhibitors.each do |inhibitor|
-              data = {
-                  inhibitorType: inhibitor[:type],
-                  inhibitorTarget: inhibitor[:target],
-                  inhibitorKey: inhibitor[:key],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Inhibitor.new(array: data_list) unless data_list.empty?
-          end
-          # Dependencies
-          if env_dependencies
-            data_list = []
-            env_dependencies.each do |dependency|
-              data = {
-                  dependencyName: dependency[:name],
-                  dependencyIdentifierType1: dependency[:type1],
-                  dependencyIdentifierValue1: dependency[:value1],
-                  dependencyIdentifierType2: dependency[:type2],
-                  dependencyIdentifierValue2: dependency[:value2],
-                  dependencyIdentifierType3: dependency[:type3],
-                  dependencyIdentifierValue3: dependency[:value3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvDeps.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware registry id
-          if hardware_ids
-            data_list = []
-            hardware_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << HardwareId.new(array: data_list) unless data_list.empty?
-          end
-          # Software registry id
-          if software_ids
-            data_list = []
-            software_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << SoftwareId.new(array: data_list) unless data_list.empty?
-          end
-          # Singatures
-          if signatures
-            data_list = []
-            signatures.each do |signature|
-              data = {
-                  signatureInformationEncoding: signature[:encoding],
-                  signer: signature[:signer],
-                  signatureMethod: signature[:method],
-                  signatureValue: signature[:value],
-                  signatureValidationRules: signature[:rules],
-                  signatureProperties: signature[:properties],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Signature.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware
-          if hardware_infos
-            data_list = []
-            hardware_infos.each do |hardware|
-              data = {
-                  hardwareName: hardware[:name],
-                  hardwareType: hardware[:type],
-                  hardwareOtherInformation: hardware[:info],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << HardwareInfo.new(array: data_list) unless data_list.empty?
-          end
-          # Software
-          if software_infos
-            data_list = []
-            software_infos.each do |software|
-              data = {
-                  softwareName: software[:name],
-                  softwareVersion: software[:version],
-                  softwareType: software[:type],
-                  softwareOtherInformation: software[:info],
-                  softwareDependancy: software[:dependency],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << SoftwareInfo.new(array: data_list) unless data_list.empty?
-          end
-          # Relationship
-          if relationship_infos
-            data_list = []
-            relationship_infos.each do |relationship|
-              data = {
-                  relationshipType: relationship[:type],
-                  relationshipSubType: relationship[:subtype],
-                  relatedObjectIdentifierType1: relationship[:type1],
-                  relatedObjectIdentifierValue1: relationship[:id1],
-                  relatedObjectSequence1: relationship[:seq1],
-                  relatedObjectIdentifierType2: relationship[:type2],
-                  relatedObjectIdentifierValue2: relationship[:id2],
-                  relatedObjectSequence2: relationship[:seq2],
-                  relatedObjectIdentifierType3: relationship[:type3],
-                  relatedObjectIdentifierValue3: relationship[:id3],
-                  relatedObjectSequence3: relationship[:seq3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << RelationShip.new(array: data_list) unless data_list.empty?
-          end
-          # Environment
-          if environments
-            data_list = []
-            environments.each do |environment|
-              data = {
-                  environmentCharacteristic: environment[:characteristic],
-                  environmentPurpose: environment[:purpose],
-                  environmentNote: environment[:note],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Environment.new(array: data_list) unless data_list.empty?
-          end
-          # Application
-          if applications
-            data_list = []
-            applications.each do |application|
-              data = {
-                  creatingApplicationName: application[:name],
-                  creatingApplicationVersion: application[:version],
-                  dateCreatedByApplication: application[:date],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Application.new(array: data_list) unless data_list.empty?
-          end
-          # Finally assemble technical section
-          dnx[:tech] = tech_data unless tech_data.empty?
-          dnx
-        end
-
-      end
-
-      class Div
-        include IdContainer
-
-        attr_accessor :label
-
-        def xml_id
-          "div-#{id}"
-        end
-
-        def children
-          files + divs
-        end
-
-        def files
-          @files ||= Array.new
-        end
-
-        def divs
-          @divs ||= Array.new
-        end
-
-        def <<(obj)
-          case obj
-            when File
-              files << obj
-            when Div
-              divs << obj
-            else
-              raise RuntimeError, "Child object type not supported: #{obj.class}"
-          end
-        end
-      end
-
-      class Map
-        include IdContainer
-
-        attr_accessor :representation, :div
-
-        def xml_id
-          "smap-#{id}"
-        end
-
-      end
-
-      class DnxSection < OpenStruct
-        def self.tag(value = nil)
-          var_name = '@tag'
-          if value.nil?
-            instance_variable_get(var_name)
-          else
-            instance_variable_set(var_name, value)
-          end
-        end
-
-        def tag
-          self.class.tag
-        end
-      end
-
-      class TechObjectChars < DnxSection
-        tag 'objectCharacteristics'
-      end
-
-      class TechGeneralIE < DnxSection
-        tag 'generalIECharacteristics'
-      end
-
-      class TechGeneralRep < DnxSection
-        tag 'generalRepCharacteristics'
-      end
-
-      class TechGeneralFile < DnxSection
-        tag 'generalFileCharacteristics'
-      end
-
-      class RetentionPeriod < DnxSection
-        tag 'retentionPolicy'
-      end
-
-      class TechFixity < DnxSection
-        tag 'fileFixity'
-      end
-
-      class Rights < DnxSection
-        tag 'accessRightsPolicy'
-      end
-
-      class WebHarvesting < DnxSection
-        tag 'webHarvesting'
-      end
-
-      class CollectionInfo   < DnxSection
-        tag 'Collection'
-      end
-
-      class PreservationLevel < DnxSection
-        tag 'preservationLevel'
-      end
-
-      class EnvDeps < DnxSection
-        tag 'environmentDependencies'
-      end
-
-      class HardwareId < DnxSection
-        tag 'envHardwareRegistry'
-      end
-
-      class SoftwareId < DnxSection
-        tag 'envSoftwareRegistry'
-      end
-
-      class HardwareInfo < DnxSection
-        tag 'environmentHardware'
-      end
-
-      class SoftwareInfo < DnxSection
-        tag 'environmentSoftware'
-      end
-
-      class Relationship < DnxSection
-        tag 'relationship'
-      end
-
-      class Environment < DnxSection
-        tag 'environment'
-      end
-
-      class Inhibitor < DnxSection
-        tag 'inhibitors'
-      end
-
-      class Signature < DnxSection
-        tag 'signatureInformation'
-      end
-
-      class Application < DnxSection
-        tag 'creatingApplication'
-      end
-
-      attr_reader :representations, :files, :divs, :maps
+      # Keeps track of {Representation}s created
+      attr_reader :representations
+      # Keeps track of {File}s created
+      attr_reader :files
+      # Keeps track of {Div}s created
+      attr_reader :divs
+      # Keeps track of {Map}s created
+      attr_reader :maps
 
       # noinspection RubyConstantNamingConvention
+
+      # Namespace constants for METS XML
       NS = {
           mets: 'http://www.loc.gov/METS/',
           dc: 'http://purl.org/dc/elements/1.1/',
@@ -617,6 +47,7 @@ module Libis
           xlin: 'http://www.w3.org/1999/xlink',
       }
 
+      # Creates an initializes a new {MetsFile} instance
       def initialize
         @representations = {}
         @files = {}
@@ -626,6 +57,20 @@ module Libis
         @dc_record = nil
       end
 
+      # Reads an existing METS XML file and parses into a large Hash structure for inspection.
+      # It will not immediately allow you to create a {MetsFile} instance from it, but with some inspection and
+      # knowledge of METS file structure it should be possible to recreate a similar file using the class.
+      #
+      # The returned Hash has the following structure:
+      #
+      # * :amd - the general AMD section with subsections
+      # * :dmd - the general DMD section with the DC record(s)
+      # Each amd section has one or more subsections with keys :tech, :rights, :source or :digiprov. Each
+      # subsection is a Hash with section id as key and an array as value. For each <record> element a Hash is
+      # added to the array with <key@id> as key and <key> content as value.
+      #
+      # @param [String,Hash,::Libis::Tools::XmlDocument, Nokogiri::XML::Document] xml XML file in any of the listed formats.
+      # @return [Hash] The parsed information.
       def self.parse(xml)
         xml_doc = case xml
                     when String
@@ -716,17 +161,40 @@ module Libis
         )
       end
 
+      # Sets the DC record for the global amd section.
+      #
+      # @param [String] xml Serialized Dublin Core XML file
       def dc_record=(xml)
         @dc_record = xml
       end
 
+      # Sets the attributes for the global amd section.
+      #
+      # @param [Hash] hash name, value pairs for the DNX sections. Each will go into it's appropriate AMD and DNX
+      # sections automatically.
+      #       The following names are currently supported:
+      #       * status
+      #       * entity_type
+      #       * user_a
+      #       * user_b
+      #       * user_c
+      #       * submission_reason
+      #       * retention_id - RentionPolicy ID
+      #       * harvest_url
+      #       * harvest_id
+      #       * harvest_target
+      #       * harvest_group
+      #       * harvest_date
+      #       * harvest_time
+      #       * collection_id - Collection ID where the IE should be added to
+      #       * access_right - AccessRight ID
+      #       * source_metadata - Array with hashes like {type: 'MyXML', data: '<xml ....>'}
       def amd_info=(hash)
-        @dnx = {}
         tech_data = []
         data = {
             groupID: hash[:group_id]
         }.cleanup
-        tech_data << TechObjectChars.new(data) unless data.empty?
+        tech_data << ObjectCharacteristics.new(data) unless data.empty?
         data = {
             status: hash[:status],
             IEEntityType: hash[:entity_type],
@@ -735,11 +203,11 @@ module Libis
             UserDefinedC: hash[:user_c],
             submissionReason: hash[:submission_reason],
         }.cleanup
-        tech_data << TechGeneralIE.new(data) unless data.empty?
+        tech_data << GeneralIECharacteristics.new(data) unless data.empty?
         data = {
             policyId: hash[:retention_id],
         }.cleanup
-        tech_data << RetentionPeriod.new(data) unless data.empty?
+        tech_data << RetentionPolicy.new(data) unless data.empty?
         data = {
             primarySeedURL: hash[:harvest_url],
             WCTIdentifier: hash[:harvest_id],
@@ -752,19 +220,20 @@ module Libis
         data = {
             collectionId: hash[:collection_id]
         }.cleanup
-        tech_data << CollectionInfo.new(data) unless data.empty?
+        tech_data << Collection.new(data) unless data.empty?
         @dnx[:tech] = tech_data unless tech_data.empty?
         data = {
             policyId: hash[:access_right]
         }.cleanup
         rights_data = []
-        rights_data << Rights.new(data) unless data.empty?
+        rights_data << AccessRightsPolicy.new(data) unless data.empty?
         @dnx[:rights] = rights_data unless rights_data.empty?
         (hash[:source_metadata] || []).each_with_index do |metadata, i|
           @dnx["source-#{metadata[:type].to_s.upcase}-#{i+1}"] = metadata[:data]
         end
       end
 
+      # Create a new representation. See {Representation} for supported Hash keys.
       # @param [Hash] hash
       # @return [Libis::Tools::MetsFile::Representation]
       def representation(hash = {})
@@ -773,6 +242,7 @@ module Libis
         @representations[rep.id] = rep
       end
 
+      # Create a new division. See {Div} for supported Hash keys.
       # @param [Hash] hash
       # @return [Libis::Tools::MetsFile::Div]
       def div(hash = {})
@@ -781,6 +251,7 @@ module Libis
         @divs[div.id] = div
       end
 
+      # Create a new file. See {File} for supported Hash keys.
       # @param [Hash] hash
       # @return [Libis::Tools::MetsFile::File]
       def file(hash = {})
@@ -789,6 +260,7 @@ module Libis
         @files[file.id] = file
       end
 
+      # Create a new structmap.
       # @param [Libis::Tools::MetsFile::Representation] rep
       # @param [Libis::Tools::MetsFile::Div] div
       # @return [Libis::Tools::MetsFile::Map]
@@ -799,6 +271,7 @@ module Libis
         @maps[map.id] = map
       end
 
+      # Create the METS XML document.
       # @return [Libis::Tools::XmlDocument]
       def xml_doc
         ::Libis::Tools::XmlDocument.build do |xml|
@@ -815,14 +288,17 @@ module Libis
 
       protected
 
+      # ID for the DMD section of a representation, division or file
       def dmd_id(id)
         "#{id}-dmd"
       end
 
+      # ID for the AMD section of a representation, division or file
       def amd_id(id)
         "#{id}-amd"
       end
 
+      # Helper method to create the XML DMD sections
       def add_dmd(xml, object = nil)
         case object
           when NilClass
@@ -838,6 +314,7 @@ module Libis
         end
       end
 
+      # Helper method to create the XML AMD sections
       def add_amd(xml, object = nil)
         case object
           when NilClass
@@ -855,6 +332,7 @@ module Libis
         end
       end
 
+      # Helper method to create the XML file section
       def add_filesec(xml, object = nil, representation = nil)
         case object
           when NilClass
@@ -895,6 +373,7 @@ module Libis
         end
       end
 
+      # Helper method to create the Structmap
       def add_struct_map(xml, object = nil)
         case object
           when NilClass
@@ -930,6 +409,7 @@ module Libis
 
       end
 
+      # Helper method to create a single XML DMD section
       def add_dmd_section(xml, id, dc_record = nil)
         return if dc_record.nil?
         xml[:mets].dmdSec(ID: dmd_id(id)) {
@@ -941,6 +421,7 @@ module Libis
         }
       end
 
+      # Helper method to create a single AMD section
       def add_amd_section(xml, id, dnx_sections = {})
         xml[:mets].amdSec(ID: amd_id(id)) {
           dnx_sections.each do |section_type, data|
@@ -965,6 +446,7 @@ module Libis
         }
       end
 
+      # Helper method to create the XML DNX sections
       def add_dnx_sections(xml, section_data)
         section_data ||= []
         xml.dnx(xmlns: NS[:dnx]) {
@@ -984,6 +466,7 @@ module Libis
         }
       end
 
+      # Helper method to parse a XML div
       def parse_div(div, rep)
         if div[:TYPE] == 'FILE'
           file_id = div.children.first[:FILEID]

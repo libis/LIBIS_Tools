@@ -8,8 +8,9 @@ require_relative 'parsers'
 module Libis
   module Tools
     module Metadata
-
       # noinspection RubyResolve
+
+      # New style parsers and converters for metadata. New, not finished and untested.
       class Mapper
 
         attr_reader :target_parser, :selection_parser, :format_parser

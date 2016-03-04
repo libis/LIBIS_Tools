@@ -1,6 +1,6 @@
-# encoding: utf-8
-
+# Extension for NilClass
 class NilClass
+  # Allows nil.empty?
   def empty?
     true
   end

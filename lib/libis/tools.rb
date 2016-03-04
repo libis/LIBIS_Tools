@@ -12,6 +12,7 @@ module Libis
     autoload :Logger, 'libis/tools/logger'
     autoload :MetsFile, 'libis/tools/mets_file'
     autoload :Parameter, 'libis/tools/parameter'
+    autoload :ThreadSafe, 'libis/tools/thread_safe'
     autoload :XmlDocument, 'libis/tools/xml_document'
 
   end

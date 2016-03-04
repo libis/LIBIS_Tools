@@ -85,11 +85,19 @@ module Libis
 
         alias_method :each_tag, :all_tags
 
+        # Get all fields matching search criteria.
+        # As {#all_tags} but without subfield criteria.
+        # @param [String] tag Tag selection string. Tag name with indicators, '#' for wildcard, '_' for blank. If an
+        #     extra subfield name is added, a result will be created for each instance found of that subfield.
+        # @param [Proc] select_block block that will be executed once for each field found. The block takes one argument
+        #     (the field) and should return true or false. True selects the field, false rejects it.
+        # @return [Array] If a block was supplied to the method call, the array will contain the result of the block
+        #     for each tag found. Otherwise the array will just contain the data for each matching tag.
         def select_fields(tag, select_block = nil, &block)
           all_tags(tag, nil, select_block, &block)
         end
 
-        # Find the first field matching the criteria.
+        # Find the first tag matching the criteria.
         #
         # If a block is supplied, it will be called with the found field data. The return value will be whatever the
         # block returns. If no block is supplied, the field data will be returned. If nothing was found, the return
@@ -105,34 +113,43 @@ module Libis
           yield result
         end
 
+        # Find all fields matching the criteria.
+        # (see #first_tag)
+        # @param (see #first_tag)
         def all_fields(tag, subfields)
-          r = all_tags(tag, subfields).collect { |tag| tag.subfields_array(subfields) }.flatten.compact
+          r = all_tags(tag, subfields).collect { |t| t.subfields_array(subfields) }.flatten.compact
           return r unless block_given?
           r.map { |field| yield field }
           r.size > 0
         end
 
-        def first_field(t, s)
-          result = all_fields(t, s).first
+        # Find the first field matching the criteria
+        # (see #all_fields)
+        # @param (see #all_fields)
+        def first_field(tag, subfields)
+          result = all_fields(tag, subfields).first
           return result unless block_given?
           return false unless result
           yield result
           true
         end
 
-
-        def each_field(t, s)
-          all_fields(t, s).each do |field|
+        # Perform action on each field found. Code block required.
+        # @param (see #all_fields)
+        def each_field(tag, subfields)
+          all_fields(tag, subfields).each do |field|
             yield field
           end
         end
 
+        # Dump content to string.
         def marc_dump
           all.values.flatten.each_with_object([]) { |record, m| m << record.dump }.join
         end
 
+        # Save the current MARC record to file.
+        # @param [String] filename name of the file
         def save(filename)
-
           doc = ::Libis::Tools::XmlDocument.new
           doc.root = @node
 
@@ -142,23 +159,25 @@ module Libis
                                ::Nokogiri::XML::Node::SaveOptions::AS_XML |
                                ::Nokogiri::XML::Node::SaveOptions::FORMAT
                            )
-
         end
 
+        # Load XML document from file and create a new {MarcRecord} for it.
+        # @param [String] filename name of XML Marc file
         def self.load(filename)
-
           doc = ::Libis::Tools::XmlDocument.open(filename)
           self.new(doc.root)
-
         end
 
+        # Load XML document from stream and create a new {MarcRecord} for it.
+        # @param [IO,String] io input stream
         def self.read(io)
           io = StringIO.new(io) if io.is_a? String
           doc = ::Libis::Tools::XmlDocument.parse(io)
           self.new(doc.root)
-
         end
 
+        # Dump Marc record in Aleph Sequential format
+        # @return [String] Aleph sequential output
         def to_aseq
           record = ''
           doc_number = tag('001').datas

@@ -47,6 +47,15 @@ module Libis
         Config.logger
       end
 
+      def set_application(name = nil)
+        name ||= self.class.name
+        ::Logging.mdc['Application'] = name.blank? ? '' : " -- #{name}"
+      end
+
+      def set_subject(name = nil)
+        ::Logging.mdc['Subject'] = name.blank? ? '' : " - #{name}"
+      end
+
       # Send a debug message to the logger.
       #
       # If the optional extra parameters are supplied, the first parameter will be interpreted as a format

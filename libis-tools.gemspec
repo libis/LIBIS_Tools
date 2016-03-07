@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.1'
   spec.add_development_dependency 'simplecov', '~> 0.9'
   spec.add_development_dependency 'equivalent-xml', '~> 0.5'
-  spec.add_development_dependency 'awesome_print'
+  spec.add_development_dependency 'awesome_print', '~> 0'
 
   spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'

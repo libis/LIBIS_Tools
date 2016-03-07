@@ -110,11 +110,13 @@ module Libis
         ::Logging::Layouts::Pattern.new(DEFAULT_LOG_LAYOUT_PARAMETERS)
       end
 
-      def logger(name = nil)
+      def logger(name = nil, appenders = nil)
         sync do
           name ||= :root
           logger = ::Logging.logger[name]
-          logger.appenders = ::Logging.appenders.stdout(DEFAULT_LOG_LAYOUT_PARAMETERS) if logger.appenders.empty?
+          if logger.appenders.empty?
+            logger.appenders = appenders || ::Logging.appenders.stdout(layout: get_log_formatter)
+          end
           logger
         end
       end
@@ -136,7 +138,7 @@ module Libis
       ::Logging::init
       # noinspection RubyResolve
       DEFAULT_LOG_LAYOUT_PARAMETERS = {
-          pattern: "%.1l, [%d #%p.%t] %#{::Logging::MAX_LEVEL_LENGTH}l : %m\n",
+          pattern: "%.1l, [%d #%p.%t] %5l%X{Application}%X{Subject} : %m\n",
           date_pattern: '%Y-%m-%dT%H:%M:%S.%L'
       }
 

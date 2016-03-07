@@ -5,7 +5,9 @@ module Libis
 
       # Generic module that provides code shortcuts for the {Representation}, {Div} and {File} classes.
       module IdContainer
-        extend ::Libis::Tools::ThreadSafe
+        def self.included(klass)
+          klass.include ::Libis::Tools::ThreadSafe
+        end
 
         # Take a hash and set class instance attributes.
         #
@@ -485,21 +487,21 @@ module Libis
 
         # All file items stored in the current division
         def files
-          mutex.synchronise do
+          self.mutex.synchronize do
             @files ||= Array.new
           end
         end
 
         # All division items stored in the current division
         def divs
-          mutex.synchronize do
+          self.mutex.synchronize do
             @divs ||= Array.new
           end
         end
 
         # Add an item ({File} or {Div}) to the current division
         def <<(obj)
-          mutex.synchronize do
+          self.mutex.synchronize do
             case obj
               when File
                 files << obj

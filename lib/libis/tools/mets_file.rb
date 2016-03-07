@@ -324,7 +324,6 @@ module Libis
             @files.values.each { |file| add_amd(xml, file) }
           when Libis::Tools::MetsFile::File
             add_amd_section(xml, object.xml_id, object.amd)
-            object.manifestations.each { |manif| add_amd_section(xml, manif.xml_id, manif.amd) }
           when Libis::Tools::MetsFile::Representation
             add_amd_section(xml, object.xml_id, object.amd)
           else

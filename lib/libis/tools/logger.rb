@@ -44,7 +44,7 @@ module Libis
       # Default implementation is to get the root logger from the Config, but can be overwritten for sub-loggers.
       # @!method(logger)
       def logger
-        Config.logger
+        ::Libis::Tools::Config.logger
       end
 
       def set_application(name = nil)

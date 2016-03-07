@@ -112,7 +112,7 @@ module Libis
 
       def logger(name = nil, appenders = nil)
         sync do
-          name ||= :root
+          name ||= 'root'
           logger = ::Logging.logger[name]
           if logger.appenders.empty?
             logger.appenders = appenders || ::Logging.appenders.stdout(layout: get_log_formatter)

@@ -9,6 +9,7 @@ module Libis
     # A RecursiveOpenStruct is derived from stdlib's OpenStruct, but can be made recursive.
     # DeepStruct enforces this behaviour and adds a clear! method.
     class DeepStruct < RecursiveOpenStruct
+      include Enumerable
 
       # Create a new DeepStruct from a Hash and configure the behaviour.
       #
@@ -21,6 +22,29 @@ module Libis
         opts = {} unless opts
         hash = {default: hash} unless hash.is_a? Hash
         super(hash, {recurse_over_arrays: true, preserve_original_keys: true}.merge(opts))
+      end
+
+      def merge(hash)
+        return self unless hash.respond_to?(:to_hash)
+        hash.to_hash.inject(self.dup) { |ds, (key, value)| ds[key] = value; ds }
+      end
+
+      def merge!(hash)
+        return self unless hash.respond_to?(:to_hash)
+        hash.to_hash.inject(self) { |ds, (key, value)| ds[key] = value; ds }
+      end
+
+      def key?(key)
+        self.respond_to?(key)
+      end
+      alias_method :has_key?, :key?
+
+      def keys
+        @table.keys
+      end
+
+      def each(&block)
+        self.each_pair &block
       end
 
       # Delete all data fields

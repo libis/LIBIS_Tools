@@ -67,7 +67,7 @@ module Libis
       # @param [Array] args optional extra arguments.
       # @!method(debug(msg, *args))
       def debug(msg, *args)
-        message :DEBUG, msg, *args
+        self.message :DEBUG, msg, *args
       end
 
       # Send an info message to the logger.
@@ -76,7 +76,7 @@ module Libis
       # @param (see #debug)
       # @!method(info(msg, *args))
       def info(msg, *args)
-        message :INFO, msg, *args
+        self.message :INFO, msg, *args
       end
 
       # Send a warning message to the logger.
@@ -85,7 +85,7 @@ module Libis
       # @param (see #debug)
       # @!method(warn(msg, *args))
       def warn(msg, *args)
-        message :WARN, msg, *args
+        self.message :WARN, msg, *args
       end
 
       # Send an error message to the logger.
@@ -94,7 +94,7 @@ module Libis
       # @param (see #debug)
       # @!method(error(msg, *args))
       def error(msg, *args)
-        message :ERROR, msg, *args
+        self.message :ERROR, msg, *args
       end
 
       # Send a fatal message to the logger.
@@ -103,7 +103,7 @@ module Libis
       # @param (see #debug)
       # @!method(fatal(msg, *args))
       def fatal(msg, *args)
-        message :FATAL, msg, *args
+        self.message :FATAL, msg, *args
       end
 
       # The method that performs the code logging action.

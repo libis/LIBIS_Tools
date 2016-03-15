@@ -4,29 +4,22 @@ module Libis
     class MetsFile
 
       # Generic module that provides code shortcuts for the {Representation}, {Div} and {File} classes.
-      module IdContainer
-        def self.included(klass)
-          klass.include ::Libis::Tools::ThreadSafe
-        end
+      module MetsObject
 
         # Take a hash and set class instance attributes.
-        #
-        #
         # @param [Hash] hash Hash with <attribute_name>, <attribute_value> pairs.
         def set_from_hash(hash)
           hash.each { |key, value| send "#{key}=", value if respond_to?(key) }
         end
 
-        # Assigns a unique id to a class instance.
-        #
-        # A class variable is used to keep track of the id sequence and is incremented as needed. Thread-safe operation.
-        def id
-          return @id if @id
-          self.mutex.synchronize do
-            @id = self.class.instance_variable_get('@id') || 1
-            self.class.instance_variable_set('@id', @id + 1)
-            @id
-          end
+        # Default initializer
+        def initialize
+          @id = 0
+        end
+
+        # Sets the unique id for the instance
+        def set_id(id)
+          @id = id
         end
 
         # Convert structure to String. Can be used for debugging to show what is stored.
@@ -34,9 +27,9 @@ module Libis
           "#{self.class}:\n" +
               self.instance_variables.map do |var|
                 v = self.instance_variable_get(var)
-                v = "#{v.class}-#{v.id}" if v.is_a? IdContainer
+                v = "#{v.class}-#{v.id}" if v.is_a? MetsObject
                 v = v.map do |x|
-                  x.is_a?(IdContainer) ? "#{x.class}-#{x.id}" : x.to_s
+                  x.is_a?(MetsObject) ? "#{x.class}-#{x.id}" : x.to_s
                 end.join(',') if v.is_a? Array
                 " - #{var.to_s.gsub(/^@/, '')}: #{v}"
               end.join("\n")
@@ -46,7 +39,7 @@ module Libis
 
       # Container class for creating a representation in the METS.
       class Representation
-        include IdContainer
+        include MetsObject
 
         # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
         attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
@@ -59,7 +52,7 @@ module Libis
 
         # The id that will be used in the XML file to reference this representation.
         def xml_id
-          "rep#{id}"
+          "rep#{@id}"
         end
 
         # This method creates the appropriate {DnxSection}s based on what attributes are filled in.
@@ -228,7 +221,7 @@ module Libis
 
       # Container class for creating a file in the METS.
       class File
-        include IdContainer
+        include MetsObject
 
         # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
         attr_accessor :label, :note, :location, :target_location, :mimetype, :puid, :size, :entity_type,
@@ -241,12 +234,12 @@ module Libis
 
         # The id that will be used in the XML file to reference this file.
         def xml_id
-          "fid#{id}"
+          "fid#{@id}"
         end
 
         # The id that will be used for the group in the XML file.
         def make_group_id
-          "grp#{group_id rescue id}"
+          "grp#{group_id rescue @id}"
         end
 
         # The file's name as it was originally.
@@ -471,13 +464,13 @@ module Libis
 
       # Container class for creating a division in the METS.
       class Div
-        include IdContainer
+        include MetsObject
 
         attr_accessor :label
 
         # The id that will be used in the XML file to reference this division.
         def xml_id
-          "div-#{id}"
+          "div-#{@id}"
         end
 
         # All items stored in the current division
@@ -517,16 +510,18 @@ module Libis
 
       # Container class for creating a structmap in the METS.
       class Map
-        include IdContainer
+        include MetsObject
 
         # The representation this structmap is for
         attr_accessor :representation
         # The top division in the structmap
         attr_accessor :div
+        # Is the structmap Logical (true) or Physical(false)?
+        attr_accessor :is_logical
 
         # The id that will be used in the XML file to reference this structmap.
         def xml_id
-          "smap-#{id}"
+          "smap-#{@id}"
         end
 
       end

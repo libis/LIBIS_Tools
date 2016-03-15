@@ -14,27 +14,30 @@ module Libis
 
     # This class supports creating METS files in a friendlier way than by creating an XML file.
     #
-    # There are sub-classes that represent {Representation}s, {File}s, {Div}isions and {Map}s.
+    # There are sub-classes that represent {::Libis::Tools::MetsFile::Representation}s,
+    # {::Libis::Tools::MetsFile::File}s, {::Libis::Tools::MetsFile::Div}isions and {::Libis::Tools::MetsFile::Map}s.
     # These are simple container classes that take care of assigning proper ids and accept most known attributes.
     # Each of the container classes have a corresponding method on the METS class that takes a Hash with attributes
     # and returns the created object.
     #
-    # {Div} and {File} instances can be added to a {Div} instance and a Div can be associated with a {Representation},
-    # thus creating a structmap.
+    # {::Libis::Tools::MetsFile::Div} and {::Libis::Tools::MetsFile::File} instances can be added to a
+    # {::Libis::Tools::MetsFile::Div} instance and a Div can be associated with a
+    # {::Libis::Tools::MetsFile::Representation}, thus creating a structmap.
     #
     # The {#amd_info=} method on the {MetsFile} class sets the main amd parameters and
     #
     # With the help of the {DnxSection} class and it's derived classes, the container classes can generate the amd
     # sections for the METS file.
     class MetsFile
+      include ::Libis::Tools::ThreadSafe
 
-      # Keeps track of {Representation}s created
+      # Keeps track of {::Libis::Tools::MetsFile::Representation}s created
       attr_reader :representations
-      # Keeps track of {File}s created
+      # Keeps track of {::Libis::Tools::MetsFile::File}s created
       attr_reader :files
-      # Keeps track of {Div}s created
+      # Keeps track of {::Libis::Tools::MetsFile::Div}s created
       attr_reader :divs
-      # Keeps track of {Map}s created
+      # Keeps track of {::Libis::Tools::MetsFile::Map}s created
       attr_reader :maps
 
       # noinspection RubyConstantNamingConvention
@@ -55,11 +58,13 @@ module Libis
         @maps = {}
         @dnx = {}
         @dc_record = nil
+        @id_map = {}
       end
 
       # Reads an existing METS XML file and parses into a large Hash structure for inspection.
+      #
       # It will not immediately allow you to create a {MetsFile} instance from it, but with some inspection and
-      # knowledge of METS file structure it should be possible to recreate a similar file using the class.
+      # knowledge of METS file structure it should be possible to recreate a similar file using the result.
       #
       # The returned Hash has the following structure:
       #
@@ -233,11 +238,23 @@ module Libis
         end
       end
 
-      # Create a new representation. See {Representation} for supported Hash keys.
+      def get_id(klass)
+        self.mutex.synchronize do
+          if @id_map[klass]
+            @id_map[klass] += 1
+          else
+            @id_map[klass] = 1
+          end
+          return @id_map[klass]
+        end
+      end
+
+      # Create a new representation. See {::Libis::Tools::MetsFile::Representation} for supported Hash keys.
       # @param [Hash] hash
       # @return [Libis::Tools::MetsFile::Representation]
       def representation(hash = {})
-        rep = Representation.new
+        rep = ::Libis::Tools::MetsFile::Representation.new
+        rep.set_id = get_id(::Libis::Tools::MetsFile::Representation)
         rep.set_from_hash hash
         @representations[rep.id] = rep
       end
@@ -247,6 +264,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::Div]
       def div(hash = {})
         div = Libis::Tools::MetsFile::Div.new
+        div.set_id = get_id(::Libis::Tools::MetsFile::Div)
         div.set_from_hash hash
         @divs[div.id] = div
       end
@@ -256,6 +274,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::File]
       def file(hash = {})
         file = Libis::Tools::MetsFile::File.new
+        file.set_id = get_id(::Libis::Tools::MetsFile::File)
         file.set_from_hash hash
         @files[file.id] = file
       end
@@ -263,11 +282,14 @@ module Libis
       # Create a new structmap.
       # @param [Libis::Tools::MetsFile::Representation] rep
       # @param [Libis::Tools::MetsFile::Div] div
+      # @param [Boolean] logical if true, create a logical structmap; if false (default): a physical structmap.
       # @return [Libis::Tools::MetsFile::Map]
-      def map(rep, div)
+      def map(rep, div, logical = false)
         map = Libis::Tools::MetsFile::Map.new
+        map.set_id = get_id(::Libis::Tools::MetsFile::Map)
         map.representation = rep
         map.div = div
+        map.is_logical = logical
         @maps[map.id] = map
       end
 

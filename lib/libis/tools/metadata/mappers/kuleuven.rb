@@ -179,8 +179,17 @@ module Libis
 
           def marc2dc_identifier_690(xml)
             # [MARC 690 02 $0]
-            all_tags('69002', '0a') { |t|
-              if t._0 =~ /^\(ODIS-(PS|ORG)\)(\d)+$/
+            # all_tags('69002', '0a') { |t|
+            #   if t._0 =~ /^\(ODIS-(PS|ORG)\)(\d)+$/
+            #     xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
+            #   else
+            #     xml['dc'].identifier t._a
+            #   end
+            # }
+            # ALMA: 690 02 ax0 => 650 _7 ax6 $2 == 'KADOC'
+            all_tags('650_7', '6a') { |t|
+              next unless t._2 == 'KADOC'
+              if t._6 =~ /^\(ODIS-(PS|ORG)\)(\d)+$/
                 xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
               else
                 xml['dc'].identifier t._a
@@ -489,7 +498,14 @@ module Libis
 
           def marc2dc_subject_691(xml)
             # [MARC 691 E1 $8] " " [ MARC 691 E1 $a]
-            all_tags('691E1', 'a8') { |t|
+            # all_tags('691E1', 'a8') { |t|
+            #   attributes = {'xsi:type' => 'http://purl.org/dc/terms/UDC'}
+            #   x = taalcode(t._9)
+            #   attributes['xml:lang'] = x if x
+            #   xml['dc'].subject(attributes).text list_s(t._ax)
+            # }
+            # ALMA: 691 E1 8a => 650 _7 ax $s == 'UDC'
+            all_tags('650_7', 'a x') { |t|
               attributes = {'xsi:type' => 'http://purl.org/dc/terms/UDC'}
               x = taalcode(t._9)
               attributes['xml:lang'] = x if x
@@ -499,7 +515,12 @@ module Libis
 
           def marc2dc_subject_082(xml)
             # [MARC 082 14 $a] " " [MARC 082 14 $x]
-            all_tags('08214', 'a x') { |t|
+            # all_tags('08214', 'a x') { |t|
+            #   xml['dc'].subject('xsi:type' => 'http://purl.org/dc/terms/DDC', 'xml:lang' => 'en').text list_s(t._ax)
+            # }
+            # ALMA: 082 14 ax2 => 650 _7 ax4 $2 = 'DDC abridged'
+            all_tags('650_7', 'a x') { |t|
+              next unless t._2 == 'DDC abridged'
               xml['dc'].subject('xsi:type' => 'http://purl.org/dc/terms/DDC', 'xml:lang' => 'en').text list_s(t._ax)
             }
           end
@@ -507,7 +528,9 @@ module Libis
           def marc2dc_subject_690(xml)
             # [MARC 690 [xx]$a]
             # Set dedups the fields
-            Set.new(each_field('690##', 'a')) { |f| xml['dc'].subject f }
+            # Set.new(each_field('690##', 'a')) { |f| xml['dc'].subject f }
+            # ALMA: 690 ## => 650 _7
+            Set.new(each_field('650_7', 'a')) { |f| xml['dc'].subject f }
           end
 
           def marc2dc_temporal(xml)
@@ -576,10 +599,16 @@ module Libis
                 # [MARC 545 __ $a]
                 all_fields('545__', 'a'),
                 # [MARC 562 __ $a]
-                all_fields('562__', 'a'),
+                # all_fields('562__', 'a'),
+                # ALMA: 562 __ a => 963 __ a
+                all_fields('963__', 'a'),
                 # [MARC 563 __ $a] " " [MARC 563 __ $9] " (" [MARC 563 __ $u] ")"
-                all_tags('563__', 'a 9 u').collect { |t|
-                  list_s(t._a9, opt_r(t._u))
+                # all_tags('563__', 'a 9 u').collect { |t|
+                #   list_s(t._a9, opt_r(t._u))
+                # },
+                # ALMA: 563 __ a9u => 563 __ a3u
+                all_tags('563__', 'a 3 u').collect { |t|
+                  list_s(t._a3, opt_r(t._u))
                 },
                 # [MARC 586 __ $a]
                 all_fields('586__', 'a'),
@@ -676,8 +705,12 @@ module Libis
             # DCTERMS:AVAILABLE
 
             # [MARC 591 ## $9] ":" [MARC 591 ## $a] " (" [MARC 591 ## $b] ")"
-            all_tags('591##', 'a b 9') { |t|
-              xml['dcterms'].available element(t._9a, join: ':', postfix: opt_r(t._b, prefix: ' '))
+            # all_tags('591##', 'a b 9') { |t|
+            #   xml['dcterms'].available element(t._9a, join: ':', postfix: opt_r(t._b, prefix: ' '))
+            # }
+            # ALMA: 591 __ ab9 => 866 __ axz
+            all_tags('866##', 'a x z') { |t|
+              xml['dcterms'].available element(t._za, join: ':', postfix: opt_r(t._x, prefix: ' '))
             }
           end
 
@@ -1176,8 +1209,12 @@ module Libis
 
           def marc2dc_source_852___(xml)
             # [MARC 852 __ $b] " " [MARC 852 __ $c] " " [MARC 852 __ $k] " " [MARC 852 __ $h] " " [MARC 852 __ $9] " " [MARC 852 __ $l] " " [MARC 852 __ $m]
-            all_tags('852__', 'b c k h 9 l m') { |t|
-              xml['dc'].source list_s(t._bckh9lm)
+            # all_tags('852__', 'b c k h 9 l m') { |t|
+            #   xml['dc'].source list_s(t._bckh9lm)
+            # }
+            # ALMA: 852 __ 9 => 852 __ i
+            all_tags('852__', 'b c k h i l m') { |t|
+              xml['dc'].source list_s(t._bckhilm)
             }
           end
 

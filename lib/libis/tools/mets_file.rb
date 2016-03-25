@@ -401,7 +401,7 @@ module Libis
             @maps.values.each do |map|
               xml[:mets].structMap(
                   ID: "#{map.representation.xml_id}-1",
-                  TYPE: 'PHYSICAL',
+                  TYPE: (map.is_logical ? 'LOGICAL' : 'PHYSICAL'),
               ) {
                 xml[:mets].div(LABEL: map.representation.label) {
                   add_struct_map(xml, map.div) if map.div

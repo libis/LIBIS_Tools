@@ -19,7 +19,7 @@ describe 'Marc21Record' do
       expect(record.marc_dump).to eq <<-STR.align_left
         LDR:'01068nam 2200241u 4500'
         005:'20150701153710.0'
-        008:'000608m17221724xx |||| | 000|0 lat c'
+        008:'000608m17221724xx |||| |   000|0   lat c'
         001:'9921543960101471'
         035: : :
         \ta:["(BeLVLBS)002154396LBS01-Aleph"]
@@ -99,10 +99,13 @@ describe 'Marc21Record' do
   <dc:identifier>8389207</dc:identifier>
   <dc:title>Anecdota Graeca, sacra et profana /</dc:title>
   <dc:creator>Wolf, Johann Christoph, 1683-1739, (author)</dc:creator>
+  <dc:subject xsi:type="http://purl.org/dc/terms/UDC" class="text">Griekse patrologie</dc:subject>
+  <dc:temporal>1701-1750</dc:temporal>
   <dc:description>Ded. Petrus Theodorus Seelmann; Erdmannus Neumeister; Thomas Claussen; Joannes Grammius\n    \nElk deel heeft eigen titelp. in roodzwartdruk, met drukkersmerk</dc:description>
   <dc:date>1722 - 1724</dc:date>
+  <dc:type xml:lang="en" class="text">Books before 1840</dc:type>
   <dcterms:extent>8o: 4 v.; [22], 298, [8]; [16], 354, [1]; [16], 299, [7]; [16], 271, [5] p.</dcterms:extent>
-  <dc:language/>
+  <dc:language>la</dc:language>
 </dc:record>
 STR
       expect(record.to_dc.root).to be_equivalent_to(xml_doc.root).respecting_element_order

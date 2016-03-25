@@ -3,7 +3,7 @@
         xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <leader>01068nam 2200241u 4500</leader>
   <controlfield tag="005">20150701153710.0</controlfield>
-  <controlfield tag="008">000608m17221724xx |||| | 000|0 lat c</controlfield>
+  <controlfield tag="008">000608m17221724xx |||| |   000|0   lat c</controlfield>
   <controlfield tag="001">9921543960101471</controlfield>
   <datafield tag="035" ind1=" " ind2=" ">
     <subfield code="a">(BeLVLBS)002154396LBS01-Aleph</subfield>

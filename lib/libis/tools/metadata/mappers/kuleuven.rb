@@ -124,7 +124,9 @@ module Libis
 
           def marc2dc_identifier_029(xml)
             # "Siglum: " [MARC 029 __ $a]
-            each_field('029__', 'a') { |f| xml['dc'].identifier element(f, prefix: 'Siglum: ') }
+            # each_field('029__', 'a') { |f| xml['dc'].identifier element(f, prefix: 'Siglum: ') }
+            # ALMA: 029 __ a => 028 00 a
+            each_field('02800', 'a') { |f| xml['dc'].identifier element(f, prefix: 'Siglum: ') }
           end
 
           def marc2dc_identifier_700(xml)
@@ -139,7 +141,7 @@ module Libis
 
           def marc2dc_identifier_752(xml)
             # [MARC 752 __ $0]
-            each_field('752#_', '0') { |f| xml['dc'].identifier f }
+            each_field('752__', '0') { |f| xml['dc'].identifier f }
           end
 
           def marc2dc_identifier_020(xml)
@@ -217,15 +219,23 @@ module Libis
 
           def marc2dc_title_245_0(xml)
             # [MARC 245 0# $a] " " [MARC 245 0# $b] " [" [MARC 245 0# $h] "]"
-            all_tags('2450#', 'a b h') { |t|
-              xml['dc'].title list_s(t._ab, opt_s(t._h))
+            # all_tags('2450#', 'a b h') { |t|
+            #   xml['dc'].title list_s(t._ab, opt_s(t._h))
+            # }
+            # ALMA: 245 ## Zh => 245 ## 6 [$h skipped, ': ' before $ skipped]
+            all_tags('2450#', 'a b') { |t|
+              xml['dc'].title element(t._ab, join: ' : ')
             }
           end
 
           def marc2dc_title_245_1(xml)
             # [MARC 245 1# $a] " " [MARC 245 1# $b] " [" [MARC 245 1# $h] "]"
-            all_tags('2451#', 'a b h') { |t|
-              xml['dc'].title element(t._ab, opt_s(t._h), join: ' ')
+            # all_tags('2451#', 'a b h') { |t|
+            #   xml['dc'].title element(t._ab, opt_s(t._h), join: ' ')
+            # }
+            # ALMA: 245 ## Zh => 245 ## 6 [$h skipped, ': ' before $ skipped]
+            all_tags('2451#', 'a b') { |t|
+              xml['dc'].title element(t._ab, join: ' : ')
             }
           end
 
@@ -246,13 +256,19 @@ module Libis
 
           def marc2dc_ispartof_243(xml)
             # [MARC 243 1# $a]
-            each_field('2431#', 'a') { |f| xml['dcterms'].isPartOf f }
+            # each_field('2431#', 'a') { |f| xml['dcterms'].isPartOf f }
+            # ALMA: 243 ## a => 830 ## a
+            each_field('8301#', 'a') { |f| xml['dcterms'].isPartOf f }
           end
 
           def marc2dc_ispartof_440(xml)
             # [MARC 440 _# $a] " : " [MARC 440 _# $b] " , " [MARC 440 _# $v]
-            all_tags('440_#', 'a b v') { |t|
-              xml['dcterms'].isPartOf element({parts: t._ab, join: ' : '}, t._v, join: ' , ')
+            # all_tags('440_#', 'a b v') { |t|
+            #   xml['dcterms'].isPartOf element({parts: t._ab, join: ' : '}, t._v, join: ' , ')
+            # }
+            # ALMA: 440 _# ab => 490 1_ a [$b replaced with ' : ']
+            all_tags('4901_', 'a v') { |t|
+              xml['dcterms'].isPartOf element(t._a, t._v, join: ' , ')
             }
           end
 
@@ -336,7 +352,11 @@ module Libis
 
           def marc2dc_alternative_246_19(xml)
             # [MARC 246 19 $a] ". " [MARC 246 19 $b]
-            all_tags('24619', 'a b') { |t|
+            # all_tags('24619', 'a b') { |t|
+            #   xml['dcterms'].alternative element(t._ab, join: '. ')
+            # }
+            # ALMA: 246 19 => 246 33
+            all_tags('24633', 'a b') { |t|
               xml['dcterms'].alternative element(t._ab, join: '. ')
             }
           end
@@ -371,10 +391,18 @@ module Libis
 
           def marc2dc_creator_100_1(xml)
             # [MARC 100 1_ $a] " " [MARC 100 1_ $b] " ("[MARC 100 1_ $c] ") " "("[MARC 100 1_ $d]") ("[MARC 100 1_ $g]"), " [MARC 100 1_ $4]" ("[MARC 100 1_ $e]") (" [MARC 100 1_ $9]")"
-            all_tags('1001_', 'a b c d g e 9') { |t|
+            # all_tags('1001_', 'a b c d g e 9') { |t|
+            #   next unless check_name(t, :creator)
+            #   xml['dc'].creator element(list_s(t._ab, opt_r(t._c), opt_r(t._d), opt_r(t._g)),
+            #                             list_s(full_name(t), opt_r(t._e), opt_r(t._9)),
+            #                             join: ', ')
+            # }
+
+            # ALMA: 100 #_ 9 => 100 #_ 3
+            all_tags('1001_', 'a b c d g e 3') { |t|
               next unless check_name(t, :creator)
               xml['dc'].creator element(list_s(t._ab, opt_r(t._c), opt_r(t._d), opt_r(t._g)),
-                                        list_s(full_name(t), opt_r(t._e), opt_r(t._9)),
+                                        list_s(full_name(t), opt_r(t._e), opt_r(t._3)),
                                         join: ', ')
             }
           end
@@ -504,12 +532,11 @@ module Libis
             #   attributes['xml:lang'] = x if x
             #   xml['dc'].subject(attributes).text list_s(t._ax)
             # }
-            # ALMA: 691 E1 8a => 650 _7 ax $s == 'UDC'
+            # ALMA: 691 E1 8a => 650 _7 ax $2 == 'UDC' $9 skipped
             all_tags('650_7', 'a x') { |t|
+              next unless t._2 == 'UDC'
               attributes = {'xsi:type' => 'http://purl.org/dc/terms/UDC'}
-              x = taalcode(t._9)
-              attributes['xml:lang'] = x if x
-              xml['dc'].subject(attributes).text list_s(t._ax)
+              xml['dc'].subject(attributes).text list_s(t._x) # should be t._ax by spec, but seems idiotic
             }
           end
 
@@ -530,7 +557,8 @@ module Libis
             # Set dedups the fields
             # Set.new(each_field('690##', 'a')) { |f| xml['dc'].subject f }
             # ALMA: 690 ## => 650 _7
-            Set.new(each_field('650_7', 'a')) { |f| xml['dc'].subject f }
+            # Set.new(all_fields('650_7', 'a')).each { |f| xml['dc'].subject f }
+            # rule disbled gives duplicates and needs to be redefined by KUL cataloguing staff
           end
 
           def marc2dc_temporal(xml)
@@ -549,16 +577,24 @@ module Libis
 
           def marc2dc_temporal_362(xml)
             # [MARC 362 __ $a]
-            each_field('362__', 'a') { |f| xml['dc'].temporal f }
+            # each_field('362__', 'a') { |f| xml['dc'].temporal f }
+            # ALMA: 362 __ a => 362 0_ a
+            each_field('3620_', 'a') { |f| xml['dc'].temporal f }
           end
 
           def marc2dc_temporal_752(xml)
             # [MARC 752 9_ $9]
-            each_field('7529_', '9') { |f| xml['dc'].temporal f }
+            # each_field('7529_', '9') { |f| xml['dc'].temporal f }
+            # ALMA: 752 9_ 9 => 953 __ a
+            each_field('953__', 'a') { |f| xml['dc'].temporal f }
 
             # [MARC 752 _9 $a] " (" [MARC 752 _9 $9]")"
-            all_tags('752_9', 'a 9') { |t|
-              xml['dc'].temporal list_s(t._a, opt_r(t._9))
+            # all_tags('752_9', 'a 9') { |t|
+            #   xml['dc'].temporal list_s(t._a, opt_r(t._9))
+            # }
+            # ALMA: 752 _9 a9 => 953 __ bc
+            all_tags('953__', 'b c') { |t|
+              xml['dc'].temporal list_s(t._b, opt_r(t._c))
             }
           end
 
@@ -567,35 +603,61 @@ module Libis
 
             x = element(
                 # [MARC 047 __ $a] " (" [MARC 047 __ $9]")"
-                all_tags('047__', 'a 9').collect { |t|
-                  list_s(t._a, opt_r(t._9))
+                # all_tags('047__', 'a 9').collect { |t|
+                #   list_s(t._a, opt_r(t._9))
+                # },
+                # ALMA: 047 __ a9 => 947 __ ab
+                all_tags('947__', 'a b').collect { |t|
+                  list_s(t._a, opt_r(t._b))
                 },
                 # [MARC 598 __ $a]
-                all_fields('598__', 'a'),
+                # all_fields('598__', 'a'),
+                # ALMA: 598 __ a => 958 __ a
+                all_fields('958__', 'a'),
                 # [MARC 597 __ $a]
-                all_fields('597__', 'a'),
+                # all_fields('597__', 'a'),
+                # ALMA: 597 __ a => 957 __ a
+                all_fields('957__', 'a'),
                 # [MARC 500 __ $a]
                 all_fields('500__', 'a'),
                 # [MARC 520 2_ $a]
                 all_fields('5202_', 'a'),
                 # "Projectie: " [MARC 093 __ $a]
-                all_tags('093__', 'a').collect { |t| element(t._a, prefix: 'Projectie: ') },
+                # all_tags('093__', 'a').collect { |t| element(t._a, prefix: 'Projectie: ') },
+                # ALMA: 093 ## a => 954 __ a
+                all_tags('954__', 'a').collect { |t| element(t._a, prefix: 'Projectie: ') },
                 # "Equidistance " [MARC 094 __ $a*]
-                all_tags('094__', 'a').collect { |t| element(t.a_a, prefix: 'Equidistance ', join: ';') },
+                # all_tags('094__', 'a').collect { |t| element(t.a_a, prefix: 'Equidistance ', join: ';') },
+                # ALMA: 094 ## a => 954 __ b
+                all_tags('954__', 'b').collect { |t| element(t.a_b, prefix: 'Equidistance ', join: ';') },
                 # [MARC 502 __ $a] ([MARC 502 __ $9])
-                all_tags('502__', 'a 9').collect { |t|
-                  list_s(t._a, opt_r(t._9))
+                # all_tags('502__', 'a 9').collect { |t|
+                #   list_s(t._a, opt_r(t._9))
+                # },
+                # ALMA: 502 __ 9 => 502 __ g
+                all_tags('502__', 'a g').collect { |t|
+                  list_s(t._a, opt_r(t._g))
                 },
                 # [MARC 529 __ $a] ", " [MARC 529 __ $b] " (" [MARC 529 __ $c] ")"
-                all_tags('529__', 'a b 9').collect { |t|
+                # all_tags('529__', 'a b 9').collect { |t|
+                #   element(t._ab,
+                #           join: ', ',
+                #           postfix: opt_r(t._9))
+                # },
+                # ALMA: 529 __ ab9 => 957 __ abc
+                all_tags('957__', 'a b c').collect { |t|
                   element(t._ab,
                           join: ', ',
-                          postfix: opt_r(t._9))
+                          postfix: opt_r(t._c))
                 },
                 # [MARC 534 9_ $a]
-                all_fields('5349_', 'a'),
+                # all_fields('5349_', 'a'),
+                # ALMA: 534 9_ a => 534 __ t
+                all_fields('534__', 't'),
                 # [MARC 534 _9 $a] "(oorspronkelijke uitgever)"
-                all_fields('534_9', 'a').collect { |f| element(f, postfix: '(oorspronkelijke uitgever)') },
+                # all_fields('534_9', 'a').collect { |f| element(f, postfix: '(oorspronkelijke uitgever)') },
+                # ALMA: 534 _9 a => 534 __ c
+                all_fields('534__', 'c').collect { |f| element(f, postfix: '(oorspronkelijke uitgever)') },
                 # [MARC 545 __ $a]
                 all_fields('545__', 'a'),
                 # [MARC 562 __ $a]
@@ -675,18 +737,31 @@ module Libis
 
           def marc2dc_tableofcontents_505_0_(xml)
             # [MARC 505 0_  $a] " "[MARC 505 0_ $t]" / " [MARC 505 0_ $r*] " ("[MARC 505 0_ $9*]")"
-            all_tags('5050_', 'a t r 9') { |t|
+            # all_tags('5050_', 'a t r 9') { |t|
+            #   xml['dcterms'].tableOfContents list_s(t._at,
+            #                                       repeat(t.a_r, prefix: '/ '),
+            #                                       opt_r(repeat(t.a_9)))
+            # }
+            # ALMA: 505 ## 9 => 505 ## g
+            all_tags('5050_', 'a t r g') { |t|
               xml['dcterms'].tableOfContents list_s(t._at,
-                                                  repeat(t.a_r, prefix: '/ '),
-                                                  opt_r(repeat(t.a_9)))
+                                                    repeat(t.a_r, prefix: '/ '),
+                                                    opt_r(repeat(t.a_g)))
             }
           end
 
           def marc2dc_tableofcontents_505_09(xml)
             # [MARC 505 09 $a*] "\n" [MARC 505 09 $9*] "\n" [MARC 505 09 $u*]
-            all_tags('50509', 'a u 9') { |t|
+            # all_tags('50509', 'a u 9') { |t|
+            #   xml['dcterms'].tableOfContents element(repeat(t.a_a),
+            #                                          repeat(t.a_9),
+            #                                          repeat(t.a_u),
+            #                                          join: "\n")
+            # }
+            # ALMA: 505 ## 9 => 505 ## g
+            all_tags('50509', 'a u g') { |t|
               xml['dcterms'].tableOfContents element(repeat(t.a_a),
-                                                     repeat(t.a_9),
+                                                     repeat(t.a_g),
                                                      repeat(t.a_u),
                                                      join: "\n")
             }
@@ -694,10 +769,16 @@ module Libis
 
           def marc2dc_tableofcontents_505_2_(xml)
             # [MARC 505 2_  $a] " "[MARC 505 2_ $t]" / " [MARC 505 2_ $r*] " ("[MARC 505 2_ $9*]")"
-            all_tags('5052_', 'a t r 9') { |t|
+            # all_tags('5052_', 'a t r 9') { |t|
+            #   xml['dcterms'].tableOfContents list_s(t._at,
+            #                                       repeat(t.a_r, prefix: '/ '),
+            #                                       opt_r(repeat(t.a_9)))
+            # }
+            # ALMA: 505 ## 9 => 505 ## g
+            all_tags('5052_', 'a t r g') { |t|
               xml['dcterms'].tableOfContents list_s(t._at,
-                                                  repeat(t.a_r, prefix: '/ '),
-                                                  opt_r(repeat(t.a_9)))
+                                                    repeat(t.a_r, prefix: '/ '),
+                                                    opt_r(repeat(t.a_g)))
             }
           end
 
@@ -736,11 +817,11 @@ module Libis
             all_tags('1000_', 'a b c d g 9') { |t|
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(list_s(t._ab,
-                                                 opt_r(t._c),
-                                                 opt_r(t._d),
-                                                 opt_r(t._g)),
+                                                   opt_r(t._c),
+                                                   opt_r(t._d),
+                                                   opt_r(t._g)),
                                             list_s(full_name(t),
-                                                 opt_r(t._9)),
+                                                   opt_r(t._9)),
                                             join: ', ')
             }
           end
@@ -750,12 +831,12 @@ module Libis
             all_tags('1001_', 'a b c d g e 9') { |t|
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(list_s(t._ab,
-                                                 opt_r(t._c),
-                                                 opt_r(t._d),
-                                                 opt_r(t._g)),
+                                                   opt_r(t._c),
+                                                   opt_r(t._d),
+                                                   opt_r(t._g)),
                                             list_s(full_name(t),
-                                                 opt_r(t._e),
-                                                 opt_r(t._9)),
+                                                   opt_r(t._e),
+                                                   opt_r(t._9)),
                                             join: ', ')
             }
           end
@@ -767,7 +848,7 @@ module Libis
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(t._abcd,
                                             list_s(t._g,
-                                                 opt_r(full_name(t), fix: '( |)')),
+                                                   opt_r(full_name(t), fix: '( |)')),
                                             t._e,
                                             join: ', ')
             }
@@ -779,7 +860,7 @@ module Libis
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(t._a,
                                             list_s(t._g,
-                                                 opt_r(full_name(t))),
+                                                   opt_r(full_name(t))),
                                             t._e,
                                             join: ', ')
             }
@@ -790,10 +871,10 @@ module Libis
             all_tags('7102_', 'a g 9 e') { |t|
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(list_s(t._a,
-                                                 opt_r(t._g)),
+                                                   opt_r(t._g)),
                                             list_s(full_name(t),
-                                                 opt_r(t._9),
-                                                 opt_r(t._e)),
+                                                   opt_r(t._9),
+                                                   opt_r(t._e)),
                                             join: ', ')
             }
           end
@@ -804,7 +885,7 @@ module Libis
               next unless check_name(t, :contributor)
               xml['dc'].contributor element(t._anc,
                                             list_s(t._d,
-                                                 opt_r(t._g)),
+                                                   opt_r(t._g)),
                                             join: ', ')
             }
           end
@@ -839,18 +920,29 @@ module Libis
 
           def marc2dc_publisher_260___(xml)
             # [MARC 260 __ $e] " " [MARC 260 __ $f] " " [MARC 260 __ $c] " " [MARC 260 __ $9] " uitgave: " [MARC 260 __ $g]
-            all_tags('260__', 'e f c 9 g') { |t|
-              xml['dc'].publisher list_s(t._c9,
-                                       element(t._g, prefix: 'uitgave: '))
+            # all_tags('260__', 'e f c 9 g') { |t|
+            #   xml['dc'].publisher list_s(t._efc9,
+            #                              element(t._g, prefix: 'uitgave: '))
+            # }
+            # ALMA: 260 _# 9 => 260 __ 3
+            all_tags('260__', 'e f c 3 g') { |t|
+              xml['dc'].publisher list_s(t._efc3,
+                                         element(t._g, prefix: 'uitgave: '))
             }
           end
 
           def marc2dc_publisher_260__9(xml)
             # [MARC 260 _9 $c] " " [MARC 260 _9 $9*] " (druk: ) " [MARC 260 _9 $g]
-            all_tags('260_9', 'c 9 g') { |t|
+            # all_tags('260_9', 'c 9 g') { |t|
+            #   xml['dc'].publisher list_s(t._c,
+            #                              repeat(t.a_9),
+            #                              element(t._g, prefix: 'druk: '))
+            # }
+            # ALMA: 260 _# 9 => 260 __ 3
+            all_tags('260_9', 'c 3 g') { |t|
               xml['dc'].publisher list_s(t._c,
-                                       repeat(t.a_9),
-                                       element(t._g, prefix: 'uitgave: '))
+                                         repeat(t.a_3),
+                                         element(t._g, prefix: 'druk: '))
             }
           end
 
@@ -860,7 +952,7 @@ module Libis
               next unless name_type(t) == :publisher
               xml['dc'].publisher element(t._abcd,
                                           list_s(t._g,
-                                               opt_r(full_name(t), fix: '( |)')),
+                                                 opt_r(full_name(t), fix: '( |)')),
                                           t._e,
                                           join: ', ',
                                           postfix: '(uitgever)')
@@ -871,7 +963,7 @@ module Libis
             # [MARC 710 29 $a] "  (" [MARC 710 29 $c] "), " [MARC 710 29 $9]  ","  [710 29 $g] "(drukker)"
             all_tags('71029', 'a c g 9 4') { |t|
               xml['dc'].publisher element(list_s(t._a,
-                                               opt_r(t._c)),
+                                                 opt_r(t._c)),
                                           t._9g,
                                           join: ', ',
                                           postfix: '(drukker)')
@@ -934,17 +1026,22 @@ module Libis
 
           def marc2dc_type_655_x9_a(xml)
             # [MARC 655 #9 $a]
-            each_field('655#9', 'a') { |f| xml['dc'].type f }
+            # each_field('655#9', 'a') { |f| xml['dc'].type f }
+            # ALMA: 655 _9 a => 955 __ a
+            each_field('955__', 'a') { |f| xml['dc'].type f }
           end
 
           def marc2dc_type_655_9x_a(xml)
             # [MARC 655 9# $a]
-            each_field('6559#', 'a') { |f| xml['dc'].type f }
+            # each_field('6559#', 'a') { |f| xml['dc'].type f }
+            # ALMA: 655 9_ a => 955 __ b
+            # Zie marc2dc_type_655_9__a
           end
 
           def marc2dc_type_655__4_z(xml)
             # [MARC 655 _4 $z]
-            each_field('655_4', 'z') { |f| xml['dc'].type f }
+            # each_field('655_4', 'z') { |f| xml['dc'].type f }
+            # ALMA: 655 _4 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_fmt(xml)
@@ -954,75 +1051,94 @@ module Libis
 
           def marc2dc_type_655_94_z(xml)
             # [MARC 655 94 $z]
-            each_field('65594', 'z') { |f| xml['dc'].type f }
+            # each_field('65594', 'z') { |f| xml['dc'].type f }
+            # ALMA: 655 94 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_655_9__a(xml)
             # [MARC 655 9_ $a]
-            each_field('6559_', 'a') { |f| xml['dc'].type f }
+            # each_field('6559_', 'a') { |f| xml['dc'].type f }
+            # ALMA: 655 9_ a => 955 __ b
+            each_field('955__', 'b') { |f| xml['dc'].type f }
           end
 
           def marc2dc_type_088_9__a(xml)
             # [MARC 088 9_ $a]
-            each_field('0889_', 'a') { |f| xml['dc'].type f } if each_field('088__', 'axy').empty?
+            # each_field('0889_', 'a') { |f| xml['dc'].type f } if each_field('088__', 'axy').empty?
+            # ALMA: 088 9_ a9 => 340 __ d3
+            # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
+            each_field('340__', 'd') { |f| xml['dc'].type f } if each_field('340__', 'a').empty?
           end
 
           def marc2dc_type_088____z(xml)
             # [MARC 088 __ $z]
-            each_field('088__', 'z') { |f| xml['dc'].type f }
+            # each_field('088__', 'z') { |f| xml['dc'].type f }
+            # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
           end
 
           def marc2dc_type_088____a(xml)
             # [MARC 088 __ $a]
-            each_field('088__', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # each_field('088__', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
+            each_field('340__', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
           end
 
           def marc2dc_type_655__4_a(xml)
             # [MARC 655 _4 $a]
-            each_field('655_4', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # each_field('655_4', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # ALMA: 655 _4 axyz => 653 _6 a [$xyz skipped]
+            each_field('653_6', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
           end
 
           def marc2dc_type_655_94_a(xml)
             # [MARC 655 94 $a]
-            each_field('65594', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # each_field('65594', 'a') { |f| xml['dc'].type('xml:lang' => 'en').text f }
+            # ALMA: 655 94 axyz => 635 _6 a [$xyz skipped]
+            # Case covered by marc2dc_type_655__4_a
           end
 
           def marc2dc_type_088____x(xml)
             # [MARC 088 __ $x]
-            each_field('088__', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # each_field('088__', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
           end
 
           def marc2dc_type_655__4_x(xml)
             # [MARC 655 _4 $x]
-            each_field('655_4', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # each_field('655_4', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # ALMA: 655 _4 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_655_94_x(xml)
             # [MARC 655 94 $x]
-            each_field('65594', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # each_field('65594', 'x') { |f| xml['dc'].type('xml:lang' => 'nl').text f }
+            # ALMA: 655 94 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_088____y(xml)
             # [MARC 088 __ $y]
-            each_field('088__', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # each_field('088__', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
           end
 
           def marc2dc_type_655__4_y(xml)
             # [MARC 655 _4 $y]
-            each_field('655_4', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # each_field('655_4', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # ALMA: 655 _4 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_655_94_y(xml)
             # [MARC 655 94 $y]
-            each_field('65594', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # each_field('65594', 'y') { |f| xml['dc'].type('xml:lang' => 'fr').text f }
+            # ALMA: 655 94 axyz => 653 _6 a [$xyz skipped]
           end
 
           def marc2dc_type_655__2(xml)
             # [MARC 655 #2 $a] " " [MARC 655 #2 $x*] " " [MARC 655 #2 $9]
             all_tags('655#2', 'a x 9') { |t|
               xml['dc'].type({'xsi:type' => 'http://purl.org/dc/terms/MESH'}).text list_s(t._a,
-                                                                                        repeat(t.a_x),
-                                                                                        t._9)
+                                                                                          repeat(t.a_x),
+                                                                                          t._9)
             }
           end
 
@@ -1039,9 +1155,14 @@ module Libis
 
           def marc2dc_spatial_752(xml)
             # [MARC 752 __ $a]  " " [MARC 752 __ $c] " " [MARC 752 __ $d] " (" [MARC 752 __ $9] ")"
-            all_tags('752__', 'a c d 9') { |t|
+            # all_tags('752__', 'a c d 9') { |t|
+            #   xml['dcterms'].spatial list_s(t._acd,
+            #                                 opt_r(t._9))
+            # }
+            # ALMA: 752 __ acd9 => 952 acde
+            all_tags('952__', 'a c d e') { |t|
               xml['dcterms'].spatial list_s(t._acd,
-                                          opt_r(t._9))
+                                            opt_r(t._e))
             }
           end
 
@@ -1073,8 +1194,8 @@ module Libis
             # [MARC 651 #0 $a] " " [MARC 651 #0 $x*] " " [MARC 651 #0 $y] " " [MARC 651 #0 $z]
             all_tags('651#0', 'a x y z') { |t|
               xml['dcterms'].spatial({'xsi:type' => 'http://purl.org/dc/terms/LCSH'}).text list_s(t._a,
-                                                                                                repeat(t.a_x),
-                                                                                                t._yz)
+                                                                                                  repeat(t.a_x),
+                                                                                                  t._yz)
             }
           end
 
@@ -1082,7 +1203,7 @@ module Libis
             # [MARC 651 #2 $a] " " [MARC 651 #2 $x*]
             all_tags('651#2', 'a x') { |t|
               xml['dcterms'].spatial({'xsi:type' => 'http://purl.org/dc/terms/LCSH'}).text list_s(t._a,
-                                                                                                repeat(t.a_x))
+                                                                                                  repeat(t.a_x))
             }
           end
 
@@ -1097,22 +1218,39 @@ module Libis
 
           def marc2dc_extent_300__(xml)
             # [MARC 300 __ $a*] " " [MARC 300 __ $b] " " [MARC 300__  $c*] " " [MARC 300 __ $e] " (" [MARC 300 __ $9] ")"
-            all_tags('300__', 'a b c e 9') { |t|
+            # all_tags('300__', 'a b c e 9') { |t|
+            #   xml['dcterms'].extent list_s(repeat(t.a_a),
+            #                              t._b,
+            #                              repeat(t.a_c),
+            #                              t._e,
+            #                              opt_r(t._9))
+            # }
+            # ALMA: 300 __ 9 => 300 __ g
+            all_tags('300__', 'a b c e g') { |t|
               xml['dcterms'].extent list_s(repeat(t.a_a),
-                                         t._b,
-                                         repeat(t.a_c),
-                                         t._e,
-                                         opt_r(t._9))
+                                           t._b,
+                                           repeat(t.a_c),
+                                           t._e,
+                                           opt_r(t._g))
             }
           end
 
           def marc2dc_extent_300_9(xml)
             # [MARC 300 9_ $a] " " [MARC 300 9_ $b] " " [MARC 300 9_ $c*] " " [MARC 300 9_ $e] " (" [MARC 300 9_ $9]")"
-            all_tags('3009_', 'a b c e 9') { |t|
-              xml['dcterms'].extent list_s(t._ab,
-                                         repeat(t.a_c),
-                                         t._e,
-                                         opt_r(t._9))
+            # all_tags('3009_', 'a b c e 9') { |t|
+            #   xml['dcterms'].extent list_s(t._ab,
+            #                              repeat(t.a_c),
+            #                              t._e,
+            #                              opt_r(t._9))
+            # }
+            # ALMA: 300 9_ ac => 300 9_ ac
+            # ALMA: 300 9_ b9 => 340 __ oc
+            # This change is not compatible with DC converter (only 1 tag per DC element). 2 DC elements generated instead.
+            all_tags('3009_', 'a c') { |t|
+              xml['dcterms'].extent list_s(t._a, repeat(t.a_c))
+            }
+            all_tags('340__', 'o c') { |t|
+              xml['dcterms'].extent list_s(t._o, opt_r(t._c))
             }
           end
 
@@ -1123,12 +1261,16 @@ module Libis
 
           def marc2dc_extent_309(xml)
             # [MARC 309 __ $a]
-            each_field('309__', 'a') { |f| xml['dcterms'].extent f }
+            # each_field('309__', 'a') { |f| xml['dcterms'].extent f }
+            # ALMA: 309 __ a => 306 __ a
+            # covered by marc2dc_extent_306
           end
 
           def marc2dc_extent_339(xml)
             # [MARC 339 __ $a*]
-            all_tags('339__', 'a') { |t| xml['dcterms'].extent repeat(t.a_a) }
+            # all_tags('339__', 'a') { |t| xml['dcterms'].extent repeat(t.a_a) }
+            # ALMA: 339 __ a => 340 __ d
+            all_tags('340__', 'd') { |t| xml['dcterms'].extent repeat(t.a_d) }
           end
 
           def marc2dc_accrualperiodicity(xml)
@@ -1137,7 +1279,7 @@ module Libis
             # [MARC 310 __ $a] " (" [MARC 310 __ $b] ")"
             all_tags('310__', 'a b') { |t|
               xml['dcterms'].accrualPeriodicity list_s(t._a,
-                                                     opt_r(t._b))
+                                                       opt_r(t._b))
             }
           end
 
@@ -1159,22 +1301,31 @@ module Libis
 
           def marc2dc_medium_319__(xml)
             # [MARC 319 __ $a]
-            each_field('319__', 'a') { |f| xml['dcterms'].medium f }
+            # each_field('319__', 'a') { |f| xml['dcterms'].medium f }
+            # ALMA: 319 __ a => 340 __ e
+            each_field('340__', 'e') { |f| xml['dcterms'].medium f }
           end
 
           def marc2dc_medium_319_9(xml)
             # [MARC 319 9_ $a] " (" [MARC 319 9_ $9] ")"
-            all_tags('3199_', 'a 9') { |t|
-              xml['dcterms'].medium list_s(t._a,
-                                         opt_r(t._9))
-            }
+            # all_tags('3199_', 'a 9') { |t|
+            #   xml['dcterms'].medium list_s(t._a,
+            #                              opt_r(t._9))
+            # }
+            # ALMA: 319 9_ a => 340 __ e
+            # covered by marc2dc_medium_319__
           end
 
           def marc2dc_medium_399(xml)
             # [MARC 399 __ $a]  " " [MARC 399 __ $b] " (" [MARC 399 __ $9] ")"
-            all_tags('399__', 'a b 9') { |t|
+            # all_tags('399__', 'a b 9') { |t|
+            #   xml['dcterms'].medium list_s(t._ab,
+            #                              opt_r(t._9))
+            # }
+            # ALMA: 399 __ ab9 => 950 __ abc
+            all_tags('950__', 'a b c') { |t|
               xml['dcterms'].medium list_s(t._ab,
-                                         opt_r(t._9))
+                                           opt_r(t._c))
             }
           end
 
@@ -1189,8 +1340,12 @@ module Libis
             # DCTERMS:REPLACES
 
             # [MARC 247 1# $a] " : " [MARC 247 1# $b] " (" [MARC 247 1# $9] ")"
-            all_tags('2471#', 'a b 9') { |t|
-              xml['dcterms'].replaces list_s(element(t._a, t._b, join: ' : '), opt_r(t._9))
+            # all_tags('2471#', 'a b 9') { |t|
+            #   xml['dcterms'].replaces list_s(element(t._a, t._b, join: ' : '), opt_r(t._9))
+            # }
+            # ALMA: 247 10 9Z => 247 10 g6
+            all_tags('2471#', 'a b g') { |t|
+              xml['dcterms'].replaces list_s(element(t._a, t._b, join: ' : '), opt_r(t._g))
             }
           end
 
@@ -1198,7 +1353,9 @@ module Libis
             # DCTERMS:HASVERSION
 
             # [MARC 534 __ $a]
-            each_field('534__', 'a') { |f| xml['dcterms'].hasVersion f }
+            # each_field('534__', 'a') { |f| xml['dcterms'].hasVersion f }
+            # ALMA: 534 __ a => 534 __ b
+            each_field('534__', 'b') { |f| xml['dcterms'].hasVersion f }
           end
 
           def marc2dc_source(xml)
@@ -1309,8 +1466,12 @@ module Libis
 
           def marc2dc_language_014_9__9(xml)
             # [MARC 041 9_ $9*]
-            all_tags('0419_', '9') { |t|
-              xml['dc'].language repeat(t.a_9.collect { |y| taalcode(y) })
+            # all_tags('0419_', '9') { |t|
+            #   xml['dc'].language repeat(t.a_9.collect { |y| taalcode(y) })
+            # }
+            # ALMA: 041 9# 9 => 041 __ k
+            all_tags('041__', 'k') { |t|
+              xml['dc'].language repeat(t.a_k.collect { |y| taalcode(y) })
             }
           end
 
@@ -1336,8 +1497,12 @@ module Libis
 
           def marc2dc_language_041__9_9(xml)
             # "Ondertitels: " [MARC 041 _9 $9*]
-            all_tags('041_9', '9') { |t|
-              xml['dc'].language element(t.a_9.collect { |y| taalcode(y) }, prefix: 'Ondertitels:')
+            # all_tags('041_9', '9') { |t|
+            #   xml['dc'].language element(t.a_9.collect { |y| taalcode(y) }, prefix: 'Ondertitels:')
+            # }
+            # ALMA: 041 #9 9 => 041 __ j
+            all_tags('041__', 'j') { |t|
+              xml['dc'].language element(t.a_j.collect { |y| taalcode(y) }, prefix: 'Ondertitels:')
             }
           end
 
@@ -1362,11 +1527,13 @@ module Libis
             # [MARC 546 __ $a]
             each_field('546__', 'a') { |f| xml['dc'].language f }
 
-            # []MARC 546 9_ $a]
-            each_field('5469_', 'a') { |f| xml['dc'].language f }
+            # [MARC 546 9_ $a]
+            # ALMA: 546 9_ a => 546 __ a
+            # each_field('5469_', 'a') { |f| xml['dc'].language f }
 
             # [MARC 546 _9 $a]
-            each_field('546_9', 'a') { |f| xml['dc'].language f }
+            # ALMA: 546 _9 a => 546 __ a
+            # each_field('546_9', 'a') { |f| xml['dc'].language f }
           end
 
           def marc2dc_rightsholder(xml)
@@ -1388,9 +1555,9 @@ module Libis
             all_tags('7102_', '4') { |t|
               next unless check_name(t, :rightsholder)
               xml['dcterms'].rightsholder element(list_s(t._a,
-                                                       opt_r(t._g)),
+                                                         opt_r(t._g)),
                                                   list_s(opt_r(t._9),
-                                                       opt_r(t._e)),
+                                                         opt_r(t._e)),
                                                   join: ', ')
             }
           end
@@ -1465,7 +1632,7 @@ module Libis
           end
 
           def lookup(table, key, constraints = {})
-            table.select { |value| constraints.map { |k,v| value[k] == v }.all? }.map { |v| v[key] }
+            table.select { |value| constraints.map { |k, v| value[k] == v }.all? }.map { |v| v[key] }
           end
 
           #noinspection RubyStringKeysInHashInspection
@@ -1476,7 +1643,7 @@ module Libis
                   arc: ['architect', :contributor],
                   arr: ['arranger', :contributor],
                   art: ['artist', :creator],
-                  aui: ['author of introduction', :contributor ],
+                  aui: ['author of introduction', :contributor],
                   aut: ['author', :creator],
                   bbl: ['bibliography', :contributor],
                   bdd: ['binder', :contributor],

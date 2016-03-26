@@ -1,3 +1,5 @@
+require 'libis/tools/thread_safe'
+
 module Libis
   module Tools
     # noinspection RubyResolve
@@ -469,6 +471,7 @@ module Libis
       # Container class for creating a division in the METS.
       class Div
         include MetsObject
+        include Libis::Tools::ThreadSafe
 
         attr_accessor :label
 

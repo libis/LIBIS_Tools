@@ -22,6 +22,10 @@ module Libis
           @id = id
         end
 
+        def id
+          @id
+        end
+
         # Convert structure to String. Can be used for debugging to show what is stored.
         def to_s
           "#{self.class}:\n" +

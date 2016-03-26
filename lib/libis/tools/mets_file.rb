@@ -254,7 +254,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::Representation]
       def representation(hash = {})
         rep = ::Libis::Tools::MetsFile::Representation.new
-        rep.set_id = get_id(::Libis::Tools::MetsFile::Representation)
+        rep.set_id get_id(::Libis::Tools::MetsFile::Representation)
         rep.set_from_hash hash
         @representations[rep.id] = rep
       end
@@ -264,7 +264,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::Div]
       def div(hash = {})
         div = Libis::Tools::MetsFile::Div.new
-        div.set_id = get_id(::Libis::Tools::MetsFile::Div)
+        div.set_id get_id(::Libis::Tools::MetsFile::Div)
         div.set_from_hash hash
         @divs[div.id] = div
       end
@@ -274,7 +274,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::File]
       def file(hash = {})
         file = Libis::Tools::MetsFile::File.new
-        file.set_id = get_id(::Libis::Tools::MetsFile::File)
+        file.set_id get_id(::Libis::Tools::MetsFile::File)
         file.set_from_hash hash
         @files[file.id] = file
       end
@@ -286,7 +286,7 @@ module Libis
       # @return [Libis::Tools::MetsFile::Map]
       def map(rep, div, logical = false)
         map = Libis::Tools::MetsFile::Map.new
-        map.set_id = get_id(::Libis::Tools::MetsFile::Map)
+        map.set_id get_id(::Libis::Tools::MetsFile::Map)
         map.representation = rep
         map.div = div
         map.is_logical = logical

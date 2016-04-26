@@ -52,6 +52,7 @@ module Libis
               marc2dc_rightsholder(xml)
               marc2dc_references(xml)
               marc2dc_isreferencedby(xml)
+              marc2dc_coverage(xml)
 
             end
 
@@ -479,6 +480,7 @@ module Libis
             marc2dc_subject_691(xml)
             marc2dc_subject_082(xml)
             marc2dc_subject_690(xml)
+            marc2dc_subject_650__7(xml)
           end
 
           def marc2dc_subject_600(xml)
@@ -559,6 +561,15 @@ module Libis
             # ALMA: 690 ## => 650 _7
             # Set.new(all_fields('650_7', 'a')).each { |f| xml['dc'].subject f }
             # rule disbled gives duplicates and needs to be redefined by KUL cataloguing staff
+          end
+
+          def marc2dc_subject_650__7(xml)
+            # KADOC: ODIS-TW zoals ODIS-PS
+            all_tags('650_7', '26a') { |t|
+              next unless t._2 == 'KADOC' and t._6 =~ /^\(ODIS-(TW)\)(\d)+$/
+              # xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
+              xml['dc'].subject list_s(t._a, element($2, prefix: '[', postfix: ']'))
+            }
           end
 
           def marc2dc_temporal(xml)
@@ -1595,6 +1606,16 @@ module Libis
             all_tags('5104_', 'a c') { |t|
               xml['dcterms'].isReferencedBy element(t._ac, join: ', ')
             }
+          end
+
+          def marc2dc_coverage(xml)
+            # KADOC: ODIS-GEO zoals ODIS-PS
+            all_tags('650_7', '26a') { |t|
+              next unless t._2 == 'KADOC' and t._6 =~ /^\(ODIS-(GEO)\)(\d)+$/
+              # xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
+              xml['dc'].coverage list_s(t._a, element($2, prefix: '[', postfix: ']'))
+            }
+
           end
 
           protected

@@ -1078,7 +1078,7 @@ module Libis
             # each_field('0889_', 'a') { |f| xml['dc'].type f } if each_field('088__', 'axy').empty?
             # ALMA: 088 9_ a9 => 340 __ d3
             # ALMA: 088 __ axyz9 => 340 __ a3 [$xyz skipped]
-            each_field('340__', 'd') { |f| xml['dc'].type f } if each_field('340__', 'a').empty?
+            each_field('340__', 'd') { |f| xml['dc'].type f } if all_fields('340__', 'a').empty?
           end
 
           def marc2dc_type_088____z(xml)

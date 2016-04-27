@@ -3,7 +3,7 @@
         xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <leader>01068nam 2200241u 4500</leader>
   <controlfield tag="005">20150701153710.0</controlfield>
-  <controlfield tag="008">000608m17221724xx |||| |   000|0   lat c</controlfield>
+  <controlfield tag="008">000608m17221724xx |||| |     000|0 lat c</controlfield>
   <controlfield tag="001">9921543960101471</controlfield>
   <datafield tag="035" ind1=" " ind2=" ">
     <subfield code="a">(BeLVLBS)002154396LBS01-Aleph</subfield>
@@ -48,6 +48,27 @@
     <subfield code="2">UDC</subfield>
     <subfield code="a">276 =75</subfield>
     <subfield code="x">Griekse patrologie</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="2">KADOC</subfield>
+    <subfield code="a">Bisdom Antwerpen (1961-heden)</subfield>
+    <subfield code="6">(ODIS-ORG)9284</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="2">KADOC</subfield>
+    <subfield code="a">Studiecentrum voor Zielzorg en Predicatie</subfield>
+    <subfield code="6">(ODIS-ORG)24894</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="2">KADOC</subfield>
+    <subfield code="a">Antwerpen [deelgemeente in gemeente Antwerpen - BE]</subfield>
+    <subfield code="6">(ODIS-GEO)10560000006504</subfield>
+  </datafield>
+  <datafield tag="650" ind1=" " ind2="7">
+    <subfield code="2">KADOC</subfield>
+    <subfield code="a">C1</subfield>
+    <subfield code="x">Kerken en religie</subfield>
+    <subfield code="6">(ODIS-HT)</subfield>
   </datafield>
   <datafield tag="653" ind1=" " ind2="6">
     <subfield code="a">Books before 1840</subfield>

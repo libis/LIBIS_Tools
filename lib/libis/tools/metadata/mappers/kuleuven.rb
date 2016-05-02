@@ -190,14 +190,15 @@ module Libis
             #   end
             # }
             # ALMA: 690 02 ax0 => 650 _7 ax6 $2 == 'KADOC'
-            all_tags('650_7', '6a') { |t|
-              next unless t._2 == 'KADOC'
-              if t._6 =~ /^\(ODIS-(PS|ORG)\)(\d+)$/
-                xml['dc'].identifier(odis_link($1, $2, CGI::escape(t._a)), 'xsi:type' => 'dcterms:URI')
-              # else
-              #   xml['dc'].identifier t._a
-              end
-            }
+            # all_tags('650_7', '6a') { |t|
+            #   next unless t._2 == 'KADOC'
+            #   if t._6 =~ /^\(ODIS-(PS|ORG)\)(\d+)$/
+            #     xml['dc'].identifier(odis_link($1, $2, CGI::escape(t._a)), 'xsi:type' => 'dcterms:URI')
+            #   # else
+            #   #   xml['dc'].identifier t._a
+            #   end
+            # }
+            # Verhuisd naar subject op vraag van KADOC (Luc Schokkaert)
           end
 
           def marc2dc_identifier_856(xml)
@@ -564,11 +565,13 @@ module Libis
           end
 
           def marc2dc_subject_650__7(xml)
-            # KADOC: ODIS-TW zoals ODIS-PS
             all_tags('650_7', '26a') { |t|
-              next unless t._2 == 'KADOC' and t._6 =~ /^\(ODIS-(TW)\)(\d)+$/
-              # xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
-              xml['dc'].subject list_s(t._a, element($2, prefix: '[', postfix: ']'))
+              next unless t._2 == 'KADOC'
+              if t._6 =~ /^\(ODIS-(PS|ORG)\)(\d+)$/
+                xml['dc'].subject(odis_link($1, $2, CGI::escape(t._a)), 'xsi:type' => 'dcterms:URI')
+              elsif t._6 =~ /^\(ODIS-(TW)\)(\d)+$/
+                xml['dc'].subject list_s(t._a, element(t._6, prefix: '[', postfix: ']'))
+              end
             }
           end
 
@@ -1609,7 +1612,6 @@ module Libis
             # KADOC: ODIS-GEO zoals ODIS-PS
             all_tags('650_7', '26a') { |t|
               next unless t._2 == 'KADOC' and t._6 =~ /^\(ODIS-(GEO)\)(\d)+$/
-              # xml['dc'].identifier('xsi:type' => 'dcterms:URI').text odis_link($1, $2, CGI::escape(t._a))
               xml['dc'].coverage list_s(t._a, element(t._6, prefix: '[', postfix: ']'))
             }
           end

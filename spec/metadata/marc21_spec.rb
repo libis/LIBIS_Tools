@@ -114,11 +114,11 @@ describe 'Marc21Record' do
   <dc:identifier>urn:ControlNumber:9921543960101471</dc:identifier>
   <dc:identifier>(BeLVLBS)002154396LBS01-Aleph</dc:identifier>
   <dc:identifier>8389207</dc:identifier>
-  <dc:identifier xsi:type="dcterms:URI">http://www.odis.be/lnk/or_9284#Bisdom+Antwerpen+%281961-heden%29</dc:identifier>
-  <dc:identifier xsi:type="dcterms:URI">http://www.odis.be/lnk/or_24894#Studiecentrum+voor+Zielzorg+en+Predicatie</dc:identifier>
   <dc:title>Anecdota Graeca, sacra et profana /</dc:title>
   <dc:creator>Wolf, Johann Christoph, 1683-1739, (author)</dc:creator>
   <dc:subject xsi:type="http://purl.org/dc/terms/UDC">276 =75 Griekse patrologie</dc:subject>
+  <dc:subject xsi:type="dcterms:URI">http://www.odis.be/lnk/or_9284#Bisdom+Antwerpen+%281961-heden%29</dc:subject>
+  <dc:subject xsi:type="dcterms:URI">http://www.odis.be/lnk/or_24894#Studiecentrum+voor+Zielzorg+en+Predicatie</dc:subject>
   <dc:temporal>1701-1750</dc:temporal>
   <dc:description>Ded. Petrus Theodorus Seelmann; Erdmannus Neumeister; Thomas Claussen; Joannes Grammius\n    \nElk deel heeft eigen titelp. in roodzwartdruk, met drukkersmerk</dc:description>
   <dc:date>1722 - 1724</dc:date>

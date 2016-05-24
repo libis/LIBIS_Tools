@@ -69,7 +69,7 @@ module Libis
                    return {} unless File.exist?(file_or_hash)
                    yield File.absolute_path(file_or_hash) if block_given?
                    # noinspection RubyResolve
-                   YAML.load(ERB.new(open(file_or_hash).read).result) rescue {}
+                   YAML.load(ERB.new(open(file_or_hash).read).result)
                  else
                    {}
                end

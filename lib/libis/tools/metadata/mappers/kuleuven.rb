@@ -1624,7 +1624,7 @@ module Libis
 
           def name_type(data)
             #noinspection RubyResolve
-            code = data._4.to_sym
+            code = data._4.to_sym rescue nil
             if DOLLAR4TABLE[data.tag].has_key? code
               return DOLLAR4TABLE[data.tag][code][1]
             end

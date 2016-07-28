@@ -120,10 +120,9 @@ module Libis
       # @param [Object] args optional list of extra arguments
       # @!method(message(severity, msg, *args))
       def message(severity, msg, *args)
-        message_text = (msg % args rescue ((msg + ' - %s') % args.to_s))
+        message_text = (msg % args rescue "#{msg}#{args.empty? ? '' : " - #{args}"}")
         self.logger.add(::Logging.level_num(severity), message_text)
       end
-
 
     end
 

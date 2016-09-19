@@ -37,7 +37,7 @@ module Libis
                         doc
                       when String
                         # noinspection RubyResolve
-                        File.exist?(doc) ? Libis::Tools::XmlDocument.load(doc) : Libis::Tools::XmlDocument.parse(doc)
+                        File.exist?(doc) ? Libis::Tools::XmlDocument.open(doc) : Libis::Tools::XmlDocument.parse(doc)
                       when IO
                         Libis::Tools::XmlDocument.parse(doc.read)
                       when Hash

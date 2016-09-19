@@ -21,7 +21,6 @@ describe 'ScopeMapper' do
     converted_dc = input_dc.to_dc
     expect(converted_dc).to be_a Libis::Tools::Metadata::DublinCoreRecord
 
-    expect(converted_dc.root).to be_equivalent_to output_dc.root
     converted_dc.root.elements.each_with_index do |element, i|
       expect(element).to be_equivalent_to(output_dc.root.elements[i])
     end

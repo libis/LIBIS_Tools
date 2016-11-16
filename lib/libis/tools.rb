@@ -7,11 +7,12 @@ module Libis
     autoload :Command, 'libis/tools/command'
     autoload :Config, 'libis/tools/config'
     autoload :ConfigFile, 'libis/tools/config_file'
-    autoload :DCRecord, 'libis/tools/dc_record'
+    autoload :Csv, 'libis/tools/csv'
     autoload :DeepStruct, 'libis/tools/deep_struct'
     autoload :Logger, 'libis/tools/logger'
     autoload :MetsFile, 'libis/tools/mets_file'
     autoload :Parameter, 'libis/tools/parameter'
+    autoload :Spreadsheet, 'libis/tools/spreadsheet'
     autoload :ThreadSafe, 'libis/tools/thread_safe'
     autoload :XmlDocument, 'libis/tools/xml_document'
 

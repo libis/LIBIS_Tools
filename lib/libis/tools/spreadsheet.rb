@@ -2,10 +2,6 @@ require 'libis/tools/extend/roo'
 require 'libis/tools/extend/hash'
 require 'awesome_print'
 
-def PUTS(*args)
-  puts *args
-end
-
 module Libis
   module Tools
 
@@ -136,9 +132,6 @@ module Libis
         @current_row = @ss.header_line
 
         # checks
-        PUTS 'required_headers:', required_headers.ai
-        PUTS 'header_line: ', @ss.header_line
-        PUTS 'header_row:', @ss.row([@ss.header_line, 1].max).ai
         found_headers = required_headers & @ss.row([@current_row, 1].max)
         if found_headers.empty?
           # No headers found - check if there are enough columns to satisfy the required headers
@@ -152,14 +145,8 @@ module Libis
           # All required headers found
         end
 
-        PUTS 'sheet headers: ', @ss.headers.ai
-        PUTS 'header_line: ', @ss.header_line.ai
-        PUTS 'header_options: ', header_options.ai
-        PUTS 'header row:', @ss.row(@ss.header_line).ai
         @extra_headers = (required_headers.empty? && optional_headers.empty?) ? [] :
             @ss.row(@ss.header_line).keep_if { |x| x && !header_options.values.include?(x) }
-        PUTS '@extra_headers:', @extra_headers.ai
-        PUTS 'headers:', headers.ai
 
         @header_options = header_options.merge(Hash[@extra_headers.map { |v| [v] * 2 }])
       end

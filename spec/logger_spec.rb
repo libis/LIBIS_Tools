@@ -51,7 +51,7 @@ describe 'Logger' do
     end
 
     it 'should log fatal output' do
-      test_logger.fatal 'Fatal message'
+      test_logger.fatal_error 'Fatal message'
       output = logoutput.string.lines.map(&:chomp)
       expect(output.size).to eq 1
       expect(output.last).to match /^F, #{timestamp_regex} FATAL : Fatal message$/
@@ -80,7 +80,7 @@ describe 'Logger' do
       # noinspection RubyResolve
       expect(output).not_to be_empty
 
-      test_logger.fatal 'Fatal message'
+      test_logger.fatal_error 'Fatal message'
       output = logoutput.string.lines.map(&:chomp)
       # noinspection RubyResolve
       expect(output).not_to be_empty

@@ -56,7 +56,7 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', 'abc')
     expect(result[:out]).to eq []
     expect(result[:err].size).to eq 1
-    expect(result[:err][0]).to match /ls: cannot access abc: No such file or directory/
+    expect(result[:err][0]).to match /ls: cannot access '?abc'?: No such file or directory/
     expect(result[:status]).to eq 2
 
   end

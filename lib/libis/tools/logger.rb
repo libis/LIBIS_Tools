@@ -101,8 +101,8 @@ module Libis
       #
       # (see #debug)
       # @param (see #debug)
-      # @!method(fatal(msg, *args))
-      def fatal(msg, *args)
+      # @!method(fatal_error(msg, *args))
+      def fatal_error(msg, *args)
         self.message :FATAL, msg, *args
       end
 

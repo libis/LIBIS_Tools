@@ -1,6 +1,5 @@
 require 'roo'
 require 'roo-xls'
-require 'roo-google'
 require 'libis/tools/extend/hash'
 
 module Roo

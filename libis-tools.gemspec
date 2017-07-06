@@ -46,5 +46,4 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'yard', '~> 0.8'
   spec.add_runtime_dependency 'roo', '~> 2.5'
   spec.add_runtime_dependency 'roo-xls', '~> 1.0'
-  spec.add_runtime_dependency 'roo-google', '~> 1.0'
 end

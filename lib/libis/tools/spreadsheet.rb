@@ -9,7 +9,7 @@ module Libis
 
       # Spreadsheet reader.
       #
-      # This class supports CSV, Excel 2007-2016, Excel (pre-2007), LibreOffice/OpenOffice Calc and Google spreadsheets
+      # This class supports CSV, Excel 2007-2016, Excel (pre-2007) and LibreOffice/OpenOffice Calc
       # thanks to the Roo (http://github.com/roo-rb/roo) project.
       #
       # The first argument is the file name to read. For spreadsheets, append '|' and the sheet name to specify the

@@ -1,10 +1,14 @@
 # require 'codeclimate-test-reporter'
 # ::CodeClimate::TestReporter.start
 
-require 'coveralls'
-Coveralls.wear!
+if !defined?(RUBY_ENGINE) || RUBY_ENGINE != 'jruby'
+  require 'coveralls'
+  Coveralls.wear!
+end
 
+# noinspection RubyResolve
 require 'bundler/setup'
+# noinspection RubyResolve
 Bundler.setup
 
 require 'rspec'

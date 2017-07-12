@@ -46,8 +46,7 @@ module Libis
       #
       # @param [String,Hash] file_or_hash optional String or Hash argument to initialize the data.
       def <<(file_or_hash, &block)
-        _file_to_hash(file_or_hash, &block).each { |key, value| self[key] = value }
-        self
+        self.merge!(_file_to_hash(file_or_hash, &block))
       end
 
       # Save configuration parameters in a YAML file.

@@ -39,7 +39,7 @@ describe ::Libis::Tools::ConfigFile do
       subject << hash
       # noinspection RubyResolve
       subject.b.v = 1
-      hash[:b]['v'] = 1
+      hash[:b][:v] = 1
       expect(subject.to_hash).to eq hash
     end
 
@@ -47,7 +47,7 @@ describe ::Libis::Tools::ConfigFile do
       subject << hash
       # noinspection RubyResolve
       subject.c[0][0].a[0].v = 1
-      hash[:c][0][0][:a][0]['v'] = 1
+      hash[:c][0][0][:a][0][:v] = 1
       expect(subject.to_hash).to eq hash
     end
 

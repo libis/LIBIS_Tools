@@ -26,12 +26,25 @@ module Libis
 
       def merge(hash)
         return self unless hash.respond_to?(:to_hash)
-        hash.to_hash.inject(self.dup) { |ds, (key, value)| ds[key] = value; ds }
+        hash.to_hash.inject(self.dup) do |ds, (key, value)|
+          ds[key] = DeepDup.new(
+              recurse_over_arrays: @recurse_over_arrays,
+              preserve_original_keys: @preserve_original_keys
+          ).call(value)
+          ds
+        end
       end
 
       def merge!(hash)
         return self unless hash.respond_to?(:to_hash)
-        hash.to_hash.inject(self) { |ds, (key, value)| ds[key] = value; ds }
+        hash.to_hash.inject(self) do |ds, (key, value)|
+          ds[key] = DeepDup.new(
+              recurse_over_arrays: @recurse_over_arrays,
+              preserve_original_keys: @preserve_original_keys
+          ).call(value)
+          ds
+        end
+        self
       end
 
       def key?(key)

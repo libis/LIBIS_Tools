@@ -2,23 +2,35 @@ language: ruby
 cache: bundler
 sudo: false
 rvm:
-  - 2.1.0
-  - 2.2.0
+  - 2.1.10
+  - 2.2.7
+  - 2.3.4
+  - 2.4.1
   - ruby-head
+  - jruby-9.0.5.0
   - jruby-9.1.5.0
+  - jruby-head
 jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
 matrix:
   exclude:
-    - rvm: 2.1.0
+    - rvm: 2.1.10
       jdk: oraclejdk7
-    - rvm: 2.1.0
+    - rvm: 2.1.10
       jdk: oraclejdk8
-    - rvm: 2.2.0
+    - rvm: 2.2.7
       jdk: oraclejdk7
-    - rvm: 2.2.0
+    - rvm: 2.2.7
+      jdk: oraclejdk8
+    - rvm: 2.3.4
+      jdk: oraclejdk7
+    - rvm: 2.3.4
+      jdk: oraclejdk8
+    - rvm: 2.4.1
+      jdk: oraclejdk7
+    - rvm: 2.4.1
       jdk: oraclejdk8
     - rvm: ruby-head
       jdk: oraclejdk7
@@ -26,7 +38,7 @@ matrix:
       jdk: oraclejdk8
   allow_failures:
     - rvm: ruby-head
-    - rvm: jruby-9.1.5.0
+    - rvm: jruby-head
 branches:
   only:
       - master

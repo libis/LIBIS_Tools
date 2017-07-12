@@ -184,7 +184,7 @@ module Libis
           end
 
           @current_row = @ss.header_line
-          @header_options = ss_options.merge(skip_headers: true)
+          @header_options = ss_options
         end
 
         @header_options.dup

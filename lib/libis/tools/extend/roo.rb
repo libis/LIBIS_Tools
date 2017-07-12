@@ -8,9 +8,8 @@ module Roo
   class Base
 
     # changes:
-    # - added option :skip_header to prevent #each and #parse to return the header row
     # - added option :partial_match to allow to use headers that only partially match the query
-    # - added option :required to force the result to have at least these columns
+    # - added option :required_headers to force the result to have at least these columns
     # - allow option :headers to contain an array with header labels that will be forced when no header row is found
     # - improved proper range scanning (first_row->last_row and first_column->last_column)
 
@@ -19,13 +18,11 @@ module Roo
     def each(options = {})
       return to_enum(:each, options) unless block_given?
 
-      skip_headers = options.delete(:skip_headers)
       @partial_match = options.delete(:partial_match) if options.has_key?(:partial_match)
       required_headers = options.delete(:required_headers) if options.has_key?(:required_headers)
 
       if options.empty?
         first_row.upto(last_row) do |line|
-          next if skip_headers && line == header_line
           yield row(line)
         end
       else
@@ -35,9 +32,7 @@ module Roo
           raise Roo::HeaderRowIncompleteError unless headers.keys & required_headers == required_headers
         end
 
-        start_line = header_line
-        start_line += 1 if skip_headers
-        start_line.upto(last_row) do |line|
+        header_line.upto(last_row) do |line|
           yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
         end
       end

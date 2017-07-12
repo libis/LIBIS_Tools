@@ -809,7 +809,6 @@ describe 'Libis::Tools::Spreadsheet' do
         it '#shift returns Hash object' do
           row = ss.shift
           expect(row).to be_a Hash
-          puts row
           expect(row['Date']).to eq Date.new(2016, 05, 10)
           expect(row['Amount']).to eq 1270.0
           expect(row['Code']).to eq 1
@@ -857,7 +856,6 @@ describe 'Libis::Tools::Spreadsheet' do
         it '#shift returns Hash object' do
           row = ss.shift
           expect(row).to be_a Hash
-          puts row
           expect(row['Date']).to eq Date.new(2016, 05, 10)
           expect(row['Amount']).to eq 1270.0
           expect(row['Code']).to eq 1
@@ -1080,7 +1078,6 @@ describe 'Libis::Tools::Spreadsheet' do
         it '#shift returns Hash object' do
           row = ss.shift
           expect(row).to be_a Hash
-          puts row
           expect(row['Date']).to eq Date.new(2016, 05, 10)
           expect(row['Amount']).to eq 1270.0
           expect(row['Code']).to eq 1
@@ -1128,7 +1125,6 @@ describe 'Libis::Tools::Spreadsheet' do
         it '#shift returns Hash object' do
           row = ss.shift
           expect(row).to be_a Hash
-          puts row
           expect(row['Date']).to eq Date.new(2016, 05, 10)
           expect(row['Amount']).to eq 1270.0
           expect(row['Code']).to eq 1

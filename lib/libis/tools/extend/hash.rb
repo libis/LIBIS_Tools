@@ -49,6 +49,16 @@ class Hash
     self.merge!(other_hash) {|_,v, _| v}
   end unless method_defined? :reverse_merge!
 
+  # Apply other hash values if current value is blank
+  def apply_defaults(other_hash)
+    self.merge(other_hash) {|_,v, w| v.blank? ? w : v}
+  end unless method_defined? :apply_defaults
+
+  # Apply in-place other hash values if current value is blank
+  def apply_defaults!(other_hash)
+    self.merge!(other_hash) {|_,v, w| v.blank? ? w : v}
+  end unless method_defined? :apply_defaults!
+
   # Convert all keys to symbols. In-place operation.
   # @param (see #key_strings_to_symbols)
   def key_strings_to_symbols!(options = {})

@@ -39,6 +39,16 @@ class Hash
     end
   end unless method_defined? :recursive_merge!
 
+  # Merges two hashes with priority for the first hash
+  def reverse_merge(other_hash)
+    self.merge(other_hash) {|_,v, _| v}
+  end unless method_defined? :reverse_merge
+
+  # Merges two hashes in-place with priority for the first hash
+  def reverse_merge!(other_hash)
+    self.merge!(other_hash) {|_,v, _| v}
+  end unless method_defined? :reverse_merge!
+
   # Convert all keys to symbols. In-place operation.
   # @param (see #key_strings_to_symbols)
   def key_strings_to_symbols!(options = {})

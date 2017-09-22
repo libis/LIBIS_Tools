@@ -134,5 +134,45 @@ STR
     end
   end
 
+  context '123456789' do
+    let(:xml) { Libis::Tools::XmlDocument.open(File.join(File.dirname(__FILE__), '123456789.marc')) }
+
+    it 'load from xml' do
+      puts record.marc_dump
+      expect(record.marc_dump).to eq <<-STR.align_left
+        LDR:'01068nam 2200241u 4500'
+        005:'20150701153710.0'
+        008:'000608m17221724xx |||| |     000|0 lat c'
+        001:'9901234567890471'
+        035: : :
+        \ta:["(BeLVLBS)123456789LBS01-Aleph"]
+        035: : :
+        \ta:["123456789"]
+        245:0:0:
+        \ta:["Title with special chars: 'éÄçñåúðäíö' / \\\"ß¥²¤€®©œøæ’×½¼þ«»¶ǽµ¢ŒÆØŒ§Ð\\\" < & % $ # >"]
+        \tc:["subtitle with special chars: \\\"ß¥²¤€®©œøæ’×½¼þ«»¶ǽµ¢ŒÆØŒ§Ð\\\" < & % $ # >"]
+      STR
+    end
+
+    it 'convert to dublin core' do
+      record.extend Libis::Tools::Metadata::Mappers::Kuleuven
+      xml_doc = Libis::Tools::XmlDocument.parse <<STR
+<?xml version="1.0" encoding="utf-8"?>
+<dc:record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <dc:identifier>urn:ControlNumber:9901234567890471</dc:identifier>
+  <dc:identifier>(BeLVLBS)123456789LBS01-Aleph</dc:identifier>
+  <dc:identifier>123456789</dc:identifier>
+  <dc:title>Title with special chars: &apos;éÄçñåúðäíö&apos; / &quot;ß¥²¤€®©œøæ’×½¼þ«»¶ǽµ¢ŒÆØŒ§Ð&quot; &lt; &amp; % $ # &gt;</dc:title>
+  <dc:date>1722 - 1724</dc:date>
+  <dc:language>la</dc:language>
+</dc:record>
+STR
+      puts puts record.to_dc.to_xml
+      record.to_dc.root.elements.each_with_index do |element, i|
+        expect(element).to be_equivalent_to(xml_doc.root.elements[i])
+      end
+    end
+  end
+
 end
 

@@ -24,7 +24,7 @@ module Libis
           @node.xpath('.//controlfield').each { |f|
             tag = f['tag']
             tag = '%03d' % tag.to_i if tag.size < 3
-            @all_records[tag] << FixField.new(tag, CGI::escapeHTML(f.content))
+            @all_records[tag] << FixField.new(tag, f.content)
           }
 
           @node.xpath('.//datafield').each { |v|
@@ -34,7 +34,7 @@ module Libis
 
             varfield = VarField.new(tag, v['ind1'].to_s, v['ind2'].to_s)
 
-            v.xpath('.//subfield').each { |s| varfield.add_subfield(s['code'], CGI::escapeHTML(s.content)) }
+            v.xpath('.//subfield').each { |s| varfield.add_subfield(s['code'], s.content) }
 
             @all_records[tag] << varfield
 

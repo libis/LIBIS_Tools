@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"
+        xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <leader>01068nam 2200241u 4500</leader>
+  <controlfield tag="005">20150701153710.0</controlfield>
+  <controlfield tag="008">000608m17221724xx |||| |     000|0 lat c</controlfield>
+  <controlfield tag="001">9901234567890471</controlfield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">(BeLVLBS)123456789LBS01-Aleph</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">123456789</subfield>
+  </datafield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">Title with special chars: 'éÄçñåúðäíö&apos; / "ß¥²¤€®©œøæ’×½¼þ«»¶ǽµ¢ŒÆØŒ§Ð&quot; &lt; &amp; % $ # &gt;</subfield>
+    <subfield code="c">subtitle with special chars: "ß¥²¤€®©œøæ’×½¼þ«»¶ǽµ¢ŒÆØŒ§Ð&quot; &lt; &amp; % $ # &gt;</subfield>
+  </datafield>
+</record>

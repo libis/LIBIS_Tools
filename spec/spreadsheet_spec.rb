@@ -6,11 +6,13 @@ require 'libis/tools/spreadsheet'
 describe 'Libis::Tools::Spreadsheet' do
 
   let(:path) {File.absolute_path('data', File.dirname(__FILE__))}
+  let(:options) { {} }
   let(:ss) {
     Libis::Tools::Spreadsheet.new(
         File.join(path, file_name),
-        required: required_headers,
+        { required: required_headers,
         optional: optional_headers
+        }.merge(options)
     )
   }
 
@@ -106,6 +108,237 @@ describe 'Libis::Tools::Spreadsheet' do
 
     context 'without headers' do
       let(:file_name) {'test-noheaders.csv'}
+
+      context 'well-formed and strict' do
+        let(:required_headers) {%w'FirstName LastName'}
+
+        it 'opens correctly' do
+          expect {ss}.not_to raise_error
+        end
+
+        it 'contains only required headers' do
+          required_headers.each do |header|
+            expect(ss.headers).to include header
+          end
+          expect(ss.headers).to eq %w'FirstName LastName'
+        end
+
+        it '#shift returns Hash object' do
+          row = ss.shift
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to be_nil
+          expect(row['phone']).to be_nil
+        end
+
+        it '#parse returns Array of Hash objects' do
+          rows = ss.parse
+          expect(rows).to be_a Array
+          expect(rows.size).to eq 1
+          row = rows[0]
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to be_nil
+          expect(row['phone']).to be_nil
+        end
+
+      end
+
+      context 'well-formed with optional headers' do
+        let(:required_headers) {%w'FirstName LastName'}
+        let(:optional_headers) {%w'address'}
+
+        it 'opens correctly' do
+          expect {ss}.not_to raise_error
+        end
+
+        it 'contains required and optional headers' do
+          required_headers.each do |header|
+            expect(ss.headers).to include header
+          end
+          optional_headers.each do |header|
+            expect(ss.headers).to include header
+          end
+          expect(ss.headers).to eq %w'FirstName LastName address'
+        end
+
+        it '#shift returns Hash object' do
+          row = ss.shift
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+        it '#parse returns Array of Hash objects' do
+          rows = ss.parse
+          expect(rows).to be_a Array
+          expect(rows.size).to eq 1
+          row = rows[0]
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+      end
+
+      context 'missing optional headers' do
+
+        let(:required_headers) {%w'FirstName LastName address'}
+        let(:optional_headers) {%w'phone'}
+
+        it 'opens correctly' do
+          expect {ss}.not_to raise_error
+        end
+
+        it 'contains only required headers' do
+          required_headers.each do |header|
+            expect(ss.headers).to include header
+          end
+          optional_headers.each do |header|
+            expect(ss.headers).not_to include header
+          end
+          expect(ss.headers).to eq %w'FirstName LastName address'
+        end
+
+        it '#shift returns Hash object' do
+          row = ss.shift
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+        it '#parse returns Array of Hash objects' do
+          rows = ss.parse
+          expect(rows).to be_a Array
+          expect(rows.size).to eq 1
+          row = rows[0]
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+      end
+
+      context 'missing required header' do
+        let(:required_headers) {%w'FirstName LastName address phone'}
+
+        it 'throws error when opened' do
+          expect {ss}.to raise_error(RuntimeError, 'Sheet does not contain enough columns.')
+        end
+
+      end
+
+    end
+
+  end
+
+  context 'TSV file' do
+
+    let(:options) { {
+        col_sep: "\t",
+        extension: 'csv'
+    }}
+
+    context 'with headers' do
+
+      let(:file_name) {'test-headers.tsv'}
+
+      context 'well-formed' do
+
+        let(:required_headers) {%w'FirstName LastName'}
+
+        it 'opens correctly' do
+          expect {ss}.not_to raise_error
+        end
+
+        it 'contains expected headers' do
+          required_headers.each do |header|
+            expect(ss.headers).to include header
+          end
+          expect(ss.headers).to eq %w'FirstName LastName address'
+        end
+
+        it '#shift returns Hash object' do
+          row = ss.shift
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+        it '#parse returns Array of Hash objects' do
+          rows = ss.parse
+          expect(rows).to be_a Array
+          expect(rows.size).to eq 1
+          row = rows[0]
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+      end
+
+      context 'not specified' do
+
+        let(:required_headers) {[]}
+
+        it 'opens correctly' do
+          expect {ss}.not_to raise_error
+        end
+
+        it 'contains expected headers' do
+          expect(ss.headers).to eq %w'FirstName LastName address'
+        end
+
+        it '#shift returns Hash object' do
+          row = ss.shift
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+        it '#parse returns Array of Hash objects' do
+          rows = ss.parse
+          expect(rows).to be_a Array
+          expect(rows.size).to eq 1
+          row = rows[0]
+          expect(row).to be_a Hash
+          expect(row['FirstName']).to eq 'John'
+          expect(row['LastName']).to eq 'Smith'
+          expect(row['address']).to eq 'mystreet 1, myplace'
+          expect(row['phone']).to be_nil
+        end
+
+      end
+
+      context 'not well-formed' do
+
+        let(:required_headers) {%w'FirstName LastName address phone'}
+
+        it 'throws error when opened' do
+          expect {ss}.to raise_error(RuntimeError, 'Headers not found: ["phone"].')
+        end
+      end
+
+    end
+
+    context 'without headers' do
+      let(:file_name) {'test-noheaders.tsv'}
 
       context 'well-formed and strict' do
         let(:required_headers) {%w'FirstName LastName'}

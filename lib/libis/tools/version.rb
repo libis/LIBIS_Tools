@@ -1,5 +1,5 @@
 module Libis
   module Tools
-    VERSION = '0.9.53'
+    VERSION = '0.9.54'
   end
 end

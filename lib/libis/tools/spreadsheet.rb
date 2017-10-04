@@ -38,14 +38,14 @@ module Libis
       # @param [Hash] opts
       def initialize(file_name, opts = {})
         options = {
-            csv_options: [:encoding, :col_sep, :quote_char].inject({}) do |h, k|
-              h[k] = opts.delete(k) if opts[k]
-              h
-            end.merge(
+            csv_options: {
                 encoding: 'UTF-8',
                 col_sep: ',',
                 quote_char: '"',
-            ),
+            }.merge([:encoding, :col_sep, :quote_char].inject({}) do |h, k|
+              h[k] = opts.delete(k) if opts[k]
+              h
+            end)
         }.merge(opts)
 
         required_headers = options.delete(:required) || []

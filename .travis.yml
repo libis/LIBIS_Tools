@@ -12,28 +12,28 @@ rvm:
   - jruby-head
 jdk:
   - openjdk7
-  - oraclejdk7
   - oraclejdk8
+  - oraclejdk9
 matrix:
   exclude:
     - rvm: 2.1.10
-      jdk: oraclejdk7
+      jdk: oraclejdk9
     - rvm: 2.1.10
       jdk: oraclejdk8
     - rvm: 2.2.7
-      jdk: oraclejdk7
+      jdk: oraclejdk9
     - rvm: 2.2.7
       jdk: oraclejdk8
     - rvm: 2.3.4
-      jdk: oraclejdk7
+      jdk: oraclejdk9
     - rvm: 2.3.4
       jdk: oraclejdk8
     - rvm: 2.4.1
-      jdk: oraclejdk7
+      jdk: oraclejdk9
     - rvm: 2.4.1
       jdk: oraclejdk8
     - rvm: ruby-head
-      jdk: oraclejdk7
+      jdk: oraclejdk9
     - rvm: ruby-head
       jdk: oraclejdk8
   allow_failures:
@@ -45,5 +45,3 @@ branches:
 addons:
   code_climate:
     repo_token: f6978964f55e6543befb82373651365f8195677816af6ff40ad70c82f7f22f09
-before_install:
-  - gem install bundler --pre

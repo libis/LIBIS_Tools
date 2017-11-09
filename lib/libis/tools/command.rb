@@ -43,13 +43,19 @@ module Libis
             err: []
         }
         begin
-          Open3.popen3(cmd, *opts) do |_, output, error, thread|
-            output = output.read
-            error = error.read
-            result[:out] = output.split("\n").map(&:chomp)
-            result[:err] = error.split("\n").map(&:chomp)
-            result[:status] = thread.value.exitstatus rescue nil
+          input, output, error, thread = Open3.popen3(cmd, *opts)
+          input.close
+          error.each_line do |line|
+            next if result[:err].size > 100
+            result[:err] << line.chomp
+            result[:err] << '.... <<< Extra messages skipped >>> ....' if result[:err] == 100
           end
+          output.each_line do |line|
+            next if result[:out].size > 100
+            result[:out] << line.chomp
+            result[:out] << '.... <<< Extra messages skipped >>> ....' if result[:out] == 100
+          end
+          result[:status] = thread.value.exitstatus rescue nil
 
         rescue StandardError => e
           result[:err] = [e.class.name, e.message]

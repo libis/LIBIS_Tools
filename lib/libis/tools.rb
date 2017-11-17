@@ -13,6 +13,7 @@ module Libis
     autoload :MetsFile, 'libis/tools/mets_file'
     autoload :Parameter, 'libis/tools/parameter'
     autoload :Spreadsheet, 'libis/tools/spreadsheet'
+    autoload :TempFile, 'libis/tools/temp_file'
     autoload :ThreadSafe, 'libis/tools/thread_safe'
     autoload :XmlDocument, 'libis/tools/xml_document'
 

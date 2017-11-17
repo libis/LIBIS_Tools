@@ -138,7 +138,7 @@ STR
     let(:xml) { Libis::Tools::XmlDocument.open(File.join(File.dirname(__FILE__), '123456789.marc')) }
 
     it 'load from xml' do
-      puts record.marc_dump
+      # puts record.marc_dump
       expect(record.marc_dump).to eq <<-STR.align_left
         LDR:'01068nam 2200241u 4500'
         005:'20150701153710.0'
@@ -167,7 +167,7 @@ STR
   <dc:language>la</dc:language>
 </dc:record>
 STR
-      puts puts record.to_dc.to_xml
+      # puts puts record.to_dc.to_xml
       record.to_dc.root.elements.each_with_index do |element, i|
         expect(element).to be_equivalent_to(xml_doc.root.elements[i])
       end

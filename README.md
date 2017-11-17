@@ -99,7 +99,34 @@ The code will strip namespaces from the input in order to greatly simplify worki
 The class {::Libis::Tools::Parameter} and the {::Libis::Tools::ParameterContainer} module provide a simple framework for
 instance variables that are type-safe and can easily be documented and provide defaults.
 
-### {::Libis::Tools::XmlDocument}
+## {::Libis::Tools::TempFile}
+
+A small and simple module that provides some convenience methods to deal with temp files. Random file names are generated
+in a similar way as the standard Ruby Tempfile class does. It has the form:
+```
+    <Optional prefix with '_' appended>_<YYYYMMDD>_<process id>_<random base36 number><optional suffix>
+```
+
+The #name method creates a random file name. Optional parameters are the prefix and suffix (including '.' character if
+needed) for the temp file name and the directory part of the file path. Without directory option the file path will be
+located in the standard folder for temporary files (e.g. /tmp on Linux).
+
+The #file method creates a random file name as above, but immediately opens it for writing. If a block is given, the open
+file pointer (IO object) will be passed as argument to the block and the file will automatically be closed and deleted
+when the block ends. In that case the return value will be whatever the block returns.
+
+Without a block, the method still creates and opens the file, but it will return the open file pointer to the caller. The
+caller is responsible to #close and #unlink or #delete the file. The #unlink and #delete methods are injected into the
+returned IO object for your convenience, but it calling the corresponding File methods instead is equally valid.
+
+## {::Libis::Tools::ThreadSafe}
+
+A convenience method that embeds the mutex implementation. Just include this module whenever you need a thread-save
+implementation and use the mutex instance variable without any concerns regarding initialization. Your class will have
+access to an instance variable 'mutex' as well as a class variable 'class_mutex'. The mutexes (Montor instance) are created
+in a thread-safe way.
+
+## {::Libis::Tools::XmlDocument}
 
 Class that embodies most used features of Nokogiri, Nori and Gyoku in one convenience class. The Nokogiri document is
 stored in the class variable 'document' and can be accessed and manipulated directly - if required. The class supports

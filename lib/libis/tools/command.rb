@@ -43,13 +43,10 @@ module Libis
             err: []
         }
         begin
-          Open3.popen3(cmd, *opts) do |_, output, error, thread|
-            output = output.read
-            error = error.read
-            result[:out] = output.split("\n").map(&:chomp)
-            result[:err] = error.split("\n").map(&:chomp)
-            result[:status] = thread.value.exitstatus rescue nil
-          end
+          output, error, status = Open3.capture3(cmd, *opts)
+          result[:out] = output.split("\n").map(&:chomp)
+          result[:err] = error.split("\n").map(&:chomp)
+          result[:status] = status.exitstatus
 
         rescue StandardError => e
           result[:err] = [e.class.name, e.message]

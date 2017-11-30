@@ -4,9 +4,9 @@ require 'backports/rails/hash'
 require 'backports/2.0.0/struct'
 
 class Struct
-  def to_hash
-    members.inject({}) {|h,m| h[m] = send(m); h}
-  end unless method_defined? :to_hash
+  # def to_hash
+  #   members.inject({}) {|h,m| h[m] = send(m); h}
+  # end unless method_defined? :to_hash
 
   def set(h = {})
     h.symbolize_keys!

@@ -71,4 +71,13 @@ describe ::Libis::Tools::ConfigFile do
 
   end
 
+  context 'initialization with hash from YAML file' do
+    subject { ::Libis::Tools::ConfigFile.new YAML.load_file(test_file)}
+
+    it 'has hash' do
+      expect(subject.to_hash).to eq hash
+    end
+
+  end
+
 end

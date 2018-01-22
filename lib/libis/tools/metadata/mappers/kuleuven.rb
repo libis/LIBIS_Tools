@@ -1633,7 +1633,7 @@ module Libis
 
           def full_name(data)
             #noinspection RubyResolve
-            code = data._4.to_sym
+            code = data._4.to_sym rescue nil
             return '' unless DOLLAR4TABLE[data.tag].has_key? code
             DOLLAR4TABLE[data.tag][code][0]
           end

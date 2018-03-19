@@ -61,4 +61,27 @@ describe 'Command' do
 
   end
 
+  it 'should allow to supply input data' do
+
+    result = Libis::Tools::Command.run('cat', stdin_data: "FooBar", timeout: 1)
+    expect(result[:out]).to eq ['FooBar']
+    expect(result[:err].size).to eq 0
+    expect(result[:status]).to eq 0
+
+  end
+
+  it 'should not timeout if command finishes' do
+
+    result = Libis::Tools::Command.run('cat', stdin_data: "FooBar", timeout: 1)
+    expect(result[:timeout]).to be_falsey
+
+  end
+
+  it 'should timeout if command hangs' do
+
+    result = Libis::Tools::Command.run('ls', '-aRlp', '/', timeout: 1)
+    expect(result[:timeout]).to be_truthy
+
+  end
+
 end

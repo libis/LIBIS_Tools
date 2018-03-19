@@ -1,4 +1,5 @@
 require 'libis/tools/thread_safe'
+require 'uri'
 
 module Libis
   module Tools
@@ -280,9 +281,9 @@ module Libis
               compositionLevel: composition_level,
               # fileLocationType: 'FILE',
               # fileLocation: '',
-              fileOriginalName: orig_name,
-              fileOriginalPath: orig_path,
-              fileOriginalID: location,
+              fileOriginalName: URI.encode(orig_name),
+              fileOriginalPath: URI.encode(orig_path),
+              fileOriginalID: URI.encode(location),
               fileExtension: ::File.extname(orig_name),
               fileMIMEType: mimetype,
               fileSizeBytes: size,

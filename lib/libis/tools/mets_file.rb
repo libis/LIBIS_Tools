@@ -240,11 +240,7 @@ module Libis
 
       def get_id(klass)
         self.mutex.synchronize do
-          if @id_map[klass]
-            @id_map[klass] += 1
-          else
-            @id_map[klass] = 1
-          end
+          @id_map[klass] = (@id_map[klass] ? @id_map[klass] + 1 : 1)
           return @id_map[klass]
         end
       end

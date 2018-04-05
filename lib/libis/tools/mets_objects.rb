@@ -1,5 +1,5 @@
 require 'libis/tools/thread_safe'
-require 'uri'
+require 'cgi'
 
 module Libis
   module Tools
@@ -267,6 +267,14 @@ module Libis
           target_location
         end
 
+        def target_name
+          ::File.basename(target)
+        end
+
+        def target_path
+          ::File.dirname(target)
+        end
+
         # This method creates the appropriate {DnxSection}s based on what attributes are filled in.
         def amd
           dnx = {}
@@ -280,14 +288,14 @@ module Libis
               FileEntityType: entity_type,
               compositionLevel: composition_level,
               # fileLocationType: 'FILE',
-              # fileLocation: '',
-              fileOriginalName: URI.encode(orig_name),
-              fileOriginalPath: URI.encode(orig_path),
-              fileOriginalID: URI.encode(location),
-              fileExtension: ::File.extname(orig_name),
+              fileLocation: location,
+              fileOriginalName: CGI.encode(target_name).gsub('+', '%20'),
+              fileOriginalPath: target_path,
+              # fileOriginalID: URI.encode(location),
+              # fileExtension: ::File.extname(orig_name),
               fileMIMEType: mimetype,
               fileSizeBytes: size,
-              formatLibraryId: puid
+              # formatLibraryId: puid
           }.cleanup
           tech_data << GeneralFileCharacteristics.new(data) unless data.empty?
           # Fixity

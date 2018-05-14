@@ -231,7 +231,7 @@ module Libis
         include MetsObject
 
         # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
-        attr_accessor :label, :note, :location, :target_location, :mimetype, :puid, :size, :entity_type,
+        attr_accessor :label, :note, :location, :target_location, :original, :mimetype, :puid, :size, :entity_type,
                       :creation_date, :modification_date, :composition_level, :group_id,
                       :checksum_MD5, :checksum_SHA1, :checksum_SHA256,:checksum_SHA384,:checksum_SHA512,
                       :fixity_type, :fixity_value,
@@ -289,7 +289,7 @@ module Libis
               compositionLevel: composition_level,
               # fileLocationType: 'FILE',
               fileLocation: location,
-              fileOriginalName: CGI.escape(target_name).gsub('+', '%20'),
+              fileOriginalName: CGI.escape(original || target_name).gsub('+', '%20'),
               fileOriginalPath: target_path,
               # fileOriginalID: URI.encode(location),
               # fileExtension: ::File.extname(orig_name),

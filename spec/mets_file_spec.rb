@@ -34,11 +34,16 @@ describe 'METS File' do
   context 'with IE AMD' do
 
     let(:dc_record) {
-      record = Libis::Tools::Metadata::DublinCoreRecord.new
-      record.title = 'Title'
-      record.author = 'Author'
-      record.subject = 'Subject'
-      record
+      Libis::Tools::XmlDocument.parse <<-STR
+        <?xml version="1.0" encoding="UTF-8"?>
+        <record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:dcterms="http://purl.org/dc/terms/">
+          <dc:title>Title</dc:title>
+          <dc:author>Author</dc:author>
+          <dc:subject>Subject</dc:subject>
+        </record>
+      STR
     }
 
     let(:marc_record) {

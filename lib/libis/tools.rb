@@ -20,5 +20,4 @@ module Libis
   end
 end
 
-require_relative 'tools/metadata'
 require_relative 'tools/extend/struct'

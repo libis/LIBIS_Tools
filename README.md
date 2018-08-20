@@ -76,25 +76,7 @@ It also initializes a default logger.
 
 The ::Libis::Tools::Logger module adds support for logging functionality to any class.
 
-## {::Libis::Tools::Metadata}
-
-This gem also provides some modules and classes that assist in working with metadata. There are classes that allow to 
-create and/or read metadata for MARC(21), Dublin Core and SharePoint. These classes all live in the 
-Libis::Tools::Metadata namespace.
-
-### MARC
-
-The classes {::Libis::Tools::Metadata::MarcRecord} and it's child class {::Libis::Tools::Metadata::Marc21Record} are 
-mainly built for reading MARC(21) records. Most of the class logic is in the base class 
-{::Libis::Tools::Metadata::MarcRecord MarcRecord}, which is incomplete and should be considered an abstract class. 
-
-{::Libis::Tools::Metadata::Marc21Record Marc21Record} on the other hand only contains the logic to parse the XML data 
-into the internal structure. A {::Libis::Tools::Metadata::MarcRecord MarcRecord} is created by supplying it an XML node
-(from Nokogiri or {::Libis::Tools::XmlDocument}) that contains child nodes with the MARC data of a single record. 
-
-The code will strip namespaces from the input in order to greatly simplify working with the XML.
-
-## {::Libis::Tools::Parameter} and {::Libis::Tools::ParameterContainer} 
+## {::Libis::Tools::Parameter} and {::Libis::Tools::ParameterContainer}
 
 The class {::Libis::Tools::Parameter} and the {::Libis::Tools::ParameterContainer} module provide a simple framework for
 instance variables that are type-safe and can easily be documented and provide defaults.
@@ -104,7 +86,7 @@ instance variables that are type-safe and can easily be documented and provide d
 A small and simple module that provides some convenience methods to deal with temp files. Random file names are generated
 in a similar way as the standard Ruby Tempfile class does. It has the form:
 ```
-    <Optional prefix with '_' appended>_<YYYYMMDD>_<process id>_<random base36 number><optional suffix>
+    <Optional prefix with '_' appended><YYYYMMDD>_<process id>_<random base36 number><optional suffix>
 ```
 
 The #name method creates a random file name. Optional parameters are the prefix and suffix (including '.' character if
@@ -117,14 +99,14 @@ when the block ends. In that case the return value will be whatever the block re
 
 Without a block, the method still creates and opens the file, but it will return the open file pointer to the caller. The
 caller is responsible to #close and #unlink or #delete the file. The #unlink and #delete methods are injected into the
-returned IO object for your convenience, but it calling the corresponding File methods instead is equally valid.
+returned IO object for your convenience, but calling the corresponding File methods instead is equally valid.
 
 ## {::Libis::Tools::ThreadSafe}
 
 A convenience method that embeds the mutex implementation. Just include this module whenever you need a thread-save
 implementation and use the mutex instance variable without any concerns regarding initialization. Your class will have
-access to an instance variable 'mutex' as well as a class variable 'class_mutex'. The mutexes (Montor instance) are created
-in a thread-safe way.
+access to an instance variable 'mutex' as well as a class variable 'class_mutex'. The mutexes (Montor instance) themselves
+are created in a thread-safe way.
 
 ## {::Libis::Tools::XmlDocument}
 

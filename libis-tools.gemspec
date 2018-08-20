@@ -44,7 +44,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'simple_xlsx_reader', '~> 1.0'
   spec.add_runtime_dependency 'logging', '~> 2.0'
   spec.add_runtime_dependency 'concurrent-ruby', '~> 1.0'
-  spec.add_runtime_dependency 'yard', '~> 0.8'
+  spec.add_runtime_dependency 'yard', '~> 0.9.11'
   spec.add_runtime_dependency 'roo', '~> 2.5'
   spec.add_runtime_dependency 'roo-xls', '~> 1.0'
 end

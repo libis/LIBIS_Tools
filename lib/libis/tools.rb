@@ -3,6 +3,8 @@ require_relative 'tools/version'
 module Libis
   module Tools
 
+    autoload :CommandLine, 'libis/tools/command_line'
+
     autoload :Checksum, 'libis/tools/checksum'
     autoload :Command, 'libis/tools/command'
     autoload :Config, 'libis/tools/config'

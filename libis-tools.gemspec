@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::JAVA if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
 
   spec.files         = `git ls-files -z`.split("\x0")
+  spec.bindir        = 'bin'
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 
@@ -47,4 +48,8 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'yard', '~> 0.9.11'
   spec.add_runtime_dependency 'roo', '~> 2.5'
   spec.add_runtime_dependency 'roo-xls', '~> 1.0'
+  spec.add_runtime_dependency 'tty-prompt'
+  spec.add_runtime_dependency 'tty-config'
+  spec.add_runtime_dependency 'thor'
+
 end

@@ -35,7 +35,8 @@ module Libis
             overwrite: "Overwite target files if newer",
             interactive: "Ask for action on changed files",
             report: "Report file",
-            dummy: "Perform phantom actions (not affecting files)"
+            dummy: "Perform phantom actions (not affecting files)",
+            config: "Load saved configuration parameters"
         }
 
         REQ_HEADERS = {term: 'Term'}
@@ -43,6 +44,10 @@ module Libis
 
         def self.included(klass)
           klass.class_exec do
+            def klass.description(field)
+              "#{STRING_CONFIG[field]}." + (DEFAULT_CONFIG[field].nil? ? '' : " default: #{DEFAULT_CONFIG[field]}")
+            end
+
             desc 'reorg [options]', 'Reorganize files'
             long_desc <<-DESC
       
@@ -94,33 +99,36 @@ module Libis
             before continuing of bailing out. If you are confident the settings are fine, you can skip this with the
             '--unatttended' option. Handle with care!
 
+            Unless you have specified the '--unattended' options, you will be presented with a menu that allows you to
+            change the configuration parameters, run the tool with the current config or bail out.
+
             DESC
 
-            method_option :base, aliases: '-b', desc: 'Directory that needs to be reorganized',
-                          default: DEFAULT_CONFIG[:base]
-            method_option :filter, aliases: '-f', desc: 'Regex for file name matching',
-                          default: DEFAULT_CONFIG[:filter]
-            method_option :expression, aliases: '-e', desc: 'Ruby string expression for the new file path',
-                          default: DEFAULT_CONFIG[:expression]
+            method_option :base, aliases: '-b',
+                          desc: description(:base)
+            method_option :filter, aliases: '-f',
+                          desc: description(:filter)
+            method_option :expression, aliases: '-e',
+                          desc: description(:expression)
 
-            method_option :action, aliases: '-a', desc: 'Operation to perform on files found',
-                          enum: VALID_ACTIONS.keys, default: DEFAULT_CONFIG[:action]
-            method_option :overwrite, aliases: '-o', desc: 'Overwrite target if changed',
-                          type: :boolean, default: DEFAULT_CONFIG[:overwrite]
-            method_option :interactive, aliases: '-i', desc: 'Ask for action when changed files are found',
-                          type: :boolean, default: DEFAULT_CONFIG[:interactive]
+            method_option :action, aliases: '-a', enum: VALID_ACTIONS.keys,
+                          desc: description(:action)
+            method_option :overwrite, aliases: '-o', type: :boolean,
+                          desc: description(:overwrite)
+            method_option :interactive, aliases: '-i', type: :boolean,
+                          desc: description(:interactive)
 
-            method_option :report, aliases: '-r', banner: 'FILE', desc: 'Generate report in FILE',
-                          default: DEFAULT_CONFIG[:report]
+            method_option :report, aliases: '-r', banner: 'FILE',
+                          desc: description(:report)
 
-            method_option :dummy, desc: 'Do not perform file actions, only report them',
-                          type: :boolean, default: DEFAULT_CONFIG[:dummy]
+            method_option :dummy, aliases: '-d', type: :boolean,
+                          desc: description(:dummy)
 
-            method_option :config, aliases: '-c', desc: 'Configuration name to use',
-                          type: :string, default: DEFAULT_CONFIG[:config]
+            method_option :config, aliases: '-c', type: :string,
+                          desc: description(:config)
 
-            method_option :unattended, aliases: '-u', desc: 'Run without asking for input',
-                          type: :boolean, default: DEFAULT_CONFIG[:unattended]
+            method_option :unattended, aliases: '-u', type: :boolean,
+                          desc: description(:unattended)
 
           end
 
@@ -131,10 +139,11 @@ module Libis
 
           # return config_write
 
-          DEFAULT_CONFIG.each {|key, value| config.set(key, value: value) if value}
+          DEFAULT_CONFIG.each {|key, value| config.set(key, value: value) unless value.nil?}
           config_read(options[:config]) if options[:config]
-          DEFAULT_CONFIG.each {|key, _| config.set(key, value: options[:key]) if options.has_key?(key)}
-          run_menu
+          DEFAULT_CONFIG.each {|key, _| config.set(key, value: options[key]) if options.has_key?(key.to_s)}
+          run_menu unless options[:unattended]
+          do_reorg
         end
 
         protected
@@ -148,8 +157,8 @@ module Libis
                         value: -> {config_menu; 1}
             }
 
-            choices << {name: "Run", value: -> {do_reorg; nil}}
-            choices << {name: "Exit", value: nil}
+            choices << {name: "Run", value: nil}
+            choices << {name: "Exit", value: -> {exit}}
 
             selection = prompt.select "[ LIBIS Tool - ReOrg ]",
                                       choices, cycle: true, default: 1

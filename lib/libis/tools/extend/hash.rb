@@ -10,8 +10,8 @@ class Hash
 
   # Removes all hash entries for which value.empty? is true. Performed recursively.
   def recursive_cleanup
-    cleanup
     each { |_, v| v.recursive_cleanup if Array === v || Hash === v }
+    cleanup
   end unless method_defined? :recursive_cleanup
 
   # Merges two hashes, but does so recursively.

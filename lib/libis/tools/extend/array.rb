@@ -9,7 +9,8 @@ class Array
 
   # Removes all empty entries recursively in the array and each Hash in it
   def recursive_cleanup
-    cleanup.each { |v| v.recursive_cleanup if Array === v || Hash === v }
+    each { |v| v.recursive_cleanup if Array === v || Hash === v }
+    cleanup
   end unless method_defined? :recursive_cleanup
 
 end

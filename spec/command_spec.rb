@@ -19,7 +19,9 @@ describe 'Command' do
 
     result = Libis::Tools::Command.run('ls')
 
-    expect(result[:out].sort).to match entries
+    output = result[:out].map {|x| x.split(/\s+/)}.flatten.compact
+    expect(output.size).to eq entries.size
+    expect(output.sort).to match entries
     expect(result[:err]).to eq []
     expect(result[:status]).to eq 0
 
@@ -30,6 +32,7 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', '-1')
 
     output = result[:out]
+    puts output.sort
     expect(output.size).to eq entries.size
     expect(output.sort).to match entries
     expect(result[:err]).to eq []

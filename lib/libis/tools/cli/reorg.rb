@@ -262,13 +262,13 @@ module Libis
             next if file_name =~ /^\.\.?$/
             entry = File.join(File.absolute_path(base_dir), file_name)
             unless File.file?(entry)
-              puts "Skipping directory #{entry}." unless @report
+              prompt.say "Skipping directory #{entry}." unless @report
               write_report(entry, '', '', 'Directory - skipped.')
               count[:skipped_dir] += 1
               next
             end
             unless file_name =~ parse_regex
-              puts "Skipping file #{file_name}. File name does not match expression." unless @report
+              prompt.say "Skipping file #{file_name}. File name does not match expression." unless @report
               write_report(entry, '', '', 'Mismatch - skipped.')
               count[:unmatched_file] += 1
               next
@@ -278,7 +278,7 @@ module Libis
             target_dir = File.dirname(target)
             target_dir = File.join(base_dir, target_dir) unless target_dir[0] == '/'
             unless target_dir_list.include?(target_dir)
-              puts "-> Create directory '#{target_dir}'" unless @report
+              prompt.say "-> Create directory '#{target_dir}'" unless @report
               FileUtils.mkpath(target_dir) unless dummy_operation
               target_dir_list << target_dir
             end
@@ -289,7 +289,7 @@ module Libis
               if compare_entry(entry, target_path)
                 remark = 'Duplicate - skipped.'
                 count[:duplicate] += 1
-                $stderr.puts "Duplicate file entry: #{entry}." unless @report
+                prompt.error "Duplicate file entry: #{entry}." unless @report
               else
                 # puts "source: #{File.mtime(entry)} #{'%11s' % Filesize.new(File.size(entry)).pretty} #{entry}"
                 # puts "target: #{File.mtime(target_path)} #{'%11s' % Filesize.new(File.size(target_path)).pretty} #{target_path}"
@@ -299,7 +299,7 @@ module Libis
                   count[:update] += 1
                 else
                   remark = 'Duplicate - rejected.'
-                  $stderr.puts "ERROR: #{entry} exists with different content." unless @report
+                  prompt.error "ERROR: #{entry} exists with different content." unless @report
                   count[:reject] += 1
                 end
               end
@@ -308,7 +308,7 @@ module Libis
               count[:move] += 1
             end
             if action
-              puts "-> #{file_operation} '#{file_name}' to '#{target}'" unless @report
+              prompt.say "-> #{file_operation} '#{file_name}' to '#{target}'" unless @report
               case file_operation
               when 'move'
                 FileUtils.move(entry, File.join(target_dir, target_file), force: true)

@@ -30,7 +30,7 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', '-1')
 
     output = result[:out]
-    expect(output.size).to eq (entries.size)
+    expect(output.size).to eq entries.size
     expect(output.sort).to match entries
     expect(result[:err]).to eq []
     expect(result[:status]).to eq 0
@@ -42,7 +42,7 @@ describe 'Command' do
     result = Libis::Tools::Command.run('ls', '-1', '-a', '-p')
 
     output = result[:out]
-    expect(output.size).to eq (entries.size + 2)
+    expect(output.size).to eq entries.size + 2
     expect(output[0]).to eq './'
     expect(output[1]).to eq '../'
     expect(output[2..-1].sort).to match entries

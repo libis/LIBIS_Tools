@@ -10,11 +10,8 @@ class Hash
 
   # Removes all hash entries for which value.empty? is true. Performed recursively.
   def recursive_cleanup
-    delete_proc = Proc.new do |_, v|
-      v.delete_if(&delete_proc) if v.kind_of?(Hash)
-      v.nil? || (v.respond_to?(:empty?) ? v.empty? : false)
-    end
-    self.delete_if &delete_proc
+    cleanup
+    each { |_, v| v.recursive_cleanup if Array === v || Hash === v }
   end unless method_defined? :recursive_cleanup
 
   # Merges two hashes, but does so recursively.
@@ -66,7 +63,7 @@ class Hash
   end unless method_defined? :key_strings_to_symbols!
 
   # Return new Hash with all keys converted to symbols.
-  # @param [Hash] opts valid options are:
+  # @param [Hash] options valid options are:
   #   * recursive : perform operation recursively
   #   * upcase : convert all keys to upper case
   #   * downcase : convert all keys to lower case

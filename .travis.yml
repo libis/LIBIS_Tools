@@ -1,28 +1,32 @@
+dist: bionic
 language: ruby
 cache: bundler
 sudo: false
 rvm:
+  - 2.3
   - 2.4
   - 2.5
   - 2.6
   - ruby-head
-  - jruby-9.0.5.0
-  - jruby-9.1.9.0
+  - jruby-9.0
+  - jruby-9.1
+  - jruby-9.2
   - jruby-head
 jdk:
-  - openjdk8
   - openjdk10
   - openjdk11
 matrix:
   exclude:
+    - rvm: 2.3
+      jdk: openjdk10
     - rvm: 2.4
-      jdk: openjdk8
+      jdk: openjdk10
     - rvm: 2.5
-      jdk: openjdk8
+      jdk: openjdk10
     - rvm: 2.6
-      jdk: openjdk8
+      jdk: openjdk10
     - rvm: ruby-head
-      jdk: openjdk8
+      jdk: openjdk10
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-head

@@ -60,7 +60,7 @@ module Libis
       # Merges other parameter data into the current parameter
       # @param [::Libis::Tools::Parameter] other parameter definition to copy properties from
       def merge!(other)
-        other.each do |k,v|
+        other.each do |k, v|
           if k == :options
             self[:options].merge!(v)
           else
@@ -130,55 +130,59 @@ module Libis
         end
         true
       end
+
       private
 
       def guess_datatype
         self[:datatype] || case self[:default]
-                             when TrueClass, FalseClass
-                               'bool'
-                             when NilClass
-                               'string'
-                             when Integer
-                               'int'
-                             when Float
-                               'float'
-                             when DateTime, Date, Time
-                               'datetime'
-                             when Array
-                               'array'
-                             when Hash
-                               'hash'
-                             else
-                               self[:default].class.name.downcase
+                           when TrueClass, FalseClass
+                             'bool'
+                           when NilClass
+                             'string'
+                           when Integer
+                             'int'
+                           when Float
+                             'float'
+                           when DateTime, Date, Time
+                             'datetime'
+                           when Array
+                             'array'
+                           when Hash
+                             'hash'
+                           else
+                             self[:default].class.name.downcase
                            end
       end
 
       def convert(v)
         case self[:datatype].to_s.downcase
-          when 'boolean', 'bool'
-            return true if TRUE_BOOL.include?(v.to_s.downcase)
-            return false if FALSE_BOOL.include?(v.to_s.downcase)
-            raise ParameterValidationError, "No boolean information in '#{v.to_s}'. " +
-                                              "Valid values are: '#{TRUE_BOOL.join('\', \'')}" +
-                                              "' and '#{FALSE_BOOL.join('\', \'')}'."
-          when 'string', 'nil'
-            return v.to_s
-          when 'int'
-            return Integer(v)
-          when 'float'
-            return Float(v)
-          when 'datetime'
-            return v.to_datetime if v.respond_to? :to_datetime
-            return DateTime.parse(v)
-          when 'array'
-            return v if v.is_a?(Array)
-            return v.split(/[,;|\s]+/) if v.is_a?(String)
-            return v.to_a if v.respond_to?(:to_a)
-          when 'hash'
-            return v when v.is_a?(Hash)
-                       return Hash[(0...v.size).zip(v)] when v.is_a?(Array)
-          else
-            raise ParameterValidationError, "Datatype not supported: '#{self[:datatype]}'"
+        when 'boolean', 'bool'
+          return true if TRUE_BOOL.include?(v.to_s.downcase)
+          return false if FALSE_BOOL.include?(v.to_s.downcase)
+          raise ParameterValidationError, "No boolean information in '#{v.to_s}'. " +
+              "Valid values are: '#{TRUE_BOOL.join('\', \'')}" +
+              "' and '#{FALSE_BOOL.join('\', \'')}'."
+        when 'string', 'nil'
+          return v.to_s
+        when 'int'
+          return Integer(v)
+        when 'float'
+          return Float(v)
+        when 'datetime'
+          return v.to_datetime if v.respond_to? :to_datetime
+          return DateTime.parse(v)
+        when 'array'
+          return v if v.is_a?(Array)
+          return v.split(/[,;|\s]+/) if v.is_a?(String)
+          # Alternatavely:
+          # return JSON.parse(v) if v.is_a?(String)
+          return v.to_a if v.respond_to?(:to_a)
+        when 'hash'
+          return v if v.is_a?(Hash)
+          return Hash[(0...v.size).zip(v)] if v.is_a?(Array)
+          return JSON.parse(v) if v.is_a?(String)
+        else
+          raise ParameterValidationError, "Datatype not supported: '#{self[:datatype]}'"
         end
         nil
       end
@@ -194,17 +198,17 @@ module Libis
       def constraint_checker(v, constraint)
 
         case constraint
-          when Array
-            constraint.each do |c|
-              return true if (constraint_checker(v, c) rescue false)
-            end
-            return true if constraint.include? v
-          when Range
-            return true if constraint.cover? v
-          when Regexp
-            return true if v =~ constraint
-          else
-            return true if v == constraint
+        when Array
+          constraint.each do |c|
+            return true if (constraint_checker(v, c) rescue false)
+          end
+          return true if constraint.include? v
+        when Range
+          return true if constraint.cover? v
+        when Regexp
+          return true if v =~ constraint
+        else
+          return true if v == constraint
         end
         false
       end
@@ -245,16 +249,16 @@ module Libis
         # @return [Hash] with parameter names as keys and {Parameter} instance as value.
         def parameter_defs
           return @parameters if @parameters
-            @parameters = ::Concurrent::Hash.new
-            begin
-              self.superclass.parameter_defs.
-                  each_with_object(@parameters) do |(name, param), hash|
-                  hash[name] = param.dup
-              end
-            rescue NoMethodError
-              # ignored
+          @parameters = ::Concurrent::Hash.new
+          begin
+            self.superclass.parameter_defs.
+                each_with_object(@parameters) do |(name, param), hash|
+              hash[name] = param.dup
             end
-            @parameters
+          rescue NoMethodError
+            # ignored
+          end
+          @parameters
         end
 
         # DSL method that allows creating parameter definitions on the class level.

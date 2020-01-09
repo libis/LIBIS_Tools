@@ -164,7 +164,7 @@ module Libis
               "' and '#{FALSE_BOOL.join('\', \'')}'."
         when 'string', 'nil'
           return v.to_s
-        when 'int'
+        when 'int', 'integer'
           return Integer(v)
         when 'float'
           return Float(v)

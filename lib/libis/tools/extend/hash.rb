@@ -1,5 +1,3 @@
-require 'backports/rails/hash'
-
 # Extension class for Hash
 class Hash
 
@@ -56,6 +54,14 @@ class Hash
     self.merge!(other_hash) {|_,v, w| v.blank? ? w : v}
   end unless method_defined? :apply_defaults!
 
+  def symbolize_keys
+    self.transform_keys {|k| k.to_sym}
+  end unless method_defined? :symbolize_keys
+
+  def symbolize_keys!
+    self.transform_keys! {|k| k.to_sym}
+  end unless method_defined? :symbolize_keys!
+
   # Convert all keys to symbols. In-place operation.
   # @param (see #key_strings_to_symbols)
   def key_strings_to_symbols!(options = {})
@@ -100,6 +106,14 @@ class Hash
 
     r
   end unless method_defined? :key_strings_to_symbols
+
+  def stringify_keys
+    self.transform_keys {|k| k.to_s}
+  end unless method_defined? :stringify_keys
+
+  def stringify_keys!
+    self.transform_keys! {|k| k.to_s}
+  end unless method_defined? :stringify_keys!
 
   # Convert all keys to strings. In-place operation.
   # (@see #key_symbols_to_strings)

@@ -36,7 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'equivalent-xml', '~> 0.5'
   spec.add_development_dependency 'awesome_print', '~> 1.6'
 
-  spec.add_runtime_dependency 'backports', '~> 3.6'
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'
   spec.add_runtime_dependency 'gyoku',  '~> 1.3'
   spec.add_runtime_dependency 'nori', '~> 2.6'

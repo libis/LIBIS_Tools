@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'json'
-require 'backports/rails/hash'
-require 'backports/2.0.0/struct'
+require_relative 'hash'
 
 class Struct
   # def to_hash

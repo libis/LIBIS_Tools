@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-require 'backports'
 require 'libis/tools/config'
 require 'libis/tools/extend/string'
 

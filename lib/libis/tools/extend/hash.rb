@@ -158,4 +158,36 @@ class Hash
     r
   end unless method_defined? :key_symbols_to_strings
 
+  def transform_keys
+    result = {}
+    each_key do |key|
+      result[yield(key)] = self[key]
+    end
+    result
+  end unless method_defined? :transform_keys
+
+  def transform_keys!
+    keys.each do |key|
+      self[yield(key)] = delete(key)
+    end
+    self
+  end unless method_defined? :transform_keys!
+
+  def transform_values
+    return enum_for(:transform_values) { size } unless block_given?
+    return {} if empty?
+    result = self.class.new
+    each do |key, value|
+      result[key] = yield(value)
+    end
+    result
+  end unless method_defined? :transform_values
+
+  def transform_values!
+    return enum_for(:transform_values!) { size } unless block_given?
+    each do |key, value|
+      self[key] = yield(value)
+    end
+  end unless method_defined? :transform_values!
+
 end

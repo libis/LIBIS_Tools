@@ -3,30 +3,30 @@
 class NilClass
   def empty?
     true
-  end unless defined? :empty?
+  end
 end
 
 class TrueClass
   def empty?
     false
-  end unless defined? :empty?
+  end
 end
 
 class FalseClass
   def empty?
     false
-  end unless defined? :empty?
+  end
 end
 
 class String
   BLANK_RE = /\A[[:space:]]^\z/.freeze
   def blank?
     empty? || BLANK_RE.match?(self)
-  end unless defined? :blank?
+  end
 end
 
 class Object
   def blank?
     respond_to?(:empty?) ? !!empty? : !self
-  end unless defined? :blank?
+  end
 end

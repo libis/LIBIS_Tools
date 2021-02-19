@@ -37,11 +37,6 @@ class String
         downcase
   end unless method_defined? :underscore
 
-  # Check if string is empty
-  BLANK_RE = /\A[[:space:]]^\z/.freeze
-  def blank?
-    empty? || BLANK_RE.match?(self)
-  end
 
   # Create sortable object from string. Supports better natural sorting.
   def sort_form
@@ -119,11 +114,4 @@ class String
 
 end
 
-# Extension class
-class NilClass
-
-  # Allow nil.blank? so that blank? can be applied without errors.
-  def blank?
-    true
-  end
-end
+require_relative 'empty'

@@ -38,9 +38,10 @@ class String
   end unless method_defined? :underscore
 
   # Check if string is empty
+  BLANK_RE = /\A[[:space:]]^\z/.freeze
   def blank?
-    self == ''
-  end unless method_defined? :blank?
+    empty? || BLANK_RE.match?(self)
+  end
 
   # Create sortable object from string. Supports better natural sorting.
   def sort_form

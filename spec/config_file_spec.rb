@@ -45,6 +45,7 @@ describe ::Libis::Tools::ConfigFile do
 
     it 'allows to change hash in array' do
       subject << hash
+      # subject = ::Libis::Tools::ConfigFile.new(hash)
       # noinspection RubyResolve
       subject.c[0][0].a[0].v = 1
       hash[:c][0][0][:a][0][:v] = 1

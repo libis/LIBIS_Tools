@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'nokogiri', '~> 1.6'
   spec.add_runtime_dependency 'gyoku',  '~> 1.3'
   spec.add_runtime_dependency 'nori', '~> 2.6'
-  spec.add_runtime_dependency 'recursive-open-struct', '~> 1.0'
+  spec.add_runtime_dependency 'recursive-open-struct', '>= 1.1.3'
   spec.add_runtime_dependency 'parslet', '~> 1.7'
   spec.add_runtime_dependency 'simple_xlsx_reader', '~> 1.0'
   spec.add_runtime_dependency 'logging', '~> 2.0'

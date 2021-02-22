@@ -3,30 +3,20 @@ language: ruby
 cache: bundler
 sudo: false
 rvm:
-  - 2.3
   - 2.4
   - 2.5
   - 2.6
+  - 2.7
+  - 3.0
   - ruby-head
 #  - jruby-9.1
   - jruby-9.2
   - jruby-head
 jdk:
-  - openjdk10
   - openjdk11
 matrix:
-  exclude:
-    - rvm: 2.3
-      jdk: openjdk10
-    - rvm: 2.4
-      jdk: openjdk10
-    - rvm: 2.5
-      jdk: openjdk10
-    - rvm: 2.6
-      jdk: openjdk10
-    - rvm: ruby-head
-      jdk: openjdk10
   allow_failures:
+    - rvm: 3.0
     - rvm: ruby-head
     - rvm: jruby-head
 branches:

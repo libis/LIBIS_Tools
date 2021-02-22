@@ -20,7 +20,7 @@ module Libis
         optional_headers = options.delete(:optional)
         options[:headers] = true
         options[:return_headers] = true
-        csv = ::CSV.open(file_name, mode, options)
+        csv = ::CSV.open(file_name, mode, **options)
         line = csv.shift
         found_headers = required_headers & line.headers
         return csv if found_headers.size == required_headers.size
@@ -29,7 +29,7 @@ module Libis
         options[:headers] = (required_headers + optional_headers)[0...line.size]
         raise RuntimeError, 'CSV does not contain enough columns' if required_headers.size > line.size
         options[:return_headers] = true
-        csv = ::CSV.open(file_name, mode, options)
+        csv = ::CSV.open(file_name, mode, **options)
         csv.shift
         csv
       end

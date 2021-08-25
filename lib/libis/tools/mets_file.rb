@@ -91,14 +91,18 @@ module Libis
                   end
 
         dmd_sec = xml_doc.root.xpath('mets:dmdSec', NS).inject({}) do |hash_dmd, dmd|
-          hash_dmd[dmd[:ID]] = dmd.xpath('.//dc:record', NS).first.children.inject({}) do |h, c|
+          id = dmd[:ID]
+          id = id.slice(0..(id.index('-dmd') + 3))
+          hash_dmd[id] = dmd.xpath('.//dc:record', NS).first.children.inject({}) do |h, c|
             h[c.name] = c.content if c.name != 'text'
             h
           end
           hash_dmd
         end
         amd_sec = xml_doc.root.xpath('mets:amdSec', NS).inject({}) do |hash_amd, amd|
-          hash_amd[amd[:ID]] = [:tech, :rights, :source, :digiprov].inject({}) do |hash_sec, sec|
+          id = amd[:ID]
+          id = id.slice(0..(id.index('-amd') + 3))
+          hash_amd[id] = [:tech, :rights, :source, :digiprov].inject({}) do |hash_sec, sec|
             md = amd.xpath("mets:#{sec}MD", NS).first
             return hash_sec unless md
             # hash_sec[sec] = md.xpath('mets:mdWrap/dnx:dnx/dnx:section', NS).inject({}) do |hash_md, dnx_sec|

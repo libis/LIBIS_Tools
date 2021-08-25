@@ -92,7 +92,7 @@ module Libis
 
         dmd_sec = xml_doc.root.xpath('mets:dmdSec', NS).inject({}) do |hash_dmd, dmd|
           hash_dmd[dmd[:ID]] = dmd.xpath('.//dc:record', NS).first.children.inject({}) do |h, c|
-            h[c.name] = c.content
+            h[c.name] = c.content if c.name != 'text'
             h
           end
           hash_dmd

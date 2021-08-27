@@ -19,10 +19,10 @@ class FalseClass
 end
 
 class String
-  BLANK_RE = /\A[[:space:]]^\z/.freeze
+  BLANK_REGEX = /\A[[:space:]]^\z/.freeze
   def blank?
-    empty? || BLANK_RE.match?(self)
-  end
+    empty? || BLANK_REGEX.match?(self)
+  end unless method_defined? :blank?
 end
 
 class Object

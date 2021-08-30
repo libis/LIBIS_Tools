@@ -289,7 +289,7 @@ module Libis
               compositionLevel: composition_level,
               # fileLocationType: 'FILE',
               fileLocation: location,
-              fileOriginalName: CGI.escape(original || target_name).gsub('+', '%20'),
+              fileOriginalName: original || target_names,
               fileOriginalPath: target_path,
               # fileOriginalID: URI.encode(location),
               # fileExtension: ::File.extname(orig_name),

@@ -289,7 +289,7 @@ module Libis
               compositionLevel: composition_level,
               # fileLocationType: 'FILE',
               fileLocation: location,
-              fileOriginalName: original || target_names,
+              fileOriginalName: original || target_name,
               fileOriginalPath: target_path,
               # fileOriginalID: URI.encode(location),
               # fileExtension: ::File.extname(orig_name),

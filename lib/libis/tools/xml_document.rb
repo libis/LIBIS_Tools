@@ -88,7 +88,7 @@ module Libis
 
       # Export the XML Document to an XML string.
       # @param [Hash] options options passed to the underlying Nokogiri::XML::Document#to_xml; default is:
-      #     !{indent: 2, encoding: 'utf-8'}
+      #     {indent: 2, encoding: 'utf-8'}
       # @return [String] a string
       def to_xml(options = {})
         options = {indent: 2, encoding: 'utf-8', save_with: Nokogiri::XML::Node::SaveOptions::DEFAULT_XML}.merge(options)

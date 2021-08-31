@@ -88,4 +88,16 @@ module Roo
     end
 
   end
+
+  class CSV
+    def each_row(options, &block)
+      if uri?(filename)
+        each_row_using_tempdir(options, &block)
+      elsif is_stream?(filename_or_stream)
+        ::CSV.new(filename_or_stream, **options).each(&block)
+      else
+        ::CSV.foreach(filename, **options, &block)
+      end
+    end
+  end
 end

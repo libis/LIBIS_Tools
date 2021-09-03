@@ -291,7 +291,7 @@ module Libis
               fileLocation: location,
               fileOriginalName: original || target_name,
               fileOriginalPath: target_path,
-              # fileOriginalID: URI.encode(location),
+              # fileOriginalID: CGI.escape(location),
               # fileExtension: ::File.extname(orig_name),
               fileMIMEType: mimetype,
               fileSizeBytes: size,

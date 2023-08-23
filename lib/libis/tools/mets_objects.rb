@@ -44,188 +44,6 @@ module Libis
 
       end
 
-      # Container class for creating a representation in the METS.
-      class Representation
-        include MetsObject
-
-        # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
-        attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
-                      :user_a, :user_b, :user_c,
-                      :group_id, :priority, :order,
-                      :digital_original, :content, :context, :hardware, :carrier, :original_name,
-                      :preservation_levels, :env_dependencies, :hardware_ids, :software_ids,
-                      :hardware_infos, :software_infos, :relationship_infos, :environments,
-                      :dc_record, :source_metadata
-
-        # The id that will be used in the XML file to reference this representation.
-        def xml_id
-          "rep#{@id}"
-        end
-
-        # This method creates the appropriate {DnxSection}s based on what attributes are filled in.
-        def amd
-          dnx = {}
-          tech_data = []
-          # General characteristics
-          data = {
-              preservationType: preservation_type,
-              usageType: usage_type,
-              DigitalOriginal: digital_original,
-              label: label,
-              representationEntityType: entity_type,
-              contentType: content,
-              contextType: context,
-              hardwareUsed: hardware,
-              physicalCarrierMedia: carrier,
-              deliveryPriority: priority,
-              orderingSequence: order,
-              RepresentationCode: representation_code,
-              RepresentationOriginalName: original_name,
-              UserDefinedA: user_a,
-              UserDefinedB: user_b,
-              UserDefinedC: user_c,
-          }.cleanup
-          tech_data << GeneralRepCharacteristics.new(data) unless data.empty?
-          # Object characteristics
-          data = {
-              groupID: group_id
-          }.cleanup
-          tech_data << ObjectCharacteristics.new(data) unless data.empty?
-          # Preservation level
-          if preservation_levels
-            data_list = []
-            preservation_levels.each do |preservation_level|
-              data = {
-                  preservationLevelValue: preservation_level[:value],
-                  preservationLevelRole: preservation_level[:role],
-                  preservationLevelRationale: preservation_level[:rationale],
-                  preservationLevelDateAssigned: preservation_level[:date],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << PreservationLevel.new(array: data_list) unless data_list.empty?
-          end
-          # Dependencies
-          if env_dependencies
-            data_list = []
-            env_dependencies.each do |dependency|
-              data = {
-                  dependencyName: dependency[:name],
-                  dependencyIdentifierType1: dependency[:type1],
-                  dependencyIdentifierValue1: dependency[:value1],
-                  dependencyIdentifierType2: dependency[:type2],
-                  dependencyIdentifierValue2: dependency[:value2],
-                  dependencyIdentifierType3: dependency[:type3],
-                  dependencyIdentifierValue3: dependency[:value3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvironmentDependencies.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware registry id
-          if hardware_ids
-            data_list = []
-            hardware_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvHardwareRegistry.new(array: data_list) unless data_list.empty?
-          end
-          # Software registry id
-          if software_ids
-            data_list = []
-            software_ids.each do |id|
-              data = {
-                  registryId: id
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvSoftwareRegistry.new(array: data_list) unless data_list.empty?
-          end
-          # Hardware
-          if hardware_infos
-            data_list = []
-            hardware_infos.each do |hardware|
-              data = {
-                  hardwareName: hardware[:name],
-                  hardwareType: hardware[:type],
-                  hardwareOtherInformation: hardware[:info],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvironmentHardware.new(array: data_list) unless data_list.empty?
-          end
-          # Software
-          if software_infos
-            data_list = []
-            software_infos.each do |software|
-              data = {
-                  softwareName: software[:name],
-                  softwareVersion: software[:version],
-                  softwareType: software[:type],
-                  softwareOtherInformation: software[:info],
-                  softwareDependancy: software[:dependency],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << EnvironmentSoftware.new(array: data_list) unless data_list.empty?
-          end
-          # Relationship
-          if relationship_infos
-            data_list = []
-            relationship_infos.each do |relationship|
-              data = {
-                  relationshipType: relationship[:type],
-                  relationshipSubType: relationship[:subtype],
-                  relatedObjectIdentifierType1: relationship[:type1],
-                  relatedObjectIdentifierValue1: relationship[:id1],
-                  relatedObjectSequence1: relationship[:seq1],
-                  relatedObjectIdentifierType2: relationship[:type2],
-                  relatedObjectIdentifierValue2: relationship[:id2],
-                  relatedObjectSequence2: relationship[:seq2],
-                  relatedObjectIdentifierType3: relationship[:type3],
-                  relatedObjectIdentifierValue3: relationship[:id3],
-                  relatedObjectSequence3: relationship[:seq3],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << RelationShip.new(array: data_list) unless data_list.empty?
-          end
-          # Environment
-          if environments
-            data_list = []
-            environments.each do |environment|
-              data = {
-                  environmentCharacteristic: environment[:characteristic],
-                  environmentPurpose: environment[:purpose],
-                  environmentNote: environment[:note],
-              }.cleanup
-              data_list << OpenStruct.new(data) unless data.empty?
-            end
-            tech_data << Environment.new(array: data_list) unless data_list.empty?
-          end
-          # Finally assemble technical section
-          dnx[:tech] = tech_data unless tech_data.empty?
-          # Rights section
-          rights_data = []
-          data = {
-              policyId: access_right_id
-          }.cleanup
-          rights_data << AccessRightsPolicy.new(data) unless data.empty?
-          dnx[:rights] = rights_data unless rights_data.empty?
-          # Source metadata
-          if source_metadata
-            source_metadata.each_with_index do |metadata, i|
-              dnx["source-#{metadata[:type].to_s.upcase}-#{i}"] = metadata[:data]
-            end
-          end
-          dnx
-        end
-
-      end
-
       # Container class for creating a file in the METS.
       class File
         include MetsObject
@@ -520,6 +338,187 @@ module Libis
                 raise RuntimeError, "Child object type not supported: #{obj.class}"
             end
           end
+        end
+
+      end
+
+      # Container class for creating a representation in the METS.
+      class Representation < Div
+
+        # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
+        attr_accessor :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
+                      :user_a, :user_b, :user_c,
+                      :group_id, :priority, :order,
+                      :digital_original, :content, :context, :hardware, :carrier, :original_name,
+                      :preservation_levels, :env_dependencies, :hardware_ids, :software_ids,
+                      :hardware_infos, :software_infos, :relationship_infos, :environments,
+                      :dc_record, :source_metadata
+
+        # The id that will be used in the XML file to reference this representation.
+        def xml_id
+          "rep#{@id}"
+        end
+
+        # This method creates the appropriate {DnxSection}s based on what attributes are filled in.
+        def amd
+          dnx = {}
+          tech_data = []
+          # General characteristics
+          data = {
+              preservationType: preservation_type,
+              usageType: usage_type,
+              DigitalOriginal: digital_original,
+              label: label,
+              representationEntityType: entity_type,
+              contentType: content,
+              contextType: context,
+              hardwareUsed: hardware,
+              physicalCarrierMedia: carrier,
+              deliveryPriority: priority,
+              orderingSequence: order,
+              RepresentationCode: representation_code,
+              RepresentationOriginalName: original_name,
+              UserDefinedA: user_a,
+              UserDefinedB: user_b,
+              UserDefinedC: user_c,
+          }.cleanup
+          tech_data << GeneralRepCharacteristics.new(data) unless data.empty?
+          # Object characteristics
+          data = {
+              groupID: group_id
+          }.cleanup
+          tech_data << ObjectCharacteristics.new(data) unless data.empty?
+          # Preservation level
+          if preservation_levels
+            data_list = []
+            preservation_levels.each do |preservation_level|
+              data = {
+                  preservationLevelValue: preservation_level[:value],
+                  preservationLevelRole: preservation_level[:role],
+                  preservationLevelRationale: preservation_level[:rationale],
+                  preservationLevelDateAssigned: preservation_level[:date],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << PreservationLevel.new(array: data_list) unless data_list.empty?
+          end
+          # Dependencies
+          if env_dependencies
+            data_list = []
+            env_dependencies.each do |dependency|
+              data = {
+                  dependencyName: dependency[:name],
+                  dependencyIdentifierType1: dependency[:type1],
+                  dependencyIdentifierValue1: dependency[:value1],
+                  dependencyIdentifierType2: dependency[:type2],
+                  dependencyIdentifierValue2: dependency[:value2],
+                  dependencyIdentifierType3: dependency[:type3],
+                  dependencyIdentifierValue3: dependency[:value3],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << EnvironmentDependencies.new(array: data_list) unless data_list.empty?
+          end
+          # Hardware registry id
+          if hardware_ids
+            data_list = []
+            hardware_ids.each do |id|
+              data = {
+                  registryId: id
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << EnvHardwareRegistry.new(array: data_list) unless data_list.empty?
+          end
+          # Software registry id
+          if software_ids
+            data_list = []
+            software_ids.each do |id|
+              data = {
+                  registryId: id
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << EnvSoftwareRegistry.new(array: data_list) unless data_list.empty?
+          end
+          # Hardware
+          if hardware_infos
+            data_list = []
+            hardware_infos.each do |hardware|
+              data = {
+                  hardwareName: hardware[:name],
+                  hardwareType: hardware[:type],
+                  hardwareOtherInformation: hardware[:info],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << EnvironmentHardware.new(array: data_list) unless data_list.empty?
+          end
+          # Software
+          if software_infos
+            data_list = []
+            software_infos.each do |software|
+              data = {
+                  softwareName: software[:name],
+                  softwareVersion: software[:version],
+                  softwareType: software[:type],
+                  softwareOtherInformation: software[:info],
+                  softwareDependancy: software[:dependency],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << EnvironmentSoftware.new(array: data_list) unless data_list.empty?
+          end
+          # Relationship
+          if relationship_infos
+            data_list = []
+            relationship_infos.each do |relationship|
+              data = {
+                  relationshipType: relationship[:type],
+                  relationshipSubType: relationship[:subtype],
+                  relatedObjectIdentifierType1: relationship[:type1],
+                  relatedObjectIdentifierValue1: relationship[:id1],
+                  relatedObjectSequence1: relationship[:seq1],
+                  relatedObjectIdentifierType2: relationship[:type2],
+                  relatedObjectIdentifierValue2: relationship[:id2],
+                  relatedObjectSequence2: relationship[:seq2],
+                  relatedObjectIdentifierType3: relationship[:type3],
+                  relatedObjectIdentifierValue3: relationship[:id3],
+                  relatedObjectSequence3: relationship[:seq3],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << RelationShip.new(array: data_list) unless data_list.empty?
+          end
+          # Environment
+          if environments
+            data_list = []
+            environments.each do |environment|
+              data = {
+                  environmentCharacteristic: environment[:characteristic],
+                  environmentPurpose: environment[:purpose],
+                  environmentNote: environment[:note],
+              }.cleanup
+              data_list << OpenStruct.new(data) unless data.empty?
+            end
+            tech_data << Environment.new(array: data_list) unless data_list.empty?
+          end
+          # Finally assemble technical section
+          dnx[:tech] = tech_data unless tech_data.empty?
+          # Rights section
+          rights_data = []
+          data = {
+              policyId: access_right_id
+          }.cleanup
+          rights_data << AccessRightsPolicy.new(data) unless data.empty?
+          dnx[:rights] = rights_data unless rights_data.empty?
+          # Source metadata
+          if source_metadata
+            source_metadata.each_with_index do |metadata, i|
+              dnx["source-#{metadata[:type].to_s.upcase}-#{i}"] = metadata[:data]
+            end
+          end
+          dnx
         end
 
       end

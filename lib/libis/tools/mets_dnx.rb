@@ -31,7 +31,9 @@ module Libis
       # Specialized DNX section.
       class WebHarvesting < DnxSection; end
       # Specialized DNX section.
-      class Collection < DnxSection; end
+      class Collection < DnxSection
+        def tag; 'Collection'; end
+      end
       # Specialized DNX section.
       class PreservationLevel < DnxSection; end
       # Specialized DNX section.

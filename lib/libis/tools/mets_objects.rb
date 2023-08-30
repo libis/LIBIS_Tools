@@ -343,7 +343,8 @@ module Libis
       end
 
       # Container class for creating a representation in the METS.
-      class Representation < Div
+      class Representation
+        include MetsObject
 
         # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
         attr_accessor :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,

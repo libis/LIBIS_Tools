@@ -347,7 +347,7 @@ module Libis
         include MetsObject
 
         # The currently allowed attributes on this class. The attributes will typically be used in {DnxSection}s.
-        attr_accessor :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
+        attr_accessor :label, :preservation_type, :usage_type, :representation_code, :entity_type, :access_right_id,
                       :user_a, :user_b, :user_c,
                       :group_id, :priority, :order,
                       :digital_original, :content, :context, :hardware, :carrier, :original_name,

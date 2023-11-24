@@ -48,9 +48,8 @@ module Libis
       #         * :err (Array<String>)- the stderr output of the command
       #         * :timeout(Boolean) - if true, the command did not return in time
       #         * :pid(Integer) - the command's processID
-      def self.run(*cmd)
+      def self.run(*cmd, **spawn_opts)
 
-        spawn_opts = Hash === cmd.last ? cmd.pop.dup : {}
         opts = {
             :stdin_data => spawn_opts.delete(:stdin_data) || '',
             :binmode => spawn_opts.delete(:binmode) || false,

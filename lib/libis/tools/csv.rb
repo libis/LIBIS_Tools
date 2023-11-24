@@ -7,7 +7,7 @@ module Libis
       # @param [String] file_name
       # @param [Hash] options
       # @return [CSV] Open CSV object
-      def self.open(file_name, options = {})
+      def self.open(file_name, **options)
         options = {
             mode: 'rb:UTF-8',
             required: %w'',

@@ -37,7 +37,7 @@ describe 'TempFile' do
 
     it 'created' do
       f = Libis::Tools::TempFile.file
-      expect(File.exists?(f.path)).to be_truthy
+      expect(File.exist?(f.path)).to be_truthy
       f.close
       f.delete
     end
@@ -61,14 +61,14 @@ describe 'TempFile' do
       f = Libis::Tools::TempFile.file
       f.close
       f.unlink
-      expect(File.exists?(f.path)).to be_falsey
+      expect(File.exist?(f.path)).to be_falsey
     end
 
     it 'can be deleted' do
       f = Libis::Tools::TempFile.file
       f.close
       f.delete
-      expect(File.exists?(f.path)).to be_falsey
+      expect(File.exist?(f.path)).to be_falsey
     end
 
   end

@@ -71,7 +71,7 @@ module Libis
       # @return [XmlDocument] new instance
       def self.from_hash(hash, options = {})
         doc = XmlDocument.new
-        doc.document = Nokogiri::XML(Gyoku.xml(hash, options))
+        doc.document = Nokogiri::XML(Gyoku.xml(hash, **options))
         doc.document.encoding = 'utf-8'
         doc
       end
@@ -92,7 +92,7 @@ module Libis
       # @return [String] a string
       def to_xml(options = {})
         options = {indent: 2, encoding: 'utf-8', save_with: Nokogiri::XML::Node::SaveOptions::DEFAULT_XML}.merge(options)
-        @document.to_xml(options)
+        @document.to_xml(**options)
       end
 
       # Export the XML Document to a Hash.
@@ -122,7 +122,7 @@ module Libis
       # @param [Hash] options
       # @return [Hash]
       def to_hash(options = {})
-        Nori.new(options).parse(to_xml)
+        Nori.new(**options).parse(to_xml)
       end
 
       # Check if the document validates against a given XML schema file.
@@ -212,7 +212,7 @@ module Libis
       def build(at_node = nil, options = {}, &block)
         options = {encoding: 'utf-8' }.merge options
         if at_node
-            Nokogiri::XML::Builder.new(options,at_node, &block)
+            Nokogiri::XML::Builder.new(options, at_node, &block)
         else
           xml = Nokogiri::XML::Builder.new(options, &block)
           @document = xml.doc
@@ -285,9 +285,7 @@ module Libis
       #     - a Hash containing tag-value pairs for each attribute; the special key ':namespaces'
       #       contains a Hash of namespace definitions as in {#add_namespaces}
       # @return [Nokogiri::XML::Node] the new node
-      def add_node(*args)
-        attributes = {}
-        attributes = args.pop if args.last.is_a? Hash
+      def add_node(*args, **attributes)
         name, value, parent = *args
 
         return nil if name.nil?
@@ -306,9 +304,9 @@ module Libis
         return node if attributes.empty?
 
         namespaces = attributes.delete :namespaces
-        add_namespaces(node, namespaces) if namespaces
+        add_namespaces(node, **namespaces) if namespaces
 
-        add_attributes(node, attributes) if attributes
+        add_attributes(node, **attributes) if attributes
 
         node
 
@@ -332,12 +330,12 @@ module Libis
       # @param [Nokogiri::XML::Node] node node to add the attributes to
       # @param [Hash] attributes a Hash with tag - value pairs for each attribute
       # @return [Nokogiri::XML::Node] the node
-      def add_attributes(node, attributes)
-        XmlDocument.add_attributes node, attributes
+      def add_attributes(node, **attributes)
+        XmlDocument.add_attributes node, **attributes
       end
 
       # (see #add_attributes)
-      def self.add_attributes(node, attributes)
+      def self.add_attributes(node, **attributes)
 
         attributes.each do |name, value|
           node.set_attribute name.to_s, value
@@ -371,12 +369,12 @@ module Libis
       # @param [Hash] namespaces a Hash with prefix - URI pairs for each namespace definition that should be added. The
       #     special key +:node_ns+ is reserved for specifying the prefix for the node itself. To set the default
       #     namespace, use the prefix +nil+
-      def add_namespaces(node, namespaces)
-        XmlDocument.add_namespaces node, namespaces
+      def add_namespaces(node, **namespaces)
+        XmlDocument.add_namespaces node, **namespaces
       end
 
       # (see #add_namespaces)
-      def self.add_namespaces(node, namespaces)
+      def self.add_namespaces(node, **namespaces)
 
         node_ns = namespaces.delete :node_ns
         default_ns = namespaces.delete nil

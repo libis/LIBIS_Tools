@@ -42,10 +42,11 @@ module Libis
       #     * constraint - Array, Range, RegEx or single value. Default is nil meaning no constraint.
       #     * frozen - Boolean. Default is false; if true the parameter value cannot be changed from the default value.
       #     * options - Any Hash. It's up to the applcation to interprete and use this info.
-      #    datatype can be omitted if the type can be derived from the
-      def initialize(*args)
+      #    datatype can be omitted if the type can be derived from the default value
+      def initialize(*args, **options)
         super(*args)
         self[:options] ||= {}
+        self[:options].merge!(options)
         self[:datatype] ||= guess_datatype
       end
 
@@ -90,7 +91,9 @@ module Libis
       # Convience method to create a new {Parameter} from a Hash.
       # @param [Hash] h Hash with parameter definition properties
       def self.from_hash(h)
-        h.each { |k, v| self[k.to_s.to_sym] = v }
+        p = new
+        h.each { |k, v| p[k.to_s.to_sym] = v }
+        p
       end
 
       # Dumps the parameter properties into a Hash.
@@ -297,8 +300,8 @@ module Libis
         #   hash is added to the retrievable properties of the parameter. Likewise any property defined, that is not in the list of
         #   known properties is added to the options hash. In this aspect the ::Libis::Tools::Parameter class behaves much like an
         #   OpenStruct even though it is implemented as a Struct.
-        def parameter(options = {})
-          return self.parameter_defs[options] unless options.is_a? Hash
+        def parameter(name = nil, **options)
+          return self.parameter_defs[name.to_s.to_sym] unless name.to_s.empty?
           return nil if options.keys.empty?
           param_def = options.shift
           name = param_def.first.to_s.to_sym

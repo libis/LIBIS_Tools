@@ -33,7 +33,7 @@ module Roo
         end
 
         header_line.upto(last_row) do |line|
-          yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+          yield(headers.each_with_object({}) { |(k, v), hash| hash[k] = cell(line, v) })
         end
       end
     end
@@ -89,15 +89,4 @@ module Roo
 
   end
 
-  class CSV
-    def each_row(options, &block)
-      if uri?(filename)
-        each_row_using_tempdir(options, &block)
-      elsif is_stream?(filename_or_stream)
-        ::CSV.new(filename_or_stream, **options).each(&block)
-      else
-        ::CSV.foreach(filename, **options, &block)
-      end
-    end
-  end
 end

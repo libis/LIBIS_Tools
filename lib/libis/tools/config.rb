@@ -35,16 +35,16 @@ module Libis
 
         # For each configuration parameter, the value can be accessed via the class or the Singleton instance.
         # The class diverts to the instance automatically.
-        def method_missing(name, *args, &block)
-          result = instance.send(name, *args, &block)
+        def method_missing(name, *args, **kwargs, &block)
+          result = instance.send(name, *args, **kwargs, &block)
           self === result ? self : result
         end
 
       end
 
       # Instance method that allows to access the configuration parameters by method.
-      def method_missing(name, *args, &block)
-        result = config.send(name, *args, &block)
+      def method_missing(name, *args, **kwargs, &block)
+        result = config.send(name, *args, **kwargs, &block)
         self === config ? self : result
       end
 

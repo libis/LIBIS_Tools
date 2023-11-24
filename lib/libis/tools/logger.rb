@@ -64,45 +64,46 @@ module Libis
       #
       # @param [String] msg the message.
       # @param [Array] args optional extra arguments.
-      # @!method(debug(msg, *args))
-      def debug(msg, *args)
-        self.message :DEBUG, msg, *args
+      # @param [Hash] kwargs optional keyword arguments
+      # @!method(debug(msg, *args, **kwargs))
+      def debug(msg, *args, **kwargs)
+        self.message :DEBUG, msg, *args, **kwargs
       end
 
       # Send an info message to the logger.
       #
       # (see #debug)
       # @param (see #debug)
-      # @!method(info(msg, *args))
-      def info(msg, *args)
-        self.message :INFO, msg, *args
+      # @!method(info(msg, *args, **kwargs))
+      def info(msg, *args, **kwargs)
+        self.message :INFO, msg, *args, **kwargs
       end
 
       # Send a warning message to the logger.
       #
       # (see #debug)
       # @param (see #debug)
-      # @!method(warn(msg, *args))
-      def warn(msg, *args)
-        self.message :WARN, msg, *args
+      # @!method(warn(msg, *args, **kwargs))
+      def warn(msg, *args, **kwargs)
+        self.message :WARN, msg, *args, **kwargs
       end
 
       # Send an error message to the logger.
       #
       # (see #debug)
       # @param (see #debug)
-      # @!method(error(msg, *args))
-      def error(msg, *args)
-        self.message :ERROR, msg, *args
+      # @!method(error(msg, *args, **kwargs))
+      def error(msg, *args, **kwargs)
+        self.message :ERROR, msg, *args, **kwargs
       end
 
       # Send a fatal message to the logger.
       #
       # (see #debug)
       # @param (see #debug)
-      # @!method(fatal_error(msg, *args))
-      def fatal_error(msg, *args)
-        self.message :FATAL, msg, *args
+      # @!method(fatal_error(msg, *args, **kwargs))
+      def fatal_error(msg, *args, **kwargs)
+        self.message :FATAL, msg, *args, **kwargs
       end
 
       # The method that performs the code logging action.
@@ -117,8 +118,9 @@ module Libis
       # @param [{::Logger::Severity}] severity
       # @param [String] msg message string
       # @param [Object] args optional list of extra arguments
-      # @!method(message(severity, msg, *args))
-      def message(severity, msg, *args)
+      # @oaram [Hash] kwargs optional list of extra keyword arguments
+      # @!method(message(severity, msg, *args, **kwargs))
+      def message(severity, msg, *args, **kwargs)
         message_text = (msg % args rescue "#{msg}#{args.empty? ? '' : " - #{args}"}")
         self.logger.add(::Logging.level_num(severity), message_text)
       end

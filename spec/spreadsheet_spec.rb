@@ -10,9 +10,9 @@ describe 'Libis::Tools::Spreadsheet' do
   let(:ss) {
     Libis::Tools::Spreadsheet.new(
         File.join(path, file_name),
-        { required: required_headers,
-        optional: optional_headers
-        }.merge(options)
+        required: required_headers,
+        optional: optional_headers,
+        **options
     )
   }
 

@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.authors       = ['Kris Dekeyser']
   spec.email         = ['kris.dekeyser@libis.be']
-  spec.homepage      = 'https://github.com/Kris-LIBIS/LIBIS_Tools'
+  spec.homepage      = 'https://github.com/libis/LIBIS_Tools'
   spec.license       = 'MIT'
 
   spec.platform      = Gem::Platform::JAVA if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'

@@ -183,7 +183,7 @@ module Libis
         when 'hash'
           return v if v.is_a?(Hash)
           return Hash[(0...v.size).zip(v)] if v.is_a?(Array)
-          return JSON.parse(v) if v.is_a?(String)
+          return JSON.parse(v.gsub('=>', ':').gsub(/\bnil\b/, "null")) if v.is_a?(String)
         else
           raise ParameterValidationError, "Datatype not supported: '#{self[:datatype]}'"
         end

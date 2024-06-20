@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.1.2](https://github.com/libis/LIBIS_Tools/tree/v1.1.2) (20/06/2024)
+
+[Full Changelog](https://github.com/libis/LIBIS_Tools/compare/v1.1.1...v1.1.2)
+
 ## [v1.1.1](https://github.com/libis/LIBIS_Tools/tree/v1.1.1) (26/03/2024)
 
 [Full Changelog](https://github.com/libis/LIBIS_Tools/compare/v1.1.0...v1.1.1)

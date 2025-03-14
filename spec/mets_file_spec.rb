@@ -565,19 +565,19 @@ describe 'METS File' do
           xml[:mets].fileSec do
             xml[:mets].fileGrp ID: 'rep1', USE: 'VIEW', ADMID: 'rep1-amd' do
               xml[:mets].file ID: 'fid1', MIMETYPE: 'application/msword', ADMID: 'fid1-amd', GROUPID: 'grp' do
-                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => 'aaa á aaa/b/abc.doc'
+                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => CGI.escape('aaa á aaa/b/abc.doc')
               end
               xml[:mets].file ID: 'fid2', MIMETYPE: 'application/msword', ADMID: 'fid2-amd', GROUPID: 'grp' do
-                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => 'aaa á aaa/b/def.dóc'
+                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => CGI.escape('aaa á aaa/b/def.dóc')
               end
               xml[:mets].file ID: 'fid3', MIMETYPE: 'application/msword', ADMID: 'fid3-amd', GROUPID: 'grp' do
-                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => 'aaa á aaa/b/ábc.doc'
+                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => CGI.escape('aaa á aaa/b/ábc.doc')
               end
               xml[:mets].file ID: 'fid4', MIMETYPE: 'application/msword', ADMID: 'fid4-amd', GROUPID: 'grp' do
-                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => 'aaa á aaa/ccçcc/ã b ç d ë ¼.doc'
+                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => CGI.escape('aaa á aaa/ccçcc/ã b ç d ë ¼.doc')
               end
               xml[:mets].file ID: 'fid5', MIMETYPE: 'application/msword', ADMID: 'fid5-amd', GROUPID: 'grp' do
-                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => 'aaa á aaa/ss$ss/ã b ç d ë ¼.doc'
+                xml[:mets].FLocat 'xmlns:xlin' => 'http://www.w3.org/1999/xlink', LOCTYPE: 'URL', 'xlin:href' => CGI.escape('aaa á aaa/ss$ss/ã b ç d ë ¼.doc')
               end
             end
           end

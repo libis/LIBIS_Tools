@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'ostruct'
+require 'cgi'
 
 require 'libis/tools/extend/hash'
 require_relative 'xml_document'
@@ -385,7 +386,7 @@ module Libis
                 xml[:mets].FLocat(
                     LOCTYPE: 'URL',
                     'xmlns:xlin' => NS[:xlin],
-                    'xlin:href' => object.target_location,
+                    'xlin:href' => CGI.escape(object.target_location),
                 )
               }
             end

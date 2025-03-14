@@ -13,3 +13,4 @@ release:
 	bundle exec rake changelog
 	git commit -a -m "Changelog update" || true
 	git push --force
+	bundle exec rake release
